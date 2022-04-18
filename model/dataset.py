@@ -6,7 +6,7 @@ import cv2
 import math
 import os
 import random
-from warp import generate_offset_map
+from .warp import generate_offset_map
 
 ## ---------------------- Dataloaders ---------------------- ##
 class Dataset_Csv_train(data.Dataset):
@@ -74,11 +74,12 @@ class Dataset_Csv_train(data.Dataset):
 class Dataset_Csv_test(data.Dataset):
     "Characterizes a dataset for PyTorch"
 
-    def __init__(self, config, data_samples,  transform=None):
+    def __init__(self, config, data_samples,  labels, transform=None):
         "Initialization"
         self.config = config
         self.data_samples = data_samples
         self.transform = transform
+        self.labels = labels
 
     def __len__(self):
         "Denotes the total number of samples"
@@ -94,7 +95,7 @@ class Dataset_Csv_test(data.Dataset):
         image = image.resize((imsize, imsize))
         image = np.array(image, np.float32)
         image = torch.from_numpy(np.array(image, np.float32) / 255)
-        im_label = 1 if 'spoof' in im_name else -1
+        im_label = int(self.labels[index])
 
 
         return image, im_name, im_label

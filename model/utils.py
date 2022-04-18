@@ -194,7 +194,7 @@ class ConvBNAct(nn.Module):
         self.act = act
         self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.01)
         if act:
             self.ac = nn.PReLU()
         if apply_dropout:
@@ -228,7 +228,7 @@ class Downsample(nn.Module):
         self.act = act
         self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.01)
         if act:
             self.ac = nn.PReLU()
         if apply_dropout:
@@ -259,12 +259,12 @@ class Upsample(nn.Module):
 
         padding = (kernel_size - 1) // 2
 
-        self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
+        self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, padding=padding, output_padding=1, bias=True)
         self.norm = norm
         self.act = act
         self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.01)
         if act:
             self.ac = nn.PReLU()
 

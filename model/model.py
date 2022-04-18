@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils import rgb_to_yuv, ConvBNAct, Upsample, Downsample
+from .utils import rgb_to_yuv, ConvBNAct, Upsample, Downsample
 
 
 class Generator(nn.Module):
@@ -64,10 +64,11 @@ class Generator(nn.Module):
         self.ESR = nn.Sequential(
           ConvBNAct(input_c=channels[2] * 3, output_c=channels[2], apply_dropout=True),
           ConvBNAct(input_c=channels[2], output_c=channels[1], apply_dropout=True),
-          ConvBNAct(input_c=channels[2] * 3, output_c=1, act=False, norm=False),
+          Downsample(input_c=channels[1], output_c=channels[1]),
+          ConvBNAct(input_c=channels[1], output_c=1, act=False, norm=False),
         )
 
-        self.avg_pool = nn.AvgPool2d(kernel_size=[1, 1, 2, 2], stride=[1, 1, 2, 2])
+        self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
 
     def forward(self, x):
         out = torch.cat([x, rgb_to_yuv(x)], dim=1)

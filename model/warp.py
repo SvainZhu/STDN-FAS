@@ -9,13 +9,11 @@ def flatten(a):
     return a.contiguous().view(-1)
 
 def repeat(a, repeats, axis=0):
-    assert len(a.get_shape()) == 1
     a = torch.unsqueeze(a, -1)
     a = a.repeat(1, repeats)
     return a.reshape(-1)
 
 def repeat_2d(a, repeats):
-    assert len(a.get_shape()) == 2
     a = torch.unsqueeze(a, 0)
     a = a.repeat(repeats, 1, 1)
     return a
@@ -30,18 +28,10 @@ def clip_by_tensor(t, t_min, t_max):
     :return: cliped tensor
     """
     t = t.float()
-    t_min = t_min.float()
-    t_max = t_max.float()
 
-    result = (t >= t_min).float() * t + (t < t_min).float() * t_min
-    result = (result <= t_max).float() * result + (result > t_max).float() * t_max
+    result = (t >= t_min).to(torch.float32).cuda() * t + (t < t_min).to(torch.float32).cuda() * t_min
+    result = (result <= t_max).to(torch.float32).cuda() * result + (result > t_max).to(torch.float32).cuda() * t_max
     return result
-
-def torch_gather_nd(x, coords):
-    x = x.contiguous()
-    inds = coords.mv(torch.LongTensor(x.stride()))
-    x_gather = torch.index_select(flatten(x), 0, inds)
-    return x_gather
 
 
 def warping(x, offsets, imsize):
@@ -49,52 +39,53 @@ def warping(x, offsets, imsize):
     xsize = x.shape[2]
     offsets = offsets * imsize
     offsets = torch.reshape(offsets[:, 0:2, :, :], (bsize, 2, -1)) # do not need z information
+    offsets = offsets.cuda()
 
     # first build the grid for target face coordinates
     t_coords = torch.meshgrid(torch.arange(xsize), torch.arange(xsize))
     t_coords = torch.stack(t_coords, dim=0)
-    t_coords = torch.FloatTensor(t_coords)
+    t_coords = t_coords.to(torch.float32)
     t_coords = t_coords.reshape(2, -1)
     t_coords = repeat_2d(t_coords, bsize)
+    t_coords = t_coords.cuda()
 
     # find the coordinates in the source image to copy pixels
     s_coords = t_coords + offsets
     s_coords = clip_by_tensor(s_coords, 0, xsize-1)
 
     n_coords = s_coords.shape[2]
-    idx = repeat(torch.arange(bsize), n_coords)
 
     def _gather_pixel(_x, coords):
-        coords = torch.IntTensor(coords)
-        xcoords = torch.reshape(coords[..., 0], (-1))
-        ycoords = torch.reshape(coords[..., 1], (-1))
-        ind = torch.stack([idx, xcoords, ycoords], dim=-1)
+        coords = coords.to(torch.int32).permute(0, 2, 1)
 
-        _y = torch_gather_nd(_x, ind)
-        _y = torch.reshape(_y, (bsize, _x.shape[3], n_coords))
+        coords_chunked = coords.chunk(2, 2)
+        masked = _x[torch.arange(_x.shape[0]).view(_x.shape[0], 1).to(torch.long), :, coords_chunked[0].squeeze().to(torch.long), coords_chunked[1].squeeze().to(torch.long)]
+        _y = masked.expand(1, *masked.shape).permute(1, 3, 2, 0).view(*_x.shape)
+
+        _y = torch.reshape(_y, (bsize, -1, n_coords))
         return _y
 
     # solve fractional coordinates via bilinear interpolation
     s_coords_lu = torch.floor(s_coords)     # floor the coordinate values
     s_coords_rb = torch.ceil(s_coords)      # ceil the coordinate values
 
-    s_coords_lb = torch.stack([s_coords_lu[..., 0], s_coords_rb[..., 1]], dim=-1)       # lu[0] + rb [1] = lb
-    s_coords_ru = torch.stack([s_coords_rb[..., 0], s_coords_lu[..., 1]], dim=-1)      # rb[0] + lu[1] = ru
+    s_coords_lb = torch.stack([s_coords_lu[:, 0, :], s_coords_rb[:, 1, :]], dim=1)       # lu[0] + rb [1] = lb
+    s_coords_ru = torch.stack([s_coords_rb[:, 0, :], s_coords_lu[:, 1, :]], dim=1)      # rb[0] + lu[1] = ru
     _x_lu = _gather_pixel(x, s_coords_lu)
     _x_rb = _gather_pixel(x, s_coords_rb)
     _x_lb = _gather_pixel(x, s_coords_lb)
     _x_ru = _gather_pixel(x, s_coords_ru)
     # bilinear interpolation
-    s_coords_fraction = s_coords - torch.FloatTensor(s_coords_lu)
-    s_coords_fraction_x = s_coords_fraction[..., 0]
-    s_coords_fraction_y = s_coords_fraction[..., 1]
+    s_coords_fraction = s_coords.cuda() - s_coords_lu.cuda()
+    s_coords_fraction_x = s_coords_fraction[:, 0, :]
+    s_coords_fraction_y = s_coords_fraction[:, 1, :]
     _xs, _ys = s_coords_fraction_x.shape
-    s_coords_fraction_x = torch.reshape(s_coords_fraction_x, (1, _xs, _ys))
-    s_coords_fraction_y = torch.reshape(s_coords_fraction_y, (1, _xs, _ys))
+    s_coords_fraction_x = torch.reshape(s_coords_fraction_x, (_xs, 1, _ys))
+    s_coords_fraction_y = torch.reshape(s_coords_fraction_y, (_xs, 1, _ys))
     _x_u = _x_lu + (_x_ru - _x_lu) * s_coords_fraction_x
     _x_b = _x_lb + (_x_rb - _x_lb) * s_coords_fraction_x
     warped_x = _x_u + (_x_b - _x_u) * s_coords_fraction_y
-    warped_x = torch.reshape(warped_x, (bsize, xsize, xsize, -1))
+    warped_x = torch.reshape(warped_x, (bsize, -1, xsize, xsize))
 
     return warped_x
 
