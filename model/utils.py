@@ -106,10 +106,10 @@ def plotResults(result_list):
         fig = clip_by_tensor(fig, 0.0, 1.0)
         row = []
         if fig.shape[3] == 1:
-            fig = torch.cat([fig, fig, fig], dim=1)
+            fig = torch.cat((fig, fig, fig), dim=1)
         else:
             r, g, b = torch.split(fig, 3, 3)
-            fig = torch.cat([b,g,r], 3)
+            fig = torch.cat((b,g,r), 3)
         fig = F.interpolate(fig, [256, 256], mode='bilinear')
         row = torch.split(fig, shape[0])
         row = torch.cat(row, dim=3)

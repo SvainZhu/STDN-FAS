@@ -90,10 +90,10 @@ def Oulu_process(crop_size):
 
     oulu_base_process(image_dir=train_image_dir, map_dir=train_map_dir, list=train_list,
                       image_csv=train_csv, map_csv=train_map_csv)
-    # oulu_base_process(image_dir=val_image_dir, map_dir=val_map_dir, list=val_list,
-    #                   image_csv=train_csv, map_csv=train_map_csv)
-    oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
+    oulu_base_process(image_dir=val_image_dir, map_dir=val_map_dir, list=val_list,
                       image_csv=test_csv, map_csv=test_map_csv)
+    # oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
+    #                   image_csv=test_csv, map_csv=test_map_csv)
 
 def SiW_process(crop_size):
     Protocol = '1'

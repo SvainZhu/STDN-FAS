@@ -48,7 +48,7 @@ class Dataset_Csv_train(data.Dataset):
             lm_li = lm_li[lm_reverse_list, :]
 
         # spoof
-        im_name = self.li_data_samples[index]
+        im_name = self.sp_data_samples[index]
         lm_name = im_name[:-3] + 'npy'
         image = Image.open(im_name)
         width, height = image.size

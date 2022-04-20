@@ -39,22 +39,23 @@ class Logger(object):
 
 def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
     best_ACER = 1.0
-    train_num = 100
+    train_num = 300
     bsize = config.BATCH_SIZE
     imsize = config.IMAGE_SIZE
     im2size = 160
     im3size = 40
+    pre_epoch = current_epoch - 1
 
     gen = Generator(in_c=3, out_c=3)
     gen.train()
-    # gen.load_state_dict(torch.load('./model_out/MRGA_depth_ViT_OULU_2.4_2_6_test/0899_vit.ckpt'))
+    gen.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_1_6/%s/gen.ckpt' %pre_epoch))
     gen = torch.nn.DataParallel(gen.cuda())
     optimizer_gen = optim.Adam(gen.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
     exp_lr_scheduler_gen = lr_scheduler.StepLR(optimizer_gen, step_size=config.NUM_EPOCHS_PER_DECAY, gamma=config.GAMMA)
 
     dis_1 = Discrinator(in_c=3, out_c=3)
     dis_1.train()
-    # dis_1.load_state_dict(torch.load('./model_out/MRGA_depth_ViT_OULU_2.4_2_6_test/0899_vit.ckpt'))
+    dis_1.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_1_6/%s/dis_1.ckpt' %pre_epoch))
     dis_1 = torch.nn.DataParallel(dis_1.cuda())
     optimizer_dis_1 = optim.Adam(dis_1.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
     exp_lr_scheduler_dis_1 = lr_scheduler.StepLR(optimizer_dis_1, step_size=config.NUM_EPOCHS_PER_DECAY,
@@ -62,7 +63,7 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
 
     dis_2 = Discrinator(in_c=3, out_c=3)
     dis_2.train()
-    # dis_2.load_state_dict(torch.load('./model_out/MRGA_depth_ViT_OULU_2.4_2_6_test/0899_vit.ckpt'))
+    dis_2.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_1_6/%s/dis_2.ckpt' %pre_epoch))
     dis_2 = torch.nn.DataParallel(dis_2.cuda())
     optimizer_dis_2 = optim.Adam(dis_2.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
     exp_lr_scheduler_dis_2 = lr_scheduler.StepLR(optimizer_dis_2, step_size=config.NUM_EPOCHS_PER_DECAY,
@@ -70,7 +71,7 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
 
     dis_3 = Discrinator(in_c=3, out_c=3)
     dis_3.train()
-    # dis_3.load_state_dict(torch.load('./model_out/MRGA_depth_ViT_OULU_2.4_2_6_test/0899_vit.ckpt'))
+    dis_3.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_1_6/%s/dis_3.ckpt' %pre_epoch))
     dis_3 = torch.nn.DataParallel(dis_3.cuda())
     optimizer_dis_3 = optim.Adam(dis_3.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
     exp_lr_scheduler_dis_3 = lr_scheduler.StepLR(optimizer_dis_3, step_size=config.NUM_EPOCHS_PER_DECAY,
@@ -217,8 +218,11 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     score = torch.mean(M, dim=(1, 2, 3))
                     label = label.data.cpu().numpy()
                     score = score.data.cpu().numpy()
-                    accuracy = accuracy_score(label, np.where(score > 0, 0, 1))
+                    score = np.where(score > 0.75, 0, 1)
+                    y_scores.extend(score)
+                    y_labels.extend(label)
                     if (i + 1) % train_num == 0:
+                        accuracy = accuracy_score(y_labels, y_scores)
                         log.write(
                             '**Epoch {}/{} Test {}/{}: Accuracy: {:.4f}\n'.format(epoch, num_epochs - 1,
                                                                                                 i,
@@ -226,9 +230,8 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                                                                                                 accuracy))
 
 
-                    y_scores.extend(score)
-                    y_labels.extend(label)
-                APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=current_epoch, num_epochs=num_epochs)
+
+                APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=epoch, num_epochs=num_epochs)
                 log.write('Epoch {}/{} Time {}s\n'.format(epoch, num_epochs - 1, time.time() - epoch_start))
                 log.write('***************************************************')
                 if ACER < best_ACER:
@@ -236,9 +239,6 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     torch.save(dis_1.module.state_dict(), dis_1_out_path)
                     torch.save(dis_2.module.state_dict(), dis_2_out_path)
                     torch.save(dis_3.module.state_dict(), dis_3_out_path)
-
-
-
 
 
 def val_model(scores, labels, current_epoch, num_epochs):
@@ -306,7 +306,7 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE
     database = config.DATABASE      #OULU, CASIA_FASD, MSU_MFSD, RE
     start = time.time()
-    current_epoch = 0
+    current_epoch = 8
     batch_size = config.BATCH_SIZE
     Protocol = config.PROTOCOL
     crop_size = config.CROP_SIZE

@@ -71,7 +71,7 @@ class Generator(nn.Module):
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
 
     def forward(self, x):
-        out = torch.cat([x, rgb_to_yuv(x)], dim=1)
+        out = torch.cat((x, rgb_to_yuv(x)), dim=1)
         out = self.stem_conv(out)
 
         # encoder
@@ -81,8 +81,8 @@ class Generator(nn.Module):
 
         # decoder
         u1 = self.decoder1(out3)
-        u2 = self.decoder2(torch.cat([u1, out2], dim=1))
-        u3 = self.decoder3(torch.cat([u2, out1], dim=1))
+        u2 = self.decoder2(torch.cat((u1, out2), dim=1))
+        u3 = self.decoder3(torch.cat((u2, out1), dim=1))
         n1 = self.ac1(u1)
         n2 = self.ac2(u2)
         n3 = self.ac2(u3)
@@ -96,7 +96,7 @@ class Generator(nn.Module):
         map1 = F.interpolate(out1, [32, 32])
         map2 = F.interpolate(out2, [32, 32])
         map3 = F.interpolate(out3, [32, 32])
-        map = torch.cat([map1, map2, map3], dim=1)
+        map = torch.cat((map1, map2, map3), dim=1)
         map_out = self.ESR(map)
 
         return map_out, s, b, C, T
@@ -138,7 +138,7 @@ class Discrinator(nn.Module):
 
 
     def forward(self, x):
-        out = torch.cat([x, rgb_to_yuv(x)], dim=1)
+        out = torch.cat((x, rgb_to_yuv(x)), dim=1)
         out = self.stem_conv(out)
 
         out1 = self.Block1(out)
@@ -175,7 +175,7 @@ class Discrinator_s(nn.Module):
         self.Block4s = ConvBNAct(input_c=channels[3], output_c=out_c // 2, act=False, norm=False)
 
     def forward(self, x):
-        out = torch.cat([x, rgb_to_yuv(x)], dim=1)
+        out = torch.cat((x, rgb_to_yuv(x)), dim=1)
         out = self.stem_conv(out)
 
         out1 = self.Block1(out)
