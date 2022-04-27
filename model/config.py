@@ -1,6 +1,7 @@
 import os
 import torch
 
+
 # Base Configuration Class
 class Config(object):
     """Base configuration class. For custom configurations, create a
@@ -39,12 +40,11 @@ class Config(object):
         self.GPU_USAGE = gpu
         self.compile()
 
-
     def compile(self):
         if not os.path.isdir(self.LOG_DIR):
             os.mkdir(self.LOG_DIR)
-        if not os.path.isdir(self.LOG_DIR+'/test'):
-            os.mkdir(self.LOG_DIR+'/test')
+        if not os.path.isdir(self.LOG_DIR + '/test'):
+            os.mkdir(self.LOG_DIR + '/test')
         """Display Configuration values."""
         print("\nConfigurations:")
         for a in dir(self):
