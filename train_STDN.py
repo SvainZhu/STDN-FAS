@@ -4,23 +4,24 @@ import sys
 import time
 import numpy as np
 import os
-import torch
-from torch.optim import lr_scheduler
-import torch.nn as nn
-from torch.utils import data
-from random import shuffle
-from model.model import Generator, Discrinator, Discrinator_s
-from model.dataset import Dataset_Csv_train, Dataset_Csv_test
-from model.config  import Config
-from model.utils   import Error, plotResults
-from model.loss    import l1_loss, l2_loss
-from model.warp    import warping
-from model.statistic import calculate_statistic
-import torch.nn.functional as F
 from albumentations import *
 from sklearn.metrics import roc_auc_score, accuracy_score
 import csv
 import random
+import cv2
+import torch
+from torch.optim import lr_scheduler
+import torch.nn as nn
+from torch.utils import data
+# from model.model import Generator, Discrinator, Discrinator_s
+from model.model_MRGA import Generator, Discrinator, Discrinator_s
+from model.dataset import Dataset_Csv_train, Dataset_Csv_test
+from model.config  import Config
+from model.utils   import plotResults
+from model.loss    import l1_loss, l2_loss
+from model.warp    import warping
+from model.statistic import calculate_statistic
+import torch.nn.functional as F
 
 
 class Logger(object):
@@ -39,45 +40,26 @@ class Logger(object):
 
 def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
     best_ACER = 1.0
-    train_num = 10
+    best_epoch = 0
+    train_num = 100
     bsize = config.BATCH_SIZE
     imsize = config.IMAGE_SIZE
     im2size = 160
     im3size = 40
-    pre_protocol = '2'
-    pre_epoch = 11
+    pre_protocol = '1'
+    pre_epoch = 26
+    model, optimizer, exp_lr_scheduler, model_path = {}, {}, {}, {}
+    for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+        if sub_model == 'gen':
+            model[sub_model] = Generator(in_c=3, out_c=3)
+        else:
+            model[sub_model] = Discrinator(in_c=3, out_c=3)
+        model[sub_model].train()
+        # model[sub_model].load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/%s.ckpt' %(pre_protocol, pre_epoch, sub_model)))
+        model[sub_model] = torch.nn.DataParallel(model[sub_model].cuda())
+        optimizer[sub_model] = optim.Adam(model[sub_model].parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
+        exp_lr_scheduler[sub_model] = lr_scheduler.StepLR(optimizer[sub_model], step_size=config.NUM_EPOCHS_PER_DECAY, gamma=config.GAMMA)
 
-    gen = Generator(in_c=3, out_c=3)
-    gen.train()
-    gen.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/gen.ckpt' %(pre_protocol, pre_epoch)))
-    gen = torch.nn.DataParallel(gen.cuda())
-    optimizer_gen = optim.Adam(gen.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
-    exp_lr_scheduler_gen = lr_scheduler.StepLR(optimizer_gen, step_size=config.NUM_EPOCHS_PER_DECAY, gamma=config.GAMMA)
-
-    dis_1 = Discrinator(in_c=3, out_c=3)
-    dis_1.train()
-    dis_1.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/dis_1.ckpt' %(pre_protocol, pre_epoch)))
-    dis_1 = torch.nn.DataParallel(dis_1.cuda())
-    optimizer_dis_1 = optim.Adam(dis_1.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
-    exp_lr_scheduler_dis_1 = lr_scheduler.StepLR(optimizer_dis_1, step_size=config.NUM_EPOCHS_PER_DECAY,
-                                                 gamma=config.GAMMA)
-
-    dis_2 = Discrinator(in_c=3, out_c=3)
-    dis_2.train()
-    dis_2.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/dis_2.ckpt' %(pre_protocol, pre_epoch)))
-    dis_2 = torch.nn.DataParallel(dis_2.cuda())
-    optimizer_dis_2 = optim.Adam(dis_2.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
-    exp_lr_scheduler_dis_2 = lr_scheduler.StepLR(optimizer_dis_2, step_size=config.NUM_EPOCHS_PER_DECAY,
-                                                 gamma=config.GAMMA)
-
-    dis_3 = Discrinator(in_c=3, out_c=3)
-    dis_3.train()
-    dis_3.load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/dis_3.ckpt' %(pre_protocol, pre_epoch)))
-    dis_3 = torch.nn.DataParallel(dis_3.cuda())
-    optimizer_dis_3 = optim.Adam(dis_3.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
-    exp_lr_scheduler_dis_3 = lr_scheduler.StepLR(optimizer_dis_3, step_size=config.NUM_EPOCHS_PER_DECAY,
-                                                 gamma=config.GAMMA)
-    criterion = nn.BCEWithLogitsLoss().cuda()
 
 
     for epoch in range(current_epoch, num_epochs):
@@ -85,30 +67,22 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
         epoch_start = time.time()
         if not os.path.exists(model_dir + str(epoch)):
             os.makedirs(model_dir + str(epoch))
-        gen_out_path = os.path.join(model_dir + str(epoch), 'gen.ckpt')
-        dis_1_out_path = os.path.join(model_dir + str(epoch), 'dis_1.ckpt')
-        dis_2_out_path = os.path.join(model_dir + str(epoch), 'dis_2.ckpt')
-        dis_3_out_path = os.path.join(model_dir + str(epoch), 'dis_3.ckpt')
+        for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+            model_path[sub_model] = os.path.join(model_dir + str(epoch), '%s.ckpt' % sub_model)
 
         log.write('------------------------------------------------------------------------\n')
         # Each epoch has a training and validation phase
         # for phase in ['test']:
         for phase in ['train', 'test']:
             if phase == 'train':
-                exp_lr_scheduler_gen.step()
-                exp_lr_scheduler_dis_1.step()
-                exp_lr_scheduler_dis_2.step()
-                exp_lr_scheduler_dis_3.step()
-                gen.train()
-                dis_1.train()
-                dis_2.train()
-                dis_3.train()
+                for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+                    exp_lr_scheduler[sub_model].step()
+                    model[sub_model].train()
 
                 for i, (image, reg_map_sp) in enumerate(dataloader[phase]):
-                    optimizer_gen.zero_grad()
-                    optimizer_dis_1.zero_grad()
-                    optimizer_dis_2.zero_grad()
-                    optimizer_dis_3.zero_grad()
+                    for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+                        optimizer[sub_model].zero_grad()
+
                     image, reg_map_sp = image.cuda(), reg_map_sp.cuda()
                     image = image.permute(1, 0, 4, 2, 3)
                     image = image.reshape(bsize * 2, 3, imsize, imsize)
@@ -117,27 +91,27 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
 
                     # disentangle the spoof traces / step 1
                     reg_map_sp = reg_map_sp.permute(0, 3, 1, 2)
-                    M, s, b, C, T = gen(image)
+                    M, s, b, C, T = model['gen'](image)
                     recon1 = (1 - s) * image - b - F.interpolate(C, [imsize, imsize]) - T  # reconstruct the live face
                     trace = image - recon1  # disentangle the spoof trace
                     trace_warp = warping(trace[bsize:, ...], reg_map_sp, imsize)  # get warpped trace
 
                     # synthesis the new spoof image
                     synth1 = image[:bsize, ...] + trace_warp
-                    image_d1 = torch.cat([image, recon1[bsize:, ...], synth1], 0)
+                    image_d1 = torch.cat((image, recon1[bsize:, ...], synth1), 0)
 
                     # input the feature into dis / step 2
-                    dis_1l, dis_1s = dis_1(image_d1)
+                    dis_1l, dis_1s = model['dis_1'](image_d1)
 
                     recon2 = F.interpolate(recon1, [im2size, im2size])
                     synth2 = F.interpolate(synth1, [im2size, im2size])
                     image_d2 = torch.cat([image2, recon2[bsize:, ...], synth2], 0)
-                    dis_2l, dis_2s = dis_2(image_d2)
+                    dis_2l, dis_2s = model['dis_2'](image_d2)
 
                     recon3 = F.interpolate(recon1, [im3size, im3size])
                     synth3 = F.interpolate(synth1, [im3size, im3size])
-                    image_d3 = torch.cat([image3, recon3[bsize:, ...], synth3], 0)
-                    dis_3l, dis_3s = dis_2(image_d3)
+                    image_d3 = torch.cat((image3, recon3[bsize:, ...], synth3), 0)
+                    dis_3l, dis_3s = model['dis_3'](image_d3)
 
                     # hard mode / step 3
                     s_hard = s * torch.Tensor(bsize * 2, 1, 1, 1).uniform_(0.1, 0.8).cuda()
@@ -153,11 +127,11 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     recon_hard_s2 = recon_hard3 if torch.gt(torch.Tensor(1).uniform_(0, 1)[0], 0.5) else recon_hard4
                     recon_hard = recon_hard_s1 if torch.gt(torch.Tensor(1).uniform_(0, 1)[0], 0.5) else recon_hard_s2
 
-                    image_a1 = torch.cat([image[:bsize, ...], recon_hard[bsize:, ...]], dim=0).detach()
-                    image_a2 = torch.cat([image[:bsize, ...], synth1], dim=0).detach()
+                    image_a1 = torch.cat((image[:bsize, ...], recon_hard[bsize:, ...]), dim=0).detach()
+                    image_a2 = torch.cat((image[:bsize, ...], synth1), dim=0).detach()
                     dec = torch.gt(torch.Tensor(1).uniform_(0, 1)[0], 0.5)
                     image_a = image_a1 if dec else image_a2
-                    M_a, s_a, b_a, C_a, T_a = gen(image_a)
+                    M_a, s_a, b_a, C_a, T_a = model['gen'](image_a)
                     traces_a = s_a * image + b_a + F.interpolate(C_a, [imsize, imsize]) + T_a
 
                     # loss computation
@@ -197,50 +171,50 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     dis_loss = d_loss
                     gen_loss.backward(retain_graph=True)
                     dis_loss.backward(retain_graph=True)
-                    optimizer_gen.step()
-                    optimizer_dis_1.step()
-                    optimizer_dis_2.step()
-                    optimizer_dis_3.step()
+                    for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+                        optimizer[sub_model].step()
                     if (i + 1) % train_num == 0:
                         log.write(
                             '**Epoch {}/{} Train {}/{}: g_loss: {:.4f} d_loss: {:.4f} a_loss: {:.4f}\n'.format(epoch, num_epochs - 1,
                             i, len(dataloader[phase]), g_loss, d_loss, a_loss))
+                        # synth = torch.cat((recon1[:bsize, ...], synth1), dim=0)
+                        fig = [image, (M+1)/2, s*5, b*5, C*5, T*5, recon1, trace*5]
+                        fig = plotResults(fig).data.numpy()
+                        fig_name = os.path.join(model_dir + str(epoch), str(i) + '.jpg')
+                        cv2.imwrite(fig_name, fig)
+
 
             else:
-                gen.eval()
-                dis_1.eval()
-                dis_2.eval()
-                dis_3.eval()
+                for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+                    model[sub_model].eval()
 
                 y_scores, y_labels = [], []
                 for i, (image, im_name, label) in enumerate(dataloader[phase]):
                     image, label = image.cuda(), torch.LongTensor(label).cuda()
                     image = image.permute(0, 3, 1, 2)
-                    M, s, b, C, T = gen(image)
+                    M, s, b, C, T = model['gen'](image)
                     score = torch.mean(M, dim=(1, 2, 3))
-                    label = label.data.cpu().numpy()
                     score = score.data.cpu().numpy()
-                    score = np.where(score > 0.75, 0, 1)
+                    score = np.where(score > 0, 0, 1)
+                    label = label.data.cpu().numpy()
+            
                     y_scores.extend(score)
                     y_labels.extend(label)
                     if (i + 1) % train_num == 0:
                         accuracy = accuracy_score(y_labels, y_scores)
                         log.write(
                             '**Epoch {}/{} Test {}/{}: Accuracy: {:.4f}\n'.format(epoch, num_epochs - 1,
-                                                                                                i,
-                                                                                                len(dataloader[phase]),
-                                                                                                accuracy))
-
-
+                            i, len(dataloader[phase]), accuracy))
 
                 APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=epoch, num_epochs=num_epochs)
                 log.write('Epoch {}/{} Time {}s\n'.format(epoch, num_epochs - 1, time.time() - epoch_start))
                 log.write('***************************************************')
                 if ACER < best_ACER:
-                    torch.save(gen.module.state_dict(), gen_out_path)
-                    torch.save(dis_1.module.state_dict(), dis_1_out_path)
-                    torch.save(dis_2.module.state_dict(), dis_2_out_path)
-                    torch.save(dis_3.module.state_dict(), dis_3_out_path)
+                    best_ACER = ACER
+                    best_epoch = epoch
+                    for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
+                        torch.save(model[sub_model].module.state_dict(), model_path[sub_model])
+                log.write('Best epoch is {}. The ACER of best epoch is {}, current epoch is {}\n'.format(best_epoch, best_ACER, epoch))
 
 
 def val_model(scores, labels, current_epoch, num_epochs):
@@ -295,14 +269,11 @@ def get_test_data(csv_file):
     log.write(str(len(image_list)) + '\n')
     return image_list, label_list
 
-
-
-
 if __name__ == '__main__':
 
     config = Config(gpu='1',
                     database='OULU',
-                    protocol='_2')
+                    protocol='_1')
 
     # Modify the following directories to yourselves
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE
@@ -322,7 +293,7 @@ if __name__ == '__main__':
         database, crop_size, Protocol, interval)  # The validation split file
 
     #  Output path
-    model_dir = 'model_out/STDN_%s_%s%s_%s/' % (database, crop_size, Protocol, interval)
+    model_dir = 'model_out/STDN_%s_%s%s_%s_mrga_test/' % (database, crop_size, Protocol, interval)
 
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
@@ -345,7 +316,7 @@ if __name__ == '__main__':
     log.write('loading train data' + '\n')
     train_list_li, train_list_sp = get_train_data(train_csv)
     ziplist = list(zip(train_list_li, train_list_sp))
-    shuffle(ziplist)
+    random.shuffle(ziplist)
     train_list_li, train_list_sp = zip(*ziplist)
 
     log.write('loading val data' + '\n')

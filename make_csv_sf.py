@@ -78,7 +78,7 @@ def Oulu_process(crop_size):
                     labels = 0
 
                 faces_name = os.listdir(os.path.join(image_dir, video_name))
-                for face_name in random.sample(faces_name, 6):
+                for face_name in random.sample(faces_name, 1):
                     face_name = face_name.split('.')[0] + '.jpg'
                     map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
                     map_path = os.path.join(os.path.join(map_dir, video_name), map_name)

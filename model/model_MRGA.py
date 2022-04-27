@@ -3,7 +3,82 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .utils import rgb_to_yuv, rgb_to_hsv, ConvBNAct, Upsample, Downsample
+import numpy as np
 
+def drop_path(x, drop_prob: float = 0.0, training: bool = False):
+    '''
+    Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks)
+    '''
+    if drop_prob == 0.0 or not training:
+        return x
+    keep_prob = 1 - drop_prob
+    shape = (x.shape[0],) + (1,) * (x.ndim - 1)  # work with diff dim tensors
+    random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
+    random_tensor.floor_()
+    output = x.div(keep_prob) * random_tensor
+    return output
+
+
+class DropPath(nn.Module):
+    '''
+    Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks)
+    '''
+
+    def __init__(self, drop_prob=None):
+        super(DropPath, self).__init__()
+        self.drop_prob = drop_prob
+
+    def forward(self, x):
+        return drop_path(x, self.drop_prob, self.training)
+
+class residual_gradient_conv(nn.Module):
+    def __init__(self,
+                 input_c: int,
+                 output_c: int,
+                 kernel_size: int = 3,
+                 stride: int = 1,
+                 norm: bool = True,
+                 act: bool = True,
+                 apply_dropout: bool = False
+                 ):
+        super(residual_gradient_conv, self).__init__()
+        self.stem_conv = nn.Conv2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, padding=1)
+        self.conv = nn.Conv2d(in_channels=input_c, out_channels=output_c, kernel_size=3, stride=stride)
+        
+        self.out_channels = output_c
+        self.stride = stride
+        self.padding = 1
+        self.norm = norm
+        self.act = act
+        self.apply_dropout = apply_dropout
+
+        self.sobel_plane = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])
+        if norm:
+            self.bn = nn.BatchNorm2d(output_c)
+        if act:
+            self.ac = nn.PReLU()
+        if apply_dropout:
+            self.dropout = nn.Dropout(p=0.3)
+
+    def forward(self, input):
+        x = self.stem_conv(input)
+        [co, ci, h, w] = self.stem_conv.weight.shape
+        sobel_kernel = torch.FloatTensor(self.sobel_plane).expand(ci, ci, 3, 3).cuda()
+        weight = nn.Parameter(data=sobel_kernel, requires_grad=False)
+        gradient_kernel = F.conv2d(input=self.stem_conv.weight, weight=weight, stride=1, padding=self.padding)
+        spatial_gradient = F.conv2d(input=input, weight=gradient_kernel, stride=self.stride, padding=self.padding)
+
+        out = x + spatial_gradient
+        if self.norm:
+            out = self.bn(out)
+        if self.act:
+            out = self.ac(out)
+        if self.apply_dropout:
+            self.dropout = nn.Dropout(p=0.3)
+
+        return out
+
+    
 
 class Generator(nn.Module):
     def __init__(self,
@@ -62,10 +137,10 @@ class Generator(nn.Module):
 
         # ESR
         self.ESR = nn.Sequential(
-          ConvBNAct(input_c=channels[2] * 3, output_c=channels[2], apply_dropout=True),
-          ConvBNAct(input_c=channels[2], output_c=channels[1], apply_dropout=True),
+          residual_gradient_conv(input_c=channels[2] * 3, output_c=channels[2], apply_dropout=True),
+          residual_gradient_conv(input_c=channels[2], output_c=channels[1], apply_dropout=True),
           Downsample(input_c=channels[1], output_c=channels[1]),
-          ConvBNAct(input_c=channels[1], output_c=1, act=False, norm=False),
+          residual_gradient_conv(input_c=channels[1], output_c=1, act=False, norm=False),
         )
 
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
@@ -172,7 +247,7 @@ class Discrinator_s(nn.Module):
         # Block 4
         self.Block4 = ConvBNAct(input_c=channels[3], output_c=channels[3])
         self.Block4l = ConvBNAct(input_c=channels[3], output_c=out_c // 2, act=False, norm=False)
-        self.Block4s = ConvBNAct(input_c=channels[3], output_c=out_c // 2, act=False, norm=False)
+        self.Block4s = ConvBNAct (input_c=channels[3], output_c=out_c // 2, act=False, norm=False)
 
     def forward(self, x):
         x = torch.cat((x, rgb_to_yuv(x)), dim=1)

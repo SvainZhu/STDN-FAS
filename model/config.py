@@ -25,7 +25,7 @@ class Config(object):
     # Training Meta
     BATCH_SIZE = 2
     G_D_RATIO = 2
-    LEARNING_RATE = 1e-2
+    LEARNING_RATE = 5e-4
     LEARNING_MOMENTUM = 0.999
     MAX_EPOCH = 50
     NUM_EPOCHS_PER_DECAY = 5.0
