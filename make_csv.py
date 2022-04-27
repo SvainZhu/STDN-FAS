@@ -183,7 +183,7 @@ def SiW_process(crop_size):
 
 
 def CASIA_FASD_process(crop_size):
-    Protocol = '2'          # 1: wrapped photo attack; 2: cut photo attack; 0: video attack
+    Protocol = '1'          # 1: wrapped photo attack; 2: cut photo attack; 0: video attack
     train_map_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/train_release/" % crop_size
     test_map_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/test_release/" % crop_size
 
@@ -191,7 +191,7 @@ def CASIA_FASD_process(crop_size):
     test_image_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/test_release/" % crop_size
 
     train_csv = r'E:/zsw/Data/CASIA_FASD/CSV/%s/train_%s_%s.csv' % (crop_size, Protocol, interval)
-    test_csv = r'E:/zsw/Data/CASIA_FASD/CSV/%s/test_%s%s_%s.csv' % (crop_size, Protocol, interval)
+    test_csv = r'E:/zsw/Data/CASIA_FASD/CSV/%s/test_%s_%s.csv' % (crop_size, Protocol, interval)
 
     train_map_csv = r'E:/zsw/Data/CASIA_FASD/CSV/%s/train_map_%s_%s.csv' % (crop_size, Protocol, interval)
     test_map_csv = r'E:/zsw/Data/CASIA_FASD/CSV/%s/test_map_%s_%s.csv' % (crop_size, Protocol, interval)
@@ -337,10 +337,10 @@ def RE_process(crop_size):
 if __name__ == '__main__':
     # Modify the following directories to yourselves
 
-    crop_size = 'STDN'
-    Oulu_process(crop_size)
+    crop_size = '1.8'
+    # Oulu_process(crop_size)
     # SiW_process(crop_size)
-    # CASIA_FASD_process(crop_size)
+    CASIA_FASD_process(crop_size)
     # RE_process(crop_size)
 
     # MSU_MFSD_process(crop_size)
