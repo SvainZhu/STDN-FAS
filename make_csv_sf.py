@@ -78,26 +78,22 @@ def Oulu_process(crop_size):
                     labels = 0
 
                 faces_name = os.listdir(os.path.join(image_dir, video_name))
-                for face_name in faces_name:
-                    if face_name.split('.')[-1] == 'npy':
-                        continue
-                    count = int(face_name.split('-')[-1].split('.')[0])
-                    if count % interval == 0:
-                        face_name = face_name.split('.')[0] + '.jpg'
-                        map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
-                        map_path = os.path.join(os.path.join(map_dir, video_name), map_name)
-                        face_path = os.path.join(os.path.join(image_dir, video_name), face_name)
-                        csv_writer.writerow([face_path, labels])
-                        map_csv_writer.writerow([map_path, labels])
+                for face_name in random.sample(faces_name, 1):
+                    face_name = face_name.split('.')[0] + '.jpg'
+                    map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
+                    map_path = os.path.join(os.path.join(map_dir, video_name), map_name)
+                    face_path = os.path.join(os.path.join(image_dir, video_name), face_name)
+                    csv_writer.writerow([face_path, labels])
+                    map_csv_writer.writerow([map_path, labels])
         map_csv_a.close()
         return 0
 
     oulu_base_process(image_dir=train_image_dir, map_dir=train_map_dir, list=train_list,
                       image_csv=train_csv, map_csv=train_map_csv)
-    # oulu_base_process(image_dir=val_image_dir, map_dir=val_map_dir, list=val_list,
-    #                   image_csv=train_csv, map_csv=train_map_csv)
-    oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
+    oulu_base_process(image_dir=val_image_dir, map_dir=val_map_dir, list=val_list,
                       image_csv=test_csv, map_csv=test_map_csv)
+    # oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
+    #                   image_csv=test_csv, map_csv=test_map_csv)
 
 def SiW_process(crop_size):
     Protocol = '1'

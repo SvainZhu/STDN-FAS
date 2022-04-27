@@ -11,7 +11,7 @@ class Config(object):
     GPU_USAGE = '0'
     DATABASE = 'OULU'
     PROTOCOL = '_1'
-    CROP_SIZE = '2.0'
+    CROP_SIZE = 'STDN'
     INTERVAL = '6'
 
     # Log and Model Storage Default
@@ -23,7 +23,7 @@ class Config(object):
     MAP_SIZE = 32
 
     # Training Meta
-    BATCH_SIZE = 16
+    BATCH_SIZE = 2
     G_D_RATIO = 2
     LEARNING_RATE = 5e-4
     LEARNING_MOMENTUM = 0.999

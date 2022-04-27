@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 def calculate_statistic(probs, labels):
-    TN, FP, FN, TP = confusion_matrix(labels, np.where(probs > 0.5, 1, 0)).ravel()
+    TN, FP, FN, TP = confusion_matrix(labels, probs).ravel()
     APCER = 1.0 if (FP + TN == 0) else FP / float(FP + TN)
     NPCER = 1.0 if (FN + TP == 0) else FN / float(FN + TP)
     ACER = (APCER + NPCER) / 2.0

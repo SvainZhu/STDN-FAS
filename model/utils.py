@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 def rgb_to_yuv(input: torch.Tensor, consts='yuv'):
     """Converts one or more images from RGB to YUV.
     Outputs a tensor of the same shape as the `input` image tensor, containing the YUV
@@ -82,6 +81,26 @@ def rgb_to_yuv(input: torch.Tensor, consts='yuv'):
     else:
         return torch.stack((y, u, v), -3)
 
+def rgb_to_hsv(input, epsilon=1e-10):
+    assert(input.shape[1] == 3)
+
+    r, g, b = input[:, 0], input[:, 1], input[:, 2]
+    max_rgb, argmax_rgb = input.max(1)
+    min_rgb, argmin_rgb = input.min(1)
+
+    max_min = max_rgb - min_rgb + epsilon
+
+    h1 = 60.0 * (g - r) / max_min + 60.0
+    h2 = 60.0 * (b - g) / max_min + 180.0
+    h3 = 60.0 * (r - b) / max_min + 300.0
+
+    h = torch.stack((h2, h3, h1), dim=0).gather(dim=0, index=argmin_rgb.unsqueeze(0)).squeeze(0)
+    s = max_min / (max_rgb + epsilon)
+    v = max_rgb
+
+    return torch.stack((h, s, v), dim=1)
+
+
 def clip_by_tensor(t, t_min, t_max):
     """
     clip_by_tensor
@@ -91,11 +110,9 @@ def clip_by_tensor(t, t_min, t_max):
     :return: cliped tensor
     """
     t = t.float()
-    t_min = t_min.float()
-    t_max = t_max.float()
 
-    result = (t >= t_min).float() * t + (t < t_min).float() * t_min
-    result = (result <= t_max).float() * result + (result > t_max).float() * t_max
+    result = (t >= t_min).to(torch.float32).cuda() * t + (t < t_min).to(torch.float32).cuda() * t_min
+    result = (result <= t_max).to(torch.float32).cuda() * result + (result > t_max).to(torch.float32).cuda() * t_max
     return result
 
 
@@ -104,47 +121,21 @@ def plotResults(result_list):
     for fig in result_list:
         shape = fig.shape
         fig = clip_by_tensor(fig, 0.0, 1.0)
-        row = []
-        if fig.shape[3] == 1:
-            fig = torch.cat([fig, fig, fig], dim=1)
+        if shape[1] == 1:
+            fig = torch.cat((fig, fig, fig), dim=1)
         else:
-            r, g, b = torch.split(fig, 3, 3)
-            fig = torch.cat([b,g,r], 3)
-        fig = F.interpolate(fig, [256, 256], mode='bilinear')
-        row = torch.split(fig, shape[0])
+            r, g, b = torch.split(fig, shape[1] // 3, 1)
+            fig = torch.cat((b, g, r), dim=1)
+        fig = F.interpolate(fig, [256, 256])
+        row = torch.split(fig, 1)
         row = torch.cat(row, dim=3)
-        column.append(row[0,:,:,:])
+        column.append(row[0, :, :, :])
 
-    column = torch.cat(column, dim=0)
-    img = torch.IntTensor(column * 255)
+    column = torch.cat(column, dim=1).data.cpu()
+    column = column * 255
+    img = torch.IntTensor(column.int()).permute(1, 2, 0)
     return img
 
-class Error:
-    def __init__(self):
-        self.losses = {}
-
-    def __call__(self, update, val=0):
-        loss_name   = update[0]
-        loss_update = update[1]
-        if loss_name not in self.losses.keys():
-            self.losses[loss_name] = {'value':0, 'step': 0, 'value_val':0, 'step_val':0}
-        if val == 1:
-            if loss_update is not None:
-                self.losses[loss_name]['value_val'] += loss_update
-                self.losses[loss_name]['step_val'] += 1
-            smooth_loss = str(round(self.losses[loss_name]['value_val'] / (self.losses[loss_name]['step_val']+1e-5),3))
-            return loss_name +':'+smooth_loss+','
-        else:
-            if loss_update is not None:
-                self.losses[loss_name]['value'] = self.losses[loss_name]['value'] * 0.9 + loss_update*0.1
-                self.losses[loss_name]['step'] += 1
-            if self.losses[loss_name]['step'] == 1:
-                self.losses[loss_name]['value'] = loss_update
-            smooth_loss = str(round(self.losses[loss_name]['value'], 3))
-            return loss_name +':'+smooth_loss+','
-
-    def reset(self):
-        self.losses = {}
 
 class FC(nn.Module):
     def __init__(self,
@@ -194,7 +185,7 @@ class ConvBNAct(nn.Module):
         self.act = act
         self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.1)
         if act:
             self.ac = nn.PReLU()
         if apply_dropout:
@@ -228,7 +219,7 @@ class Downsample(nn.Module):
         self.act = act
         self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.01)
         if act:
             self.ac = nn.PReLU()
         if apply_dropout:
@@ -259,12 +250,11 @@ class Upsample(nn.Module):
 
         padding = (kernel_size - 1) // 2
 
-        self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
+        self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, padding=padding, output_padding=1, bias=True)
         self.norm = norm
         self.act = act
-        self.apply_dropout = apply_dropout
         if norm:
-            self.bn = nn.BatchNorm2d(eps=1e-5, momentum=0.01)
+            self.bn = nn.BatchNorm2d(output_c, eps=1e-5, momentum=0.1)
         if act:
             self.ac = nn.PReLU()
 
