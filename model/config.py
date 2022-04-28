@@ -12,11 +12,11 @@ class Config(object):
     GPU_USAGE = '0'
     DATABASE = 'OULU'
     PROTOCOL = '_1'
-    CROP_SIZE = 'STDN'
+    CROP_SIZE = '2.0'
     INTERVAL = '6'
 
     # Log and Model Storage Default
-    LOG_DIR = './log/STDN'
+    LOG_DIR = './log/SiW/2.0/'
     LOG_DEVICE_PLACEMENT = False
 
     # Input Data Meta

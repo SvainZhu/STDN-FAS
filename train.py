@@ -301,8 +301,8 @@ def get_test_data(csv_file):
 if __name__ == '__main__':
 
     config = Config(gpu='1',
-                    database='OULU',
-                    protocol='_2')
+                    database='Siw',
+                    protocol='_1')
 
     # Modify the following directories to yourselves
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE
@@ -314,11 +314,11 @@ if __name__ == '__main__':
     crop_size = config.CROP_SIZE
     interval = config.INTERVAL
 
-    train_csv = r'E:/zsw/Data/%s/CSV/%s/train%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
-    test_csv = r'E:/zsw/Data/%s/CSV/%s/test%s_%s.csv' % (database, crop_size, Protocol, interval)  # The validation split file
+    train_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
+    test_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/test%s_%s.csv' % (database, crop_size, Protocol, interval)  # The validation split file
 
-    train_map_csv = r'E:/zsw/Data/%s/CSV/%s/train_map%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
-    test_map_csv = r'E:/zsw/Data/%s/CSV/%s/test_map%s_%s.csv' % (
+    train_map_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train_map%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
+    test_map_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/test_map%s_%s.csv' % (
         database, crop_size, Protocol, interval)  # The validation split file
 
     #  Output path
