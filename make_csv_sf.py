@@ -4,9 +4,6 @@ import json
 import random
 import pandas as pd
 
-interval = 6
-
-
 def base_process(image_dir, map_dir, image_csv, map_csv):
     map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
     map_csv_writer = csv.writer(map_csv_a)
@@ -332,7 +329,7 @@ def RE_process(crop_size):
 
 if __name__ == '__main__':
     # Modify the following directories to yourselves
-
+    interval = 6
     crop_size = '2.0'
     # Oulu_process(crop_size)
     SiW_process(crop_size)
