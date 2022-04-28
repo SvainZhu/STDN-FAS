@@ -133,13 +133,7 @@ def SiW_process(crop_size):
                         property_list = k.split('-')
                         if int(property_list[2]) in type_ids and int(property_list[3]) in medium_ids:
                             file_path3 = os.path.join(file_path2, k)
-                            count = -1
-                            for map in os.listdir(file_path3):
-                                count += 1
-                                if count >= frames_num:
-                                    break
-                                if count % interval != 0:
-                                    continue
+                            for map in random.sample(os.listdir(file_path3), 3):
                                 face_name = '_'.join(map.split('_')[:-1]) + '.jpg'
                                 map_path = os.path.join(file_path3, map)
                                 face_path = os.path.join(os.path.join(os.path.join(os.path.join(image_dir, i), j), k),
@@ -341,8 +335,8 @@ if __name__ == '__main__':
 
     crop_size = '2.0'
     # Oulu_process(crop_size)
-    # SiW_process(crop_size)
-    CASIA_FASD_process(crop_size)
+    SiW_process(crop_size)
+    # CASIA_FASD_process(crop_size)
     # RE_process(crop_size)
 
     # MSU_MFSD_process(crop_size)
