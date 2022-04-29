@@ -59,8 +59,6 @@ class MMDR_Trainer(nn.Module):
 
     def forward(self, x_r, x_s):
         self.eval()
-        style_s_fake = Variable(self.style_s_fake)
-        style_r_fake = Variable(self.style_r_fake)
         content_s, style_s = self.gen_s.encode(x_s)
         content_r, style_r = self.gen_r.encode(x_r)
         x_rs = self.gen_r.decode(content_s, style_r)
@@ -70,8 +68,6 @@ class MMDR_Trainer(nn.Module):
 
     def gen_update(self, x_r, x_s, hyperparameters):
         self.gen_opt.zero_grad()
-        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
-        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
 
         # encode
         content_r, style_r = self.gen_r.encode(x_r)
@@ -100,70 +96,56 @@ class MMDR_Trainer(nn.Module):
         self.loss_gen_cycrecon_x_r = self.recon_criterion(x_rsr, x_r) if hyperparameters['recon_x_cyc_w'] > 0 else 0
         self.loss_gen_cycrecon_x_s = self.recon_criterion(x_srs, x_s) if hyperparameters['recon_x_cyc_w'] > 0 else 0
         # GAN loss
-        self.loss_gen_adv_a = self.dis_a.calc_gen_loss(x_ba)
-        self.loss_gen_adv_b = self.dis_b.calc_gen_loss(x_ab)
-        # domain-invariant perceptual loss
-        self.loss_gen_vgg_a = self.compute_vgg_loss(self.vgg, x_ba, x_b) if hyperparameters['vgg_w'] > 0 else 0
-        self.loss_gen_vgg_b = self.compute_vgg_loss(self.vgg, x_ab, x_a) if hyperparameters['vgg_w'] > 0 else 0
+        self.loss_gen_adv_r = self.dis_a.calc_gen_loss(x_sr)
+        self.loss_gen_adv_s = self.dis_b.calc_gen_loss(x_rs)
         # total loss
-        self.loss_gen_total = hyperparameters['gan_w'] * self.loss_gen_adv_a + \
-                              hyperparameters['gan_w'] * self.loss_gen_adv_b + \
-                              hyperparameters['recon_x_w'] * self.loss_gen_recon_x_a + \
-                              hyperparameters['recon_s_w'] * self.loss_gen_recon_s_a + \
-                              hyperparameters['recon_c_w'] * self.loss_gen_recon_c_a + \
-                              hyperparameters['recon_x_w'] * self.loss_gen_recon_x_b + \
-                              hyperparameters['recon_s_w'] * self.loss_gen_recon_s_b + \
-                              hyperparameters['recon_c_w'] * self.loss_gen_recon_c_b + \
-                              hyperparameters['recon_x_cyc_w'] * self.loss_gen_cycrecon_x_a + \
-                              hyperparameters['recon_x_cyc_w'] * self.loss_gen_cycrecon_x_b + \
-                              hyperparameters['vgg_w'] * self.loss_gen_vgg_a + \
-                              hyperparameters['vgg_w'] * self.loss_gen_vgg_b
+        self.loss_gen_total = hyperparameters['gan_w'] * self.loss_gen_adv_r + \
+                              hyperparameters['gan_w'] * self.loss_gen_adv_s + \
+                              hyperparameters['recon_x_w'] * self.loss_gen_recon_x_r + \
+                              hyperparameters['recon_s_w'] * self.loss_gen_recon_style_r + \
+                              hyperparameters['recon_c_w'] * self.loss_gen_recon_content_r + \
+                              hyperparameters['recon_x_w'] * self.loss_gen_recon_x_s + \
+                              hyperparameters['recon_s_w'] * self.loss_gen_recon_style_s + \
+                              hyperparameters['recon_c_w'] * self.loss_gen_recon_content_s + \
+                              hyperparameters['recon_x_cyc_w'] * self.loss_gen_cycrecon_x_r + \
+                              hyperparameters['recon_x_cyc_w'] * self.loss_gen_cycrecon_x_s
         self.loss_gen_total.backward()
         self.gen_opt.step()
 
-    def compute_vgg_loss(self, vgg, img, target):
-        img_vgg = vgg_preprocess(img)
-        target_vgg = vgg_preprocess(target)
-        img_fea = vgg(img_vgg)
-        target_fea = vgg(target_vgg)
-        return torch.mean((self.instancenorm(img_fea) - self.instancenorm(target_fea)) ** 2)
-
-    def sample(self, x_a, x_b):
+    def sample(self, x_r, x_s):
         self.eval()
-        s_a1 = Variable(self.s_a)
-        s_b1 = Variable(self.s_b)
-        s_a2 = Variable(torch.randn(x_a.size(0), self.style_dim, 1, 1).cuda())
-        s_b2 = Variable(torch.randn(x_b.size(0), self.style_dim, 1, 1).cuda())
-        x_a_recon, x_b_recon, x_ba1, x_ba2, x_ab1, x_ab2 = [], [], [], [], [], []
-        for i in range(x_a.size(0)):
-            c_a, s_a_fake = self.gen_a.encode(x_a[i].unsqueeze(0))
-            c_b, s_b_fake = self.gen_b.encode(x_b[i].unsqueeze(0))
-            x_a_recon.append(self.gen_a.decode(c_a, s_a_fake))
-            x_b_recon.append(self.gen_b.decode(c_b, s_b_fake))
-            x_ba1.append(self.gen_a.decode(c_b, s_a1[i].unsqueeze(0)))
-            x_ba2.append(self.gen_a.decode(c_b, s_a2[i].unsqueeze(0)))
-            x_ab1.append(self.gen_b.decode(c_a, s_b1[i].unsqueeze(0)))
-            x_ab2.append(self.gen_b.decode(c_a, s_b2[i].unsqueeze(0)))
-        x_a_recon, x_b_recon = torch.cat(x_a_recon), torch.cat(x_b_recon)
-        x_ba1, x_ba2 = torch.cat(x_ba1), torch.cat(x_ba2)
-        x_ab1, x_ab2 = torch.cat(x_ab1), torch.cat(x_ab2)
+        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
+        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
+        x_r_recon, x_s_recon, x_sr, x_sr_fake, x_rs, x_rs_fake = [], [], [], [], [], []
+        for i in range(x_r.size(0)):
+            content_r, style_r = self.gen_a.encode(x_r[i].unsqueeze(0))
+            content_s, style_s = self.gen_b.encode(x_s[i].unsqueeze(0))
+            x_r_recon.append(self.gen_r.decode(content_r, style_r))
+            x_s_recon.append(self.gen_s.decode(content_s, style_s))
+            x_sr.append(self.gen_r.decode(content_s, style_r))
+            x_sr_fake.append(self.gen_r.decode(content_s, style_r_fake[i].unsqueeze(0)))
+            x_rs.append(self.gen_s.decode(content_r, style_s))
+            x_rs_fake.append(self.gen_s.decode(content_r, style_s_fake[i].unsqueeze(0)))
+        x_r_recon, x_s_recon = torch.cat(x_r_recon), torch.cat(x_s_recon)
+        x_sr, x_sr_fake = torch.cat(x_sr), torch.cat(x_sr_fake)
+        x_rs, x_rs_fake = torch.cat(x_rs), torch.cat(x_rs_fake)
         self.train()
-        return x_a, x_a_recon, x_ab1, x_ab2, x_b, x_b_recon, x_ba1, x_ba2
+        return x_r, x_r_recon, x_sr, x_sr_fake, x_s, x_s_recon, x_sr, x_sr_fake
 
-    def dis_update(self, x_a, x_b, hyperparameters):
+    def dis_update(self, x_r, x_s, hyperparameters):
         self.dis_opt.zero_grad()
-        s_a = Variable(torch.randn(x_a.size(0), self.style_dim, 1, 1).cuda())
-        s_b = Variable(torch.randn(x_b.size(0), self.style_dim, 1, 1).cuda())
+        # style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
+        # style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
         # encode
-        c_a, _ = self.gen_a.encode(x_a)
-        c_b, _ = self.gen_b.encode(x_b)
+        content_r, style_r = self.gen_r.encode(x_r)
+        content_s, style_s = self.gen_s.encode(x_s)
         # decode (cross domain)
-        x_ba = self.gen_a.decode(c_b, s_a)
-        x_ab = self.gen_b.decode(c_a, s_b)
+        x_sr = self.gen_r.decode(content_s, style_r)
+        x_rs = self.gen_s.decode(content_r, style_s)
         # D loss
-        self.loss_dis_a = self.dis_a.calc_dis_loss(x_ba.detach(), x_a)
-        self.loss_dis_b = self.dis_b.calc_dis_loss(x_ab.detach(), x_b)
-        self.loss_dis_total = hyperparameters['gan_w'] * self.loss_dis_a + hyperparameters['gan_w'] * self.loss_dis_b
+        self.loss_dis_r = self.dis_r.calc_dis_loss(x_sr.detach(), x_r)
+        self.loss_dis_s = self.dis_s.calc_dis_loss(x_rs.detach(), x_s)
+        self.loss_dis_total = hyperparameters['gan_w'] * self.loss_dis_r + hyperparameters['gan_w'] * self.loss_dis_s
         self.loss_dis_total.backward()
         self.dis_opt.step()
 
@@ -177,14 +159,14 @@ class MMDR_Trainer(nn.Module):
         # Load generators
         last_model_name = get_model_list(checkpoint_dir, "gen")
         state_dict = torch.load(last_model_name)
-        self.gen_a.load_state_dict(state_dict['a'])
-        self.gen_b.load_state_dict(state_dict['b'])
+        self.gen_r.load_state_dict(state_dict['r'])
+        self.gen_s.load_state_dict(state_dict['s'])
         iterations = int(last_model_name[-11:-3])
         # Load discriminators
         last_model_name = get_model_list(checkpoint_dir, "dis")
         state_dict = torch.load(last_model_name)
-        self.dis_a.load_state_dict(state_dict['a'])
-        self.dis_b.load_state_dict(state_dict['b'])
+        self.dis_r.load_state_dict(state_dict['r'])
+        self.dis_s.load_state_dict(state_dict['s'])
         # Load optimizers
         state_dict = torch.load(os.path.join(checkpoint_dir, 'optimizer.pt'))
         self.dis_opt.load_state_dict(state_dict['dis'])
@@ -200,6 +182,6 @@ class MMDR_Trainer(nn.Module):
         gen_name = os.path.join(snapshot_dir, 'gen_%08d.pt' % (iterations + 1))
         dis_name = os.path.join(snapshot_dir, 'dis_%08d.pt' % (iterations + 1))
         opt_name = os.path.join(snapshot_dir, 'optimizer.pt')
-        torch.save({'a': self.gen_a.state_dict(), 'b': self.gen_b.state_dict()}, gen_name)
-        torch.save({'a': self.dis_a.state_dict(), 'b': self.dis_b.state_dict()}, dis_name)
+        torch.save({'r': self.gen_r.state_dict(), 's': self.gen_s.state_dict()}, gen_name)
+        torch.save({'r': self.dis_r.state_dict(), 's': self.dis_s.state_dict()}, dis_name)
         torch.save({'gen': self.gen_opt.state_dict(), 'dis': self.dis_opt.state_dict()}, opt_name)
