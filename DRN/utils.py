@@ -1,14 +1,10 @@
-"""
-Copyright (C) 2018 NVIDIA Corporation.  All rights reserved.
-Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
-"""
 from torch.utils.serialization import load_lua
 from torch.utils.data import DataLoader
 from networks import Vgg16
 from torch.autograd import Variable
 from torch.optim import lr_scheduler
 from torchvision import transforms
-from data import ImageFilelist, ImageFolder, ImageFileCsv
+from dataset import ImageFilelist, ImageFolder, ImageFileCsv
 import torch
 import torch.nn as nn
 import os
@@ -31,9 +27,6 @@ import time
 # slerp
 # get_slerp_interp
 # get_model_list
-# load_vgg16
-# load_inception
-# vgg_preprocess
 # get_scheduler
 # weights_init
 
@@ -155,41 +148,6 @@ def prepare_sub_folder(output_directory):
     return checkpoint_directory, image_directory
 
 
-def write_one_row_html(html_file, iterations, img_filename, all_size):
-    html_file.write("<h3>iteration [%d] (%s)</h3>" % (iterations,img_filename.split('/')[-1]))
-    html_file.write("""
-        <p><a href="%s">
-          <img src="%s" style="width:%dpx">
-        </a><br>
-        <p>
-        """ % (img_filename, img_filename, all_size))
-    return
-
-
-def write_html(filename, iterations, image_save_iterations, image_directory, all_size=1536):
-    html_file = open(filename, "w")
-    html_file.write('''
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Experiment name = %s</title>
-      <meta http-equiv="refresh" content="30">
-    </head>
-    <body>
-    ''' % os.path.basename(filename))
-    html_file.write("<h3>current</h3>")
-    write_one_row_html(html_file, iterations, '%s/gen_a2b_train_current.jpg' % (image_directory), all_size)
-    write_one_row_html(html_file, iterations, '%s/gen_b2a_train_current.jpg' % (image_directory), all_size)
-    for j in range(iterations, image_save_iterations-1, -1):
-        if j % image_save_iterations == 0:
-            write_one_row_html(html_file, j, '%s/gen_a2b_test_%08d.jpg' % (image_directory, j), all_size)
-            write_one_row_html(html_file, j, '%s/gen_b2a_test_%08d.jpg' % (image_directory, j), all_size)
-            write_one_row_html(html_file, j, '%s/gen_a2b_train_%08d.jpg' % (image_directory, j), all_size)
-            write_one_row_html(html_file, j, '%s/gen_b2a_train_%08d.jpg' % (image_directory, j), all_size)
-    html_file.write("</body></html>")
-    html_file.close()
-
-
 def write_loss(iterations, trainer, train_writer):
     members = [attr for attr in dir(trainer) \
                if not callable(getattr(trainer, attr)) and not attr.startswith("__") and ('loss' in attr or 'grad' in attr or 'nwd' in attr)]
@@ -239,46 +197,6 @@ def get_model_list(dirname, key):
     return last_model_name
 
 
-def load_vgg16(model_dir):
-    """ Use the model from https://github.com/abhiskk/fast-neural-style/blob/master/neural_style/utils.py """
-    if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
-    if not os.path.exists(os.path.join(model_dir, 'vgg16.weight')):
-        if not os.path.exists(os.path.join(model_dir, 'vgg16.t7')):
-            os.system('wget https://www.dropbox.com/s/76l3rt4kyi3s8x7/vgg16.t7?dl=1 -O ' + os.path.join(model_dir, 'vgg16.t7'))
-        vgglua = load_lua(os.path.join(model_dir, 'vgg16.t7'))
-        vgg = Vgg16()
-        for (src, dst) in zip(vgglua.parameters()[0], vgg.parameters()):
-            dst.data[:] = src
-        torch.save(vgg.state_dict(), os.path.join(model_dir, 'vgg16.weight'))
-    vgg = Vgg16()
-    vgg.load_state_dict(torch.load(os.path.join(model_dir, 'vgg16.weight')))
-    return vgg
-
-def load_inception(model_path):
-    state_dict = torch.load(model_path)
-    model = inception_v3(pretrained=False, transform_input=True)
-    model.aux_logits = False
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, state_dict['fc.weight'].size(0))
-    model.load_state_dict(state_dict)
-    for param in model.parameters():
-        param.requires_grad = False
-    return model
-
-def vgg_preprocess(batch):
-    tensortype = type(batch.data)
-    (r, g, b) = torch.chunk(batch, 3, dim = 1)
-    batch = torch.cat((b, g, r), dim = 1) # convert RGB to BGR
-    batch = (batch + 1) * 255 * 0.5 # [-1, 1] -> [0, 255]
-    mean = tensortype(batch.data.size()).cuda()
-    mean[:, 0, :, :] = 103.939
-    mean[:, 1, :, :] = 116.779
-    mean[:, 2, :, :] = 123.680
-    batch = batch.sub(Variable(mean)) # subtract mean
-    return batch
-
-
 def get_scheduler(optimizer, hyperparameters, iterations=-1):
     if 'lr_policy' not in hyperparameters or hyperparameters['lr_policy'] == 'constant':
         scheduler = None # constant scheduler
@@ -323,85 +241,3 @@ class Timer:
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         print(self.msg % (time.time() - self.start_time))
-
-
-def pytorch03_to_pytorch04(state_dict_base, trainer_name):
-    def __conversion_core(state_dict_base, trainer_name):
-        state_dict = state_dict_base.copy()
-        if trainer_name == 'MUNIT':
-            for key, value in state_dict_base.items():
-                if key.endswith(('enc_content.model.0.norm.running_mean',
-                                 'enc_content.model.0.norm.running_var',
-                                 'enc_content.model.1.norm.running_mean',
-                                 'enc_content.model.1.norm.running_var',
-                                 'enc_content.model.2.norm.running_mean',
-                                 'enc_content.model.2.norm.running_var',
-                                 'enc_content.model.3.model.0.model.1.norm.running_mean',
-                                 'enc_content.model.3.model.0.model.1.norm.running_var',
-                                 'enc_content.model.3.model.0.model.0.norm.running_mean',
-                                 'enc_content.model.3.model.0.model.0.norm.running_var',
-                                 'enc_content.model.3.model.1.model.1.norm.running_mean',
-                                 'enc_content.model.3.model.1.model.1.norm.running_var',
-                                 'enc_content.model.3.model.1.model.0.norm.running_mean',
-                                 'enc_content.model.3.model.1.model.0.norm.running_var',
-                                 'enc_content.model.3.model.2.model.1.norm.running_mean',
-                                 'enc_content.model.3.model.2.model.1.norm.running_var',
-                                 'enc_content.model.3.model.2.model.0.norm.running_mean',
-                                 'enc_content.model.3.model.2.model.0.norm.running_var',
-                                 'enc_content.model.3.model.3.model.1.norm.running_mean',
-                                 'enc_content.model.3.model.3.model.1.norm.running_var',
-                                 'enc_content.model.3.model.3.model.0.norm.running_mean',
-                                 'enc_content.model.3.model.3.model.0.norm.running_var',
-                                 )):
-                    del state_dict[key]
-        else:
-            def __conversion_core(state_dict_base):
-                state_dict = state_dict_base.copy()
-                for key, value in state_dict_base.items():
-                    if key.endswith(('enc.model.0.norm.running_mean',
-                                     'enc.model.0.norm.running_var',
-                                     'enc.model.1.norm.running_mean',
-                                     'enc.model.1.norm.running_var',
-                                     'enc.model.2.norm.running_mean',
-                                     'enc.model.2.norm.running_var',
-                                     'enc.model.3.model.0.model.1.norm.running_mean',
-                                     'enc.model.3.model.0.model.1.norm.running_var',
-                                     'enc.model.3.model.0.model.0.norm.running_mean',
-                                     'enc.model.3.model.0.model.0.norm.running_var',
-                                     'enc.model.3.model.1.model.1.norm.running_mean',
-                                     'enc.model.3.model.1.model.1.norm.running_var',
-                                     'enc.model.3.model.1.model.0.norm.running_mean',
-                                     'enc.model.3.model.1.model.0.norm.running_var',
-                                     'enc.model.3.model.2.model.1.norm.running_mean',
-                                     'enc.model.3.model.2.model.1.norm.running_var',
-                                     'enc.model.3.model.2.model.0.norm.running_mean',
-                                     'enc.model.3.model.2.model.0.norm.running_var',
-                                     'enc.model.3.model.3.model.1.norm.running_mean',
-                                     'enc.model.3.model.3.model.1.norm.running_var',
-                                     'enc.model.3.model.3.model.0.norm.running_mean',
-                                     'enc.model.3.model.3.model.0.norm.running_var',
-
-                                     'dec.model.0.model.0.model.1.norm.running_mean',
-                                     'dec.model.0.model.0.model.1.norm.running_var',
-                                     'dec.model.0.model.0.model.0.norm.running_mean',
-                                     'dec.model.0.model.0.model.0.norm.running_var',
-                                     'dec.model.0.model.1.model.1.norm.running_mean',
-                                     'dec.model.0.model.1.model.1.norm.running_var',
-                                     'dec.model.0.model.1.model.0.norm.running_mean',
-                                     'dec.model.0.model.1.model.0.norm.running_var',
-                                     'dec.model.0.model.2.model.1.norm.running_mean',
-                                     'dec.model.0.model.2.model.1.norm.running_var',
-                                     'dec.model.0.model.2.model.0.norm.running_mean',
-                                     'dec.model.0.model.2.model.0.norm.running_var',
-                                     'dec.model.0.model.3.model.1.norm.running_mean',
-                                     'dec.model.0.model.3.model.1.norm.running_var',
-                                     'dec.model.0.model.3.model.0.norm.running_mean',
-                                     'dec.model.0.model.3.model.0.norm.running_var',
-                                     )):
-                        del state_dict[key]
-        return state_dict
-
-    state_dict = dict()
-    state_dict['a'] = __conversion_core(state_dict_base['a'], trainer_name)
-    state_dict['b'] = __conversion_core(state_dict_base['b'], trainer_name)
-    return state_dict
