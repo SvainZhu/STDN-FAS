@@ -24,7 +24,8 @@ recon_x_w: 10                 # weight of image reconstruction loss
 recon_s_w: 1                  # weight of style reconstruction loss
 recon_c_w: 1                  # weight of content reconstruction loss
 recon_x_cyc_w: 1              # weight of explicit style augmented cycle consistency loss
-vgg_w: 0                      # weight of domain-invariant perceptual loss
+est_o_w: 1                    # weight of original depth estimator loss
+est_s_w: 1                    # weight of swap depth estimator loss
 
 # model options
 gen:
@@ -43,6 +44,13 @@ dis:
   norm: none                  # normalization layer [none/bn/in/ln]
   act: lrelu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: reflect           # padding type [zero/reflect]
+est:
+  dim: 1                     # number of channels for depth map
+  n_layer: 3                  # number of layers in E
+  layer_type: conv             # estimator type [conv/cdconv/rgconv]
+  norm: bn                  # normalization layer [none/bn/in/ln]
+  act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
+  pad_type: zero           # padding type [zero/reflect]
 
 # data options
 input_dim_r: 3                              # number of image channels [1/3]

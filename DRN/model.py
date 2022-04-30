@@ -1,3 +1,4 @@
+import numpy as np
 from torch import nn
 from torch.autograd import Variable
 import torch
@@ -111,6 +112,7 @@ class VAEGen(nn.Module):
         images = self.dec(hiddens)
         return images
 
+
 ##################################################################################
 # Discriminator
 ##################################################################################
@@ -181,6 +183,139 @@ class MultiScaleDis(nn.Module):
             else:
                 assert 0, "Unsupported GAN type: {}".format(self.gan_type)
         return loss
+
+
+##################################################################################
+# Depth Map Estimator
+##################################################################################
+
+class DepthEstimator(nn.Module):
+    def __init__(self,
+                 input_c,
+                 output_c,
+                 n_layer=3,
+                 layer_type='conv',
+                 norm='none',
+                 act='relu',
+                 pad_type='zero'):
+        super(DepthEstimator, self).__init__()
+        self.layer_type = layer_type
+        self.norm = norm
+        self.act = act
+        self.pad_type = pad_type
+
+        self.stem_conv = self._make_block([input_c, 128], 1)
+
+        output_cs = [128, 128, 196, 128]
+        self.blocks = []
+        for i in range(3):
+            self.blocks += [self._make_block(output_cs, n_layer)]
+        self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=True)
+
+        last_output_cs = [[128, 128], [128, 64], [64, output_c]]
+        self.last_blocks = []
+        for i in range(3):
+            self.last_blocks += [self._make_block(last_output_cs[i], 1)]
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        assert H == self.img_size[0] and W == self.img_size[1]
+
+        outs = self.stem_conv(x)
+        outs_ds = []
+        for i in range(3):
+            outs = self.blocks[i](outs)
+            outs_ds += [self.downsample(outs)]
+        maps = torch.cat(outs_ds, dim=1)
+
+        for i in range(3):
+            maps = self.last_blocks[i](maps)
+
+        return maps
+
+    def calc_map_loss(self, inputs, maps_gt):
+        # calculate the loss
+        maps_est = self.forward(inputs)
+        loss = 0
+
+        for it, (map_est, map_gt) in enumerate(zip(maps_est, maps_gt)):
+            if self.layer_type == 'cdconv':
+                contrast_est = self.contrast_depth_conv(map_est)
+                contrast_gt = self.contrast_depth_conv(maps_gt)
+                loss += F.mse_loss(contrast_est, contrast_gt)
+            elif self.layer_type == 'rgconv':
+                adjacent_est = self.adjacent_depth_conv(map_est)
+                adjacent_gt = self.adjacent_depth_conv(maps_gt)
+                loss += F.mse_loss(adjacent_est, adjacent_gt)
+            elif self.layer_type == 'conv':
+                loss += F.l1_loss(map_est, map_gt)
+        return loss
+
+    def contrast_depth_conv(input):
+        ''' compute contrast depth in both of (out, label) '''
+        '''
+            input  32x32
+            output 8x32x32
+        '''
+
+        kernel_filter_list = [
+            [[1, 0, 0], [0, -1, 0], [0, 0, 0]], [[0, 1, 0], [0, -1, 0], [0, 0, 0]], [[0, 0, 1], [0, -1, 0], [0, 0, 0]],
+            [[0, 0, 0], [1, -1, 0], [0, 0, 0]], [[0, 0, 0], [0, -1, 1], [0, 0, 0]],
+            [[0, 0, 0], [0, -1, 0], [1, 0, 0]], [[0, 0, 0], [0, -1, 0], [0, 1, 0]], [[0, 0, 0], [0, -1, 0], [0, 0, 1]]
+        ]
+
+        kernel_filter = np.array(kernel_filter_list, np.float32)
+
+        kernel_filter = torch.from_numpy(kernel_filter.astype(np.float32)).float().cuda()
+        # weights (in_channel, out_channel, kernel, kernel)
+        kernel_filter = kernel_filter.unsqueeze(dim=1)
+
+        input = input.unsqueeze(dim=1).expand(input.shape[0], 8, input.shape[1], input.shape[2])
+
+        contrast_depth = F.conv2d(input, weight=kernel_filter, groups=8)  # depthwise conv
+
+        return contrast_depth
+
+    def adjacent_depth_conv(input):
+        ''' compute adjacent depth in both of (out, label) '''
+        '''
+            input  32x32
+            output 8x32x32
+        '''
+
+        kernel_filter_list = [[0.5, 1, 0.5], [1, -6, 1], [0.5, 1, 0.5]]
+
+        kernel_filter = np.array(kernel_filter_list, np.float32)
+
+        kernel_filter = torch.from_numpy(kernel_filter.astype(np.float32)).float().cuda()
+        # weights (in_channel, out_channel, kernel, kernel)
+        kernel_filter = kernel_filter.unsqueeze(dim=0).unsqueeze(dim=0)
+
+        input = input.unsqueeze(dim=1).expand(input.shape[0], 1, input.shape[1], input.shape[2])
+
+        adjacent_depth = F.conv2d(input, weight=kernel_filter, groups=1)  # depthwise conv
+
+        return adjacent_depth
+
+    def _make_block(self, output_cs, n_layer):
+        block_x = []
+        for i in range(n_layer):
+            if self.layer_type == 'conv':
+                block_x += [ConvNormAct(output_cs[i], output_cs[i+1], kernel_size=3, stride=1, padding=1, norm=self.norm,
+                                  act=self.act, pad_type=self.pad_type)]
+            elif self.layer_type == 'cdconv':
+                block_x += [CDConvNormAct(output_cs[i], output_cs[i+1], kernel_size=3, stride=1, padding=1, norm=self.norm,
+                                  act=self.act, pad_type=self.pad_type)]
+            elif self.layer_type == 'rgconv':
+                block_x += [RGConvNormAct(output_cs[i], output_cs[i+1], kernel_size=3, stride=1, padding=1, norm=self.norm,
+                                  act=self.act, pad_type=self.pad_type)]
+            else:
+                assert 0, "Unsupported Estimator type: {}".format(self.layer_type)
+        if n_layer > 1:
+            block_x += [nn.MaxPool2d(kernel_size=3, stride=2, padding=1)]
+        block_x = nn.Sequential(*block_x)
+        return block_x
+
 
 
 ##################################################################################
@@ -441,8 +576,169 @@ class LinearBlock(nn.Module):
         if self.norm:
             out = self.norm(out)
         if self.act:
-            out = self.activation(out)
+            out = self.act(out)
         return out
+
+
+class RGConvNormAct(nn.Module):
+    def __init__(self,
+                 input_c,
+                 output_c,
+                 kernel_size=3,
+                 stride=1,
+                 padding=0,
+                 norm='none',
+                 act='relu',
+                 pad_type='zero'):
+        super(RGConvNormAct, self).__init__()
+
+        self.use_bias = True
+        # initialize padding
+        if pad_type == 'reflect':
+            self.pad = nn.ReflectionPad2d(padding)
+        elif pad_type == 'replicate':
+            self.pad = nn.ReplicationPad2d(padding)
+        elif pad_type == 'zero':
+            self.pad = nn.ZeroPad2d(padding)
+        else:
+            assert 0, "Unsupported padding type: {}".format(pad_type)
+
+        # initialize normalization
+        norm_c = output_c
+        if norm == 'bn':
+            self.norm = nn.BatchNorm2d(norm_c)
+        elif norm == 'in':
+            # self.norm = nn.InstanceNorm2d(norm_dim, track_running_stats=True)
+            self.norm = nn.InstanceNorm2d(norm_c)
+        elif norm == 'ln':
+            self.norm = LayerNorm(norm_c)
+        elif norm == 'adain':
+            self.norm = AdaptiveInstanceNorm2d(norm_c)
+        elif norm == 'none' or norm == 'sn':
+            self.norm = None
+        else:
+            assert 0, "Unsupported normalization: {}".format(norm)
+
+        # initialize activation
+        if act == 'relu':
+            self.act = nn.ReLU(inplace=True)
+        elif act == 'lrelu':
+            self.act = nn.LeakyReLU(0.2, inplace=True)
+        elif act == 'prelu':
+            self.act = nn.PReLU()
+        elif act == 'selu':
+            self.act = nn.SELU(inplace=True)
+        elif act == 'tanh':
+            self.act = nn.Tanh()
+        elif act == 'none':
+            self.act = None
+        else:
+            assert 0, "Unsupported activation: {}".format(act)
+
+        # initialize convolution
+        if norm == 'sn':
+            self.stem_conv = SpectralNorm(nn.Conv2d(input_c, output_c, kernel_size, stride, padding, bias=self.use_bias))
+            self.conv = SpectralNorm(nn.Conv2d(input_c, output_c, kernel_size, stride, padding, bias=self.use_bias))
+        else:
+            self.stem_conv = nn.Conv2d(input_c, output_c, kernel_size, stride, padding, bias=self.use_bias)
+            self.conv = nn.Conv2d(input_c, output_c, 3, 1, padding, bias=self.use_bias)
+
+        self.output_c = output_c
+        self.stride = stride
+        self.padding = padding
+        self.grad_kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])
+
+    def forward(self, x):
+        out = self.stem_conv(x)
+        [co, ci, h, w] = self.stem_conv.weight.shape
+        sobel_kernel = torch.FloatTensor(self.grad_kernel).expand(ci, ci, 3, 3).cuda()
+        weight = nn.Parameter(data=sobel_kernel, requires_grad=False)
+        gradient_kernel = F.conv2d(input=self.stem_conv.weight, weight=weight, stride=1, padding=self.padding)
+        spatial_gradient = F.conv2d(input=x, weight=gradient_kernel, stride=self.stride, padding=self.padding)
+        out = out + spatial_gradient
+
+        if self.norm:
+            out = self.norm(out)
+        if self.act:
+            out = self.act(out)
+        return out
+
+class CDConvNormAct(nn.Module):
+    def __init__(self,
+                 input_c,
+                 output_c,
+                 kernel_size=3,
+                 stride=1,
+                 padding=0,
+                 norm='none',
+                 act='relu',
+                 pad_type='zero'):
+        super(CDConvNormAct, self).__init__()
+
+        self.use_bias = True
+        # initialize padding
+        if pad_type == 'reflect':
+            self.pad = nn.ReflectionPad2d(padding)
+        elif pad_type == 'replicate':
+            self.pad = nn.ReplicationPad2d(padding)
+        elif pad_type == 'zero':
+            self.pad = nn.ZeroPad2d(padding)
+        else:
+            assert 0, "Unsupported padding type: {}".format(pad_type)
+
+        # initialize normalization
+        norm_c = output_c
+        if norm == 'bn':
+            self.norm = nn.BatchNorm2d(norm_c)
+        elif norm == 'in':
+            # self.norm = nn.InstanceNorm2d(norm_dim, track_running_stats=True)
+            self.norm = nn.InstanceNorm2d(norm_c)
+        elif norm == 'ln':
+            self.norm = LayerNorm(norm_c)
+        elif norm == 'adain':
+            self.norm = AdaptiveInstanceNorm2d(norm_c)
+        elif norm == 'none' or norm == 'sn':
+            self.norm = None
+        else:
+            assert 0, "Unsupported normalization: {}".format(norm)
+
+        # initialize activation
+        if act == 'relu':
+            self.act = nn.ReLU(inplace=True)
+        elif act == 'lrelu':
+            self.act = nn.LeakyReLU(0.2, inplace=True)
+        elif act == 'prelu':
+            self.act = nn.PReLU()
+        elif act == 'selu':
+            self.act = nn.SELU(inplace=True)
+        elif act == 'tanh':
+            self.act = nn.Tanh()
+        elif act == 'none':
+            self.act = None
+        else:
+            assert 0, "Unsupported activation: {}".format(act)
+
+        # initialize convolution
+        if norm == 'sn':
+            self.conv = SpectralNorm(nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias))
+        else:
+            self.conv = nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias)
+
+
+    def forward(self, x):
+        out = self.conv(x)
+        kernel_diff = self.conv.weight.sum(2).sum(2)
+        kernel_diff = kernel_diff[:, :, None, None]
+        out_diff = F.conv2d(input=x, weight=kernel_diff, bias=self.conv.bias, stride=self.conv.stride, padding=0,
+                            groups=self.conv.groups)
+        out = out - out_diff
+        if self.norm:
+            out = self.norm(out)
+        if self.act:
+            out = self.act(out)
+
+        return out
+
 
 ##################################################################################
 # Normalization layers

@@ -52,14 +52,15 @@ shutil.copy(opts.config, os.path.join(output_directory, 'config.yaml')) # copy c
 # Start training
 iterations = trainer.resume(checkpoint_directory, hyperparameters=config) if opts.resume else 0
 while True:
-    for it, (images_a, images_b) in enumerate(zip(train_loader_r, train_loader_s)):
+    for it, (images_r, images_s, maps_r, maps_s) in enumerate(zip(train_loader_r, train_loader_s)):
         trainer.update_learning_rate()
-        images_a, images_b = images_a.cuda().detach(), images_b.cuda().detach()
+        images_r, images_s = images_r.cuda().detach(), images_s.cuda().detach()
 
         with Timer("Elapsed time in update: %f"):
             # Main training code
-            trainer.dis_update(images_a, images_b, config)
-            trainer.gen_update(images_a, images_b, config)
+            trainer.dis_update(images_r, images_s, config)
+            trainer.gen_update(images_r, images_s, config)
+            trainer.gen_update(images_r, images_s, maps_r, maps_s, config)
             torch.cuda.synchronize()
 
         # Dump training stats in log file
