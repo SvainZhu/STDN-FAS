@@ -52,25 +52,26 @@ class ImageFilelist(data.Dataset):
 
 
 class ImageLabelFilelist(data.Dataset):
-    def __init__(self, root, flist, transform=None,
-                 flist_reader=default_flist_reader, loader=default_loader):
-        self.root = root
-        self.imlist = flist_reader(os.path.join(self.root, flist))
+    def __init__(self, images_r, images_s, transform=None, loader=default_loader):
+        self.images_r = images_r
+        self.images_s = images_s
         self.transform = transform
         self.loader = loader
-        self.classes = sorted(list(set([path.split('/')[0] for path in self.imlist])))
-        self.class_to_idx = {self.classes[i]: i for i in range(len(self.classes))}
-        self.imgs = [(impath, self.class_to_idx[impath.split('/')[0]]) for impath in self.imlist]
 
     def __getitem__(self, index):
-        impath, label = self.imgs[index]
-        img = self.loader(os.path.join(self.root, impath))
+        impath, mappath, label = self.images_r[index]
+        image_r, map_r = self.loader(impath), self.loader(mappath)
         if self.transform is not None:
-            img = self.transform(img)
-        return img, label
+            image_r, map_r = self.transform(image_r), self.transform(map_r)
+
+        impath, mappath, label = self.images_s[index]
+        image_s, map_s = self.loader(impath), self.loader(mappath)
+        if self.transform is not None:
+            image_s, map_s = self.transform(image_s), self.transform(map_s)
+        return image_r, map_r, image_s, map_s
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.image_r)
 
 
 class ImageFileCsv(data.Dataset):

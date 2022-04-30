@@ -36,11 +36,11 @@ else:
     sys.exit("Only support MMDR")
 
 trainer.cuda()
-train_loader_r, train_loader_s, test_loader_r, test_loader_s = get_all_data_loaders(config)
-train_display_images_r = torch.stack([train_loader_r.dataset[i] for i in range(display_size)]).cuda()
-train_display_images_s = torch.stack([train_loader_s.dataset[i] for i in range(display_size)]).cuda()
-test_display_images_r = torch.stack([test_loader_r.dataset[i] for i in range(display_size)]).cuda()
-test_display_images_s = torch.stack([test_loader_s.dataset[i] for i in range(display_size)]).cuda()
+train_loader, test_loader = get_all_data_loaders(config)
+train_display_images_r = torch.stack([train_loader.dataset[i][0] for i in range(display_size)]).cuda()
+train_display_images_s = torch.stack([train_loader.dataset[i][3] for i in range(display_size)]).cuda()
+test_display_images_r = torch.stack([test_loader.dataset[i][0] for i in range(display_size)]).cuda()
+test_display_images_s = torch.stack([train_loader.dataset[i][3] for i in range(display_size)]).cuda()
 
 # Setup logger and output folders
 model_name = os.path.splitext(os.path.basename(opts.config))[0]
@@ -52,15 +52,15 @@ shutil.copy(opts.config, os.path.join(output_directory, 'config.yaml')) # copy c
 # Start training
 iterations = trainer.resume(checkpoint_directory, hyperparameters=config) if opts.resume else 0
 while True:
-    for it, (images_r, images_s, maps_r, maps_s) in enumerate(zip(train_loader_r, train_loader_s)):
+    for it, (images_r, maps_r, images_s, maps_s) in enumerate(train_loader):
         trainer.update_learning_rate()
-        images_r, images_s = images_r.cuda().detach(), images_s.cuda().detach()
+        images_r, maps_r, images_s, maps_s = images_r.cuda().detach(), maps_r.cuda().detach(), images_s.cuda().detach(), maps_s.cuda().detach()
 
         with Timer("Elapsed time in update: %f"):
             # Main training code
             trainer.dis_update(images_r, images_s, config)
             trainer.gen_update(images_r, images_s, config)
-            trainer.gen_update(images_r, images_s, maps_r, maps_s, config)
+            trainer.est_update(images_r, images_s, maps_r, maps_s, config)
             torch.cuda.synchronize()
 
         # Dump training stats in log file
