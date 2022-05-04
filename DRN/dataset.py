@@ -3,7 +3,6 @@ import os.path
 import csv
 from PIL import Image
 
-
 def default_loader(path):
     return Image.open(path).convert('RGB')
 
@@ -60,18 +59,18 @@ class ImageLabelFilelist(data.Dataset):
 
     def __getitem__(self, index):
         impath, mappath, label = self.images_r[index]
-        image_r, map_r = self.loader(impath), self.loader(mappath)
+        image_r, map_r = self.loader(impath), Image.open(mappath).convert('L').resize((32, 32))
         if self.transform is not None:
             image_r, map_r = self.transform(image_r), self.transform(map_r)
 
         impath, mappath, label = self.images_s[index]
-        image_s, map_s = self.loader(impath), self.loader(mappath)
+        image_s, map_s = self.loader(impath), Image.open(mappath).convert('L').resize((32, 32))
         if self.transform is not None:
             image_s, map_s = self.transform(image_s), self.transform(map_s)
         return image_r, map_r, image_s, map_s
 
     def __len__(self):
-        return len(self.image_r)
+        return len(self.images_r)
 
 
 class ImageFileCsv(data.Dataset):

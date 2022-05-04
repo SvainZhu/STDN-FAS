@@ -4,11 +4,13 @@ from torch.autograd import Variable
 import torch
 import torch.nn as nn
 import os
+import torch.nn.functional as F
 
 class MMDR_Trainer(nn.Module):
     def __init__(self, hyperparameters):
         super(MMDR_Trainer, self).__init__()
         lr = hyperparameters['lr']
+        self.style_dim = hyperparameters['gen']['style_dim']
         gen_config = hyperparameters['gen']
         dis_config = hyperparameters['dis']
         est_config = hyperparameters['est']
@@ -30,7 +32,7 @@ class MMDR_Trainer(nn.Module):
 
         self.est = DepthEstimator(hyperparameters['input_dim_r'], est_config['dim'],
                               est_config['n_layer'], est_config['layer_type'], est_config['norm'],
-                              est_config['act'], gen_config['pad_type'])  # depth map estimator for style feature
+                              est_config['act'], gen_config['pad_type']).cuda()  # depth map estimator for style feature
 
         # fix the noise used in sampling
         display_size = int(hyperparameters['display_size'])
@@ -65,7 +67,7 @@ class MMDR_Trainer(nn.Module):
 
     def forward(self, x_r, x_s):
         # self.eval()
-        # self.train()
+        self.train()
         content_s, style_s = self.gen_s.encode(x_s)
         content_r, style_r = self.gen_r.encode(x_r)
         x_rs = self.gen_r.decode(content_s, style_r)
@@ -90,7 +92,7 @@ class MMDR_Trainer(nn.Module):
 
         # encode again
         content_s_recon, style_r_recon = self.gen_r.encode(x_sr)
-        content_r_recon, style_s_recon = self.gen_b.encode(x_rs)
+        content_r_recon, style_s_recon = self.gen_s.encode(x_rs)
         # decode again (if needed)
         x_rsr = self.gen_r.decode(content_r_recon, style_r) if hyperparameters['recon_x_cyc_w'] > 0 else None
         x_srs = self.gen_s.decode(content_s_recon, style_s) if hyperparameters['recon_x_cyc_w'] > 0 else None
@@ -105,8 +107,8 @@ class MMDR_Trainer(nn.Module):
         self.loss_gen_cycrecon_x_r = self.recon_criterion(x_rsr, x_r) if hyperparameters['recon_x_cyc_w'] > 0 else 0
         self.loss_gen_cycrecon_x_s = self.recon_criterion(x_srs, x_s) if hyperparameters['recon_x_cyc_w'] > 0 else 0
         # GAN loss
-        self.loss_gen_adv_r = self.dis_a.calc_gen_loss(x_sr)
-        self.loss_gen_adv_s = self.dis_b.calc_gen_loss(x_rs)
+        self.loss_gen_adv_r = self.dis_r.calc_gen_loss(x_sr)
+        self.loss_gen_adv_s = self.dis_s.calc_gen_loss(x_rs)
         # total loss
         self.loss_gen_total = hyperparameters['gan_w'] * self.loss_gen_adv_r + \
                               hyperparameters['gan_w'] * self.loss_gen_adv_s + \
@@ -123,23 +125,31 @@ class MMDR_Trainer(nn.Module):
 
     def sample(self, x_r, x_s):
         self.eval()
-        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
-        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
-        x_r_recon, x_s_recon, x_sr, x_sr_fake, x_rs, x_rs_fake = [], [], [], [], [], []
+        xs_r_recon, xs_s_recon, xs_sr, xs_rs = [], [], [], []
+        maps_r, maps_s, maps_sr, maps_rs = [], [], [], []
         for i in range(x_r.size(0)):
-            content_r, style_r = self.gen_a.encode(x_r[i].unsqueeze(0))
-            content_s, style_s = self.gen_b.encode(x_s[i].unsqueeze(0))
-            x_r_recon.append(self.gen_r.decode(content_r, style_r))
-            x_s_recon.append(self.gen_s.decode(content_s, style_s))
-            x_sr.append(self.gen_r.decode(content_s, style_r))
-            x_sr_fake.append(self.gen_r.decode(content_s, style_r_fake[i].unsqueeze(0)))
-            x_rs.append(self.gen_s.decode(content_r, style_s))
-            x_rs_fake.append(self.gen_s.decode(content_r, style_s_fake[i].unsqueeze(0)))
-        x_r_recon, x_s_recon = torch.cat(x_r_recon), torch.cat(x_s_recon)
-        x_sr, x_sr_fake = torch.cat(x_sr), torch.cat(x_sr_fake)
-        x_rs, x_rs_fake = torch.cat(x_rs), torch.cat(x_rs_fake)
+            content_r, style_r = self.gen_r.encode(x_r[i].unsqueeze(0))
+            content_s, style_s = self.gen_s.encode(x_s[i].unsqueeze(0))
+            x_r_recon = self.gen_r.decode(content_r, style_r)
+            x_s_recon = self.gen_s.decode(content_s, style_s)
+            x_sr = self.gen_r.decode(content_r, style_s)
+            x_rs = self.gen_s.decode(content_s, style_r)
+            xs_r_recon.append(x_r_recon)
+            xs_s_recon.append(x_s_recon)
+            xs_sr.append(x_sr)
+            xs_rs.append(x_rs)
+            maps_r.append(self.est(x_r_recon))
+            maps_s.append(self.est(x_s_recon))
+            maps_sr.append(self.est(x_sr))
+            maps_rs.append(self.est(x_rs))
+
+        x_r_recon, x_s_recon, x_sr, x_rs = torch.cat(xs_r_recon), torch.cat(xs_s_recon), torch.cat(xs_sr), torch.cat(xs_rs)
+        maps_r, maps_s, maps_sr, maps_rs = torch.cat(maps_r), torch.cat(maps_s), torch.cat(maps_sr), torch.cat(maps_rs)
+        maps_r, maps_s, maps_sr, maps_rs = F.interpolate(maps_r, (256, 256)), F.interpolate(maps_s, (256, 256)), \
+                                           F.interpolate(maps_sr, (256, 256)), F.interpolate(maps_rs, (256, 256))
+
         self.train()
-        return x_r, x_r_recon, x_sr, x_sr_fake, x_s, x_s_recon, x_sr, x_sr_fake
+        return x_r, x_r_recon, x_sr, maps_r, maps_sr, x_s, x_s_recon, x_rs, maps_s, maps_rs
 
     def dis_update(self, x_r, x_s, hyperparameters):
         self.dis_opt.zero_grad()
@@ -159,6 +169,8 @@ class MMDR_Trainer(nn.Module):
         self.dis_opt.step()
 
     def est_update(self, x_r, x_s, gt_r, gt_s, hyperparameters):
+        gt_r = F.interpolate(gt_r, (32, 32))
+        gt_s = F.interpolate(gt_s, (32, 32))
         self.est_opt.zero_grad()
         # encode
         content_r, style_r = self.gen_r.encode(x_r)
@@ -175,9 +187,9 @@ class MMDR_Trainer(nn.Module):
         self.loss_est_s = self.est.calc_map_loss(map_s, gt_s)
         self.loss_est_rs = self.est.calc_map_loss(map_rs, gt_s)
         self.loss_est_sr = self.est.calc_map_loss(map_sr, gt_r)
-        self.loss_est_total = hyperparameters['est_o_w'] * (self.loss_est_r + self.loss_est_s) + \
-                              hyperparameters['est_s_w'] * (self.loss_est_rs + self.loss_est_sr)
-        self.loss_dis_total.backward()
+        self.loss_est_total = hyperparameters['est_o_w'] * self.loss_est_r + hyperparameters['est_o_w'] * self.loss_est_s \
+                              + hyperparameters['est_s_w'] * self.loss_est_rs + hyperparameters['est_s_w'] * self.loss_est_sr
+        self.loss_est_total.backward()
         self.est_opt.step()
 
     def update_learning_rate(self):

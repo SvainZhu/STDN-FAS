@@ -32,7 +32,7 @@ class AdaINGen(nn.Module):
 
         # content encoder
         self.enc_content = ContentEncoder(input_c=input_c, output_c=output_c, n_res=n_resblock, n_downsample=n_downsample, norm='in', act=act, pad_type=pad_type)
-        self.dec = Decoder(input_c=input_c, output_c=self.enc_content.output_c, n_upsample=n_downsample, n_res= n_resblock, res_norm='adain', act=act, pad_type=pad_type)
+        self.dec = Decoder(input_c=self.enc_content.output_c, output_c=input_c, n_upsample=n_downsample, n_res= n_resblock, res_norm='adain', act=act, pad_type=pad_type)
 
         # MLP to generate AdaIN parameters
         self.mlp = MLP(input_c=style_c, output_c=self.get_num_adain_params(self.dec), dim=mlp_c, n_block=3, norm='none', act=act)
@@ -139,7 +139,7 @@ class MultiScaleDis(nn.Module):
         cnn_x = []
         cnn_x += [ConvNormAct(self.input_c, output_c, kernel_size=4, stride=2, padding=1, norm='none', act=self.act, pad_type=self.pad_type)]
         for i in range(self.n_layer - 1):
-            cnn_x += [ConvNormAct(self.output_c, output_c * 2, kernel_size=4, stride=2, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type)]
+            cnn_x += [ConvNormAct(output_c, output_c * 2, kernel_size=4, stride=2, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type)]
             output_c *= 2
         cnn_x += [nn.Conv2d(in_channels=output_c, out_channels=1, kernel_size=1, stride=1, padding=0)]
         cnn_x = nn.Sequential(*cnn_x)
@@ -212,15 +212,12 @@ class DepthEstimator(nn.Module):
             self.blocks += [self._make_block(output_cs, n_layer)]
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=True)
 
-        last_output_cs = [[128, 128], [128, 64], [64, output_c]]
+        last_output_cs = [[128*3, 128], [128, 64], [64, output_c]]
         self.last_blocks = []
         for i in range(3):
             self.last_blocks += [self._make_block(last_output_cs[i], 1)]
 
     def forward(self, x):
-        B, C, H, W = x.shape
-        assert H == self.img_size[0] and W == self.img_size[1]
-
         outs = self.stem_conv(x)
         outs_ds = []
         for i in range(3):
@@ -233,25 +230,25 @@ class DepthEstimator(nn.Module):
 
         return maps
 
-    def calc_map_loss(self, inputs, maps_gt):
+    def calc_map_loss(self, maps_est, maps_gt):
         # calculate the loss
-        maps_est = self.forward(inputs)
-        loss = 0
 
+        loss = 0
         for it, (map_est, map_gt) in enumerate(zip(maps_est, maps_gt)):
+
             if self.layer_type == 'cdconv':
-                contrast_est = self.contrast_depth_conv(map_est)
-                contrast_gt = self.contrast_depth_conv(maps_gt)
-                loss += F.mse_loss(contrast_est, contrast_gt)
+                contrast_est = self.contrast_depth_conv(map_est.unsqueeze(0))
+                contrast_gt = self.contrast_depth_conv(map_gt.unsqueeze(0))
+                loss = loss + F.mse_loss(contrast_est, contrast_gt)
             elif self.layer_type == 'rgconv':
                 adjacent_est = self.adjacent_depth_conv(map_est)
-                adjacent_gt = self.adjacent_depth_conv(maps_gt)
-                loss += F.mse_loss(adjacent_est, adjacent_gt)
+                adjacent_gt = self.adjacent_depth_conv(map_gt)
+                loss = loss + F.mse_loss(adjacent_est, adjacent_gt)
             elif self.layer_type == 'conv':
-                loss += F.l1_loss(map_est, map_gt)
+                loss = loss + F.l1_loss(map_est, map_gt)
         return loss
 
-    def contrast_depth_conv(input):
+    def contrast_depth_conv(self, input):
         ''' compute contrast depth in both of (out, label) '''
         '''
             input  32x32
@@ -276,7 +273,7 @@ class DepthEstimator(nn.Module):
 
         return contrast_depth
 
-    def adjacent_depth_conv(input):
+    def adjacent_depth_conv(self, input):
         ''' compute adjacent depth in both of (out, label) '''
         '''
             input  32x32
@@ -314,7 +311,7 @@ class DepthEstimator(nn.Module):
         if n_layer > 1:
             block_x += [nn.MaxPool2d(kernel_size=3, stride=2, padding=1)]
         block_x = nn.Sequential(*block_x)
-        return block_x
+        return block_x.cuda()
 
 
 
@@ -464,8 +461,8 @@ class ConvNormAct(nn.Module):
     def __init__(self,
                  input_c,
                  output_c,
-                 kernel_size,
-                 stride,
+                 kernel_size=3,
+                 stride=1,
                  padding=0,
                  norm='none',
                  act='relu',
@@ -518,7 +515,7 @@ class ConvNormAct(nn.Module):
         if norm == 'sn':
             self.conv = SpectralNorm(nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias))
         else:
-            self.conv = nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias)
+            self.conv = nn.Conv2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size, stride=stride, bias=self.use_bias)
 
     def forward(self, x):
         x = self.conv(self.pad(x))

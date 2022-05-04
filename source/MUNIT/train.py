@@ -20,7 +20,7 @@ import tensorboardX
 import shutil
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/OULU2CASIA.yaml', help='Path to the config file.')
+parser.add_argument('--config', type=str, default='configs/OULU.yaml', help='Path to the config file.')
 parser.add_argument('--output_path', type=str, default='./results', help="outputs path")
 parser.add_argument("--resume", action="store_true")
 parser.add_argument('--trainer', type=str, default='MUNIT', help="MUNIT|UNIT")

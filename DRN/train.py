@@ -15,8 +15,8 @@ except ImportError: # will be 3.x series
     pass
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/OULU2CASIA.yaml', help='Path to the config file.')
-parser.add_argument('--output_path', type=str, default='./results', help="outputs path")
+parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
+parser.add_argument('--output_path', type=str, default='./results/cdconv/', help="outputs path")
 parser.add_argument("--resume", action="store_true")
 parser.add_argument('--trainer', type=str, default='MMDR', help="MMDR/?")
 opts = parser.parse_args()
@@ -38,9 +38,9 @@ else:
 trainer.cuda()
 train_loader, test_loader = get_all_data_loaders(config)
 train_display_images_r = torch.stack([train_loader.dataset[i][0] for i in range(display_size)]).cuda()
-train_display_images_s = torch.stack([train_loader.dataset[i][3] for i in range(display_size)]).cuda()
+train_display_images_s = torch.stack([train_loader.dataset[i][2] for i in range(display_size)]).cuda()
 test_display_images_r = torch.stack([test_loader.dataset[i][0] for i in range(display_size)]).cuda()
-test_display_images_s = torch.stack([train_loader.dataset[i][3] for i in range(display_size)]).cuda()
+test_display_images_s = torch.stack([train_loader.dataset[i][2] for i in range(display_size)]).cuda()
 
 # Setup logger and output folders
 model_name = os.path.splitext(os.path.basename(opts.config))[0]

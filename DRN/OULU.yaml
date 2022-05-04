@@ -5,7 +5,7 @@
 image_save_iter: 500         # How often do you want to save output images during training
 image_display_iter: 10000       # How often do you want to display output images during training
 display_size: 4               # How many images do you want to display each time
-snapshot_save_iter: 10000     # How often do you want to save trained models
+snapshot_save_iter: 1000     # How often do you want to save trained models
 log_iter: 10                   # How often do you want to log the training stats
 
 # optimization options
@@ -34,7 +34,7 @@ gen:
   n_downsample: 2             # number of downsampling layers in content encoder
   n_resblock: 4                    # number of residual blocks in content encoder/decoder
   mlp_dim: 256                # number of filters in MLP
-  act: prelu                 # activation function [relu/lrelu/prelu/selu/tanh]
+  act: relu                 # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: reflect           # padding type [zero/reflect]
 dis:
   dim: 64                     # number of filters in the bottommost layer
@@ -42,15 +42,15 @@ dis:
   n_layer: 4                  # number of layers in D
   gan_type: lsgan             # GAN loss [lsgan/nsgan]
   norm: none                  # normalization layer [none/bn/in/ln]
-  act: lrelu                # activation function [relu/lrelu/prelu/selu/tanh]
+  act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: reflect           # padding type [zero/reflect]
 est:
   dim: 1                     # number of channels for depth map
   n_layer: 3                  # number of layers in E
-  layer_type: conv             # estimator type [conv/cdconv/rgconv]
+  layer_type: cdconv             # estimator type [conv/cdconv/rgconv]
   norm: bn                  # normalization layer [none/bn/in/ln]
   act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
-  pad_type: zero           # padding type [zero/reflect]
+  pad_type: peflect           # padding type [zero/reflect]
 
 # data options
 input_dim_r: 3                              # number of image channels [1/3]
@@ -59,7 +59,5 @@ num_workers: 0                              # number of data loading threads
 new_size: 256                               # first resize the shortest image side to this size
 crop_image_height: 256                      # random crop image of this height
 crop_image_width: 256                       # random crop image of this width
-data_csv_train_a: E:\zsw\Data\OULU\CSV_rsf\2.0\train_1_6.csv     # a train dataset csv location
-data_csv_test_a: E:\zsw\Data\OULU\CSV_rsf\2.0\test_1_6.csv     # a test dataset csv location
-data_csv_train_b: E:\zsw\Data\CASIA_FASD\CSV_rsf\2.0\train_1_6.csv     # b train dataset csv location
-data_csv_test_b: E:\zsw\Data\CASIA_FASD\CSV_rsf\2.0\test_1_6.csv     # b test dataset csv location
+data_csv_train: E:\zsw\Data\OULU\CSV_MMDR\2.0\train_1_6.csv     # a train dataset csv location
+data_csv_test: E:\zsw\Data\OULU\CSV_MMDR\2.0\test_1_6.csv     # a test dataset csv location

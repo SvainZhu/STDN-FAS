@@ -4,6 +4,8 @@ import json
 import random
 import pandas as pd
 
+
+n_sample = 6
 def base_process(image_dir, map_dir, image_csv, map_csv):
     map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
     map_csv_writer = csv.writer(map_csv_a)
@@ -37,6 +39,8 @@ def base_process(image_dir, map_dir, image_csv, map_csv):
 def Oulu_process(crop_size):
     Protocol = '1'
     sub_Protocol = ''
+    # if os.path.exists(r'E:/zsw/Data/OULU/CSV_MMDR/%s/' % (crop_size)):
+    #     os.makedirs(r'E:/zsw/Data/OULU/CSV_MMDR/%s/' % (crop_size))
 
     train_image_dir = 'E:/zsw/Data/OULU/CropFace256/%s/Train_files/' % crop_size
     val_image_dir = 'E:/zsw/Data/OULU/CropFace256/%s/Dev_files/' % crop_size
@@ -54,15 +58,11 @@ def Oulu_process(crop_size):
     crop_size, Protocol, sub_Protocol, interval)  # the train split file
     val_csv = r'E:/zsw/Data/OULU/CSV_MMDR/%s/val_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, interval)  # the validation split file
-    test_csv = r'E:/zsw/Data/OULU/CSV_MMDR/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, interval)
-
-
-    if os.path.exists(r'E:/zsw/Data/OULU/CSV_MMDR/%s/' % (crop_size)):
-        os.makedirs(r'E:/zsw/Data/OULU/CSV_MMDR/%s/' % (crop_size))
+    test_csv = r'E:/zsw/Data/OULU/CSV_MMDR/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
     def oulu_base_process(image_dir, map_dir, list, data_csv):
         set = pd.read_csv(list, delimiter=',', header=None)
-        with open(image_csv, 'a', encoding='utf-8', newline='') as f:
+        with open(data_csv, 'a', encoding='utf-8', newline='') as f:
             csv_writer = csv.writer(f)
             for i in range(len(set)):
                 video_name = str(set.iloc[i, 1])
@@ -73,7 +73,7 @@ def Oulu_process(crop_size):
                     labels = 0
 
                 faces_name = os.listdir(os.path.join(image_dir, video_name))
-                for face_name in random.sample(faces_name, 3):
+                for face_name in random.sample(faces_name, n_sample):
                     face_name = face_name.split('.')[0] + '.jpg'
                     map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
                     map_path = os.path.join(os.path.join(map_dir, video_name), map_name)
