@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.tri as mtri
-from model.utils import clip_by_tensor
+
 
 def warping(x, offsets, imsize):
     bsize = x.shape[0]

@@ -25,3 +25,9 @@ def calculate_accuracy_score(labels, scores):
 
 def calculate_roc_auc_score(labels, scores):
     return roc_auc_score(labels, scores)
+
+def calculate_accuracy_score(labels, scores):
+    return accuracy_score(labels, scores)
+
+def calculate_roc_auc_score(labels, scores):
+    return roc_auc_score(labels, scores)
