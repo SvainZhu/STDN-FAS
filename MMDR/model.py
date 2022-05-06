@@ -114,46 +114,33 @@ class MultiScaleDis(nn.Module):
 # Depth Map Estimator
 ##################################################################################
 
-class DepthEstimator(nn.Module):
+class FeatureEstimator(nn.Module):
     def __init__(self,
                  input_c,
                  output_c,
                  n_layer=3,
-                 layer_type='conv',
                  norm='none',
                  act='relu',
                  pad_type='zero'):
-        super(DepthEstimator, self).__init__()
-        self.layer_type = layer_type
+        super(FeatureEstimator, self).__init__()
         self.norm = norm
         self.act = act
         self.pad_type = pad_type
 
-        self.stem_conv = self._make_block([input_c, 128], 1)
-
-        output_cs = [128, 128, 196, 128]
-        self.blocks = []
-        for i in range(3):
-            self.blocks += [self._make_block(output_cs, n_layer)]
-        self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=True)
-
-        last_output_cs = [[128*3, 128], [128, 64], [64, output_c]]
-        self.last_blocks = []
-        for i in range(3):
-            self.last_blocks += [self._make_block(last_output_cs[i], 1)]
+        channels = [input_c, 64, output_c]
+        self.est = nn.Sequential(
+          ConvNormAct(input_c=channels[0]*3, output_c=channels[0], norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+          ConvNormAct(input_c=channels[0], output_c=channels[1], norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+          ConvNormAct(input_c=channels[1], output_c=channels[1], stride=2, norm=norm, act=act, pad_type=pad_type),
+          ConvNormAct(input_c=channels[1], output_c=channels[2], norm='none', act='none', pad_type=pad_type),
+        )
 
     def forward(self, x):
-        outs = self.stem_conv(x)
-        outs_ds = []
+        maps = []
         for i in range(3):
-            outs = self.blocks[i](outs)
-            outs_ds += [self.downsample(outs)]
-        maps = torch.cat(outs_ds, dim=1)
-
-        for i in range(3):
-            maps = self.last_blocks[i](maps)
-
-        return maps
+            maps += [F.interpolate(x[i], [32, 32])]
+        map = torch.cat(maps, dim=1)
+        return self.est(map)
 
     def calc_map_loss(self, maps_est, maps_gt):
         # calculate the loss
