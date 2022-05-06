@@ -6,9 +6,12 @@ import torch
 from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
 import sys
+import numpy as np
 import tensorboardX
 import shutil
 from trainer import MMDR_Trainer
+from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
+
 try:
     from itertools import izip as zip
 except ImportError: # will be 3.x series
@@ -16,7 +19,7 @@ except ImportError: # will be 3.x series
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
-parser.add_argument('--output_path', type=str, default='./results/cdconv/', help="outputs path")
+parser.add_argument('--output_path', type=str, default='./results/conv/', help="outputs path")
 parser.add_argument("--resume", action="store_true")
 parser.add_argument('--trainer', type=str, default='MMDR', help="MMDR/?")
 opts = parser.parse_args()
@@ -39,8 +42,6 @@ trainer.cuda()
 train_loader, test_loader = get_all_data_loaders(config)
 train_display_images_r = torch.stack([train_loader.dataset[i][0] for i in range(display_size)]).cuda()
 train_display_images_s = torch.stack([train_loader.dataset[i][2] for i in range(display_size)]).cuda()
-test_display_images_r = torch.stack([test_loader.dataset[i][0] for i in range(display_size)]).cuda()
-test_display_images_s = torch.stack([train_loader.dataset[i][2] for i in range(display_size)]).cuda()
 
 # Setup logger and output folders
 model_name = os.path.splitext(os.path.basename(opts.config))[0]
@@ -71,15 +72,8 @@ while True:
         # Write images
         if (iterations + 1) % config['image_save_iter'] == 0:
             with torch.no_grad():
-                test_image_outputs = trainer.sample(test_display_images_r, test_display_images_s)
                 train_image_outputs = trainer.sample(train_display_images_r, train_display_images_s)
-            write_2images(test_image_outputs, display_size, image_directory, 'test_%08d' % (iterations + 1))
-            write_2images(train_image_outputs, display_size, image_directory, 'train_%08d' % (iterations + 1))
-
-        if (iterations + 1) % config['image_display_iter'] == 0:
-            with torch.no_grad():
-                image_outputs = trainer.sample(train_display_images_r, train_display_images_s)
-            write_2images(image_outputs, display_size, image_directory, 'train_current')
+                write_2images(train_image_outputs, display_size, image_directory, 'train_%08d' % (iterations + 1))
 
         # Save network weights
         if (iterations + 1) % config['snapshot_save_iter'] == 0:
@@ -89,3 +83,15 @@ while True:
         if iterations >= max_iter:
             sys.exit('Finish training')
 
+
+# def val_model(scores, labels, current_iter, num_iters):
+#     labels, scores = np.array(labels), np.array(scores)
+#     APCER, NPCER, ACER, ACC, HTER = calculate_statistic(scores, labels)
+#     AUC = calculate_roc_auc_score(labels, scores)
+#     log.write(
+#         '\n *********Iters {}/{}: APCER: {:.4f} NPCER: {:.4f} ACER: {:.4f} HTER: {:.4f} AUC: {:.4f} \n'.format(
+#             current_iter,
+#             num_iters - 1,
+#             APCER, NPCER, ACER, HTER, AUC))
+#     log.write('***************************************************\n')
+#     return APCER, NPCER, ACER, HTER, AUC

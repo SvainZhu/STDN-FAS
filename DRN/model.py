@@ -233,6 +233,7 @@ class DepthEstimator(nn.Module):
     def calc_map_loss(self, maps_est, maps_gt):
         # calculate the loss
 
+        maps_est = maps_est.squeeze(0)
         loss = 0
         for it, (map_est, map_gt) in enumerate(zip(maps_est, maps_gt)):
 
@@ -245,7 +246,8 @@ class DepthEstimator(nn.Module):
                 adjacent_gt = self.adjacent_depth_conv(map_gt)
                 loss = loss + F.mse_loss(adjacent_est, adjacent_gt)
             elif self.layer_type == 'conv':
-                loss = loss + F.l1_loss(map_est, map_gt)
+                l2_loss = nn.MSELoss()
+                loss = loss + l2_loss(map_est, map_gt)
         return loss
 
     def contrast_depth_conv(self, input):
@@ -384,7 +386,7 @@ class Decoder(nn.Module):
         self.model += [ResBlocks(channels=input_c, num_blocks=n_res, norm=res_norm, act=act, pad_type=pad_type)]
         # upsampling blocks
         for i in range(n_upsample):
-            self.model += [nn.Upsample(scale_factor=2),
+            self.model += [nn.Upsample(scale_factor=2, mode='bilinear'),
                            ConvNormAct(input_c=input_c, output_c=input_c // 2, kernel_size=5, stride=1, padding=2, norm='ln', act=act, pad_type=pad_type)]
             input_c //= 2
         # use reflection padding in the last conv layer
@@ -719,7 +721,7 @@ class CDConvNormAct(nn.Module):
         if norm == 'sn':
             self.conv = SpectralNorm(nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias))
         else:
-            self.conv = nn.Conv2d(input_c, output_c, kernel_size, stride, bias=self.use_bias)
+            self.conv = nn.Conv2d(input_c, output_c, kernel_size, stride, padding=1, bias=self.use_bias)
 
 
     def forward(self, x):

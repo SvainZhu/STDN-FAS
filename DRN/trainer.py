@@ -27,17 +27,16 @@ class MMDR_Trainer(nn.Module):
         self.dis_s = MultiScaleDis(hyperparameters['input_dim_r'], dis_config['dim'], dis_config['num_scales'],
                               dis_config['n_layer'], dis_config['gan_type'], dis_config['norm'],
                               dis_config['act'], dis_config['pad_type'])  # discriminator for type spoof
-        self.instancenorm = nn.InstanceNorm2d(512, affine=False)
-        self.style_c = hyperparameters['gen']['style_dim']
-
         self.est = DepthEstimator(hyperparameters['input_dim_r'], est_config['dim'],
                               est_config['n_layer'], est_config['layer_type'], est_config['norm'],
                               est_config['act'], gen_config['pad_type']).cuda()  # depth map estimator for style feature
 
         # fix the noise used in sampling
+        self.instancenorm = nn.InstanceNorm2d(512, affine=False)
+        self.style_c = hyperparameters['gen']['style_dim']
         display_size = int(hyperparameters['display_size'])
-        self.style_r_fake = torch.randn(display_size, self.style_dim, 1, 1).cuda()
-        self.style_s_fake = torch.randn(display_size, self.style_dim, 1, 1).cuda()
+        self.style_r_fake = torch.randn(display_size, self.style_c, 1, 1).cuda()
+        self.style_s_fake = torch.randn(display_size, self.style_c, 1, 1).cuda()
 
         # Setup the optimizers
         beta1 = hyperparameters['beta1']
@@ -60,26 +59,30 @@ class MMDR_Trainer(nn.Module):
         self.apply(weights_init(hyperparameters['init']))
         self.dis_r.apply(weights_init('gaussian'))
         self.dis_s.apply(weights_init('gaussian'))
+        self.est.apply(weights_init('gaussian'))
 
 
     def recon_criterion(self, input, target):
         return torch.mean(torch.abs(input - target))
 
     def forward(self, x_r, x_s):
-        # self.eval()
-        self.train()
+        self.eval()
+        style_r_fake = Variable(self.style_r_fake)
+        style_s_fake = Variable(self.style_s_fake)
         content_s, style_s = self.gen_s.encode(x_s)
         content_r, style_r = self.gen_r.encode(x_r)
-        x_rs = self.gen_r.decode(content_s, style_r)
-        x_sr = self.gen_s.decode(content_r, style_s)
+        x_rs = self.gen_r.decode(content_s, style_r_fake)
+        x_sr = self.gen_s.decode(content_r, style_s_fake)
 
         map_rs = self.est(x_rs)
         map_sr = self.est(x_sr)
+        self.train()
         return x_rs, x_sr, map_rs, map_sr
 
     def gen_update(self, x_r, x_s, hyperparameters):
         self.gen_opt.zero_grad()
-
+        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
+        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
         # encode
         content_r, style_r = self.gen_r.encode(x_r)
         content_s, style_s = self.gen_s.encode(x_s)
@@ -87,12 +90,12 @@ class MMDR_Trainer(nn.Module):
         x_r_recon = self.gen_r.decode(content_r, style_r)
         x_s_recon = self.gen_s.decode(content_s, style_s)
         # decode (cross type)
-        x_sr = self.gen_r.decode(content_s, style_r)
-        x_rs = self.gen_s.decode(content_r, style_s)
+        x_rs = self.gen_s.decode(content_s, style_r)
+        x_sr = self.gen_r.decode(content_r, style_s)
 
         # encode again
-        content_s_recon, style_r_recon = self.gen_r.encode(x_sr)
-        content_r_recon, style_s_recon = self.gen_s.encode(x_rs)
+        content_r_recon, style_s_recon = self.gen_r.encode(x_sr)
+        content_s_recon, style_r_recon = self.gen_s.encode(x_rs)
         # decode again (if needed)
         x_rsr = self.gen_r.decode(content_r_recon, style_r) if hyperparameters['recon_x_cyc_w'] > 0 else None
         x_srs = self.gen_s.decode(content_s_recon, style_s) if hyperparameters['recon_x_cyc_w'] > 0 else None
@@ -125,6 +128,8 @@ class MMDR_Trainer(nn.Module):
 
     def sample(self, x_r, x_s):
         self.eval()
+        style_r_fake = Variable(self.style_r_fake)
+        style_s_fake = Variable(self.style_s_fake)
         xs_r_recon, xs_s_recon, xs_sr, xs_rs = [], [], [], []
         maps_r, maps_s, maps_sr, maps_rs = [], [], [], []
         for i in range(x_r.size(0)):
@@ -143,24 +148,25 @@ class MMDR_Trainer(nn.Module):
             maps_sr.append(self.est(x_sr))
             maps_rs.append(self.est(x_rs))
 
-        x_r_recon, x_s_recon, x_sr, x_rs = torch.cat(xs_r_recon), torch.cat(xs_s_recon), torch.cat(xs_sr), torch.cat(xs_rs)
+        xs_r_recon, xs_s_recon, xs_sr, xs_rs = torch.cat(xs_r_recon), torch.cat(xs_s_recon), torch.cat(xs_sr), torch.cat(xs_rs)
         maps_r, maps_s, maps_sr, maps_rs = torch.cat(maps_r), torch.cat(maps_s), torch.cat(maps_sr), torch.cat(maps_rs)
         maps_r, maps_s, maps_sr, maps_rs = F.interpolate(maps_r, (256, 256)), F.interpolate(maps_s, (256, 256)), \
                                            F.interpolate(maps_sr, (256, 256)), F.interpolate(maps_rs, (256, 256))
 
         self.train()
-        return x_r, x_r_recon, x_sr, maps_r, maps_sr, x_s, x_s_recon, x_rs, maps_s, maps_rs
+        return x_r, xs_r_recon, xs_sr, maps_r, maps_sr, x_s, xs_s_recon, xs_rs, maps_s, maps_rs
 
     def dis_update(self, x_r, x_s, hyperparameters):
         self.dis_opt.zero_grad()
-        # style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
-        # style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
+        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
+        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
         # encode
         content_r, style_r = self.gen_r.encode(x_r)
         content_s, style_s = self.gen_s.encode(x_s)
         # decode (cross domain)
-        x_sr = self.gen_r.decode(content_s, style_r)
-        x_rs = self.gen_s.decode(content_r, style_s)
+
+        x_sr = self.gen_r.decode(content_r, style_s_fake)
+        x_rs = self.gen_s.decode(content_s, style_r_fake)
         # D loss
         self.loss_dis_r = self.dis_r.calc_dis_loss(x_sr.detach(), x_r)
         self.loss_dis_s = self.dis_s.calc_dis_loss(x_rs.detach(), x_s)
@@ -169,24 +175,26 @@ class MMDR_Trainer(nn.Module):
         self.dis_opt.step()
 
     def est_update(self, x_r, x_s, gt_r, gt_s, hyperparameters):
-        gt_r = F.interpolate(gt_r, (32, 32))
-        gt_s = F.interpolate(gt_s, (32, 32))
         self.est_opt.zero_grad()
         # encode
+        style_r_fake = Variable(torch.randn(x_r.size(0), self.style_dim, 1, 1).cuda())
+        style_s_fake = Variable(torch.randn(x_s.size(0), self.style_dim, 1, 1).cuda())
         content_r, style_r = self.gen_r.encode(x_r)
         content_s, style_s = self.gen_s.encode(x_s)
         # decode (cross domain)
-        x_sr = self.gen_r.decode(content_s, style_r)
-        x_rs = self.gen_s.decode(content_r, style_s)
-        map_r = self.est(x_r)
-        map_s = self.est(x_s)
+        x_r_recon = self.gen_r.decode(content_r, style_r)
+        x_s_recon = self.gen_s.decode(content_s, style_s)
+        x_sr = self.gen_r.decode(content_r, style_s)
+        x_rs = self.gen_s.decode(content_s, style_r)
+        map_r = self.est(x_r_recon)
+        map_s = self.est(x_s_recon)
         map_rs = self.est(x_rs)
         map_sr = self.est(x_sr)
         # E loss
         self.loss_est_r = self.est.calc_map_loss(map_r, gt_r)
         self.loss_est_s = self.est.calc_map_loss(map_s, gt_s)
-        self.loss_est_rs = self.est.calc_map_loss(map_rs, gt_s)
-        self.loss_est_sr = self.est.calc_map_loss(map_sr, gt_r)
+        self.loss_est_rs = self.est.calc_map_loss(map_rs, gt_r)
+        self.loss_est_sr = self.est.calc_map_loss(map_sr, gt_s)
         self.loss_est_total = hyperparameters['est_o_w'] * self.loss_est_r + hyperparameters['est_o_w'] * self.loss_est_s \
                               + hyperparameters['est_s_w'] * self.loss_est_rs + hyperparameters['est_s_w'] * self.loss_est_sr
         self.loss_est_total.backward()

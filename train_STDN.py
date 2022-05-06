@@ -16,11 +16,11 @@ from torch.utils import data
 # from model.model import Generator, Discrinator, Discrinator_s
 from model.model_MRGA import Generator, Discrinator, Discrinator_s
 from model.dataset import Dataset_Csv_train, Dataset_Csv_test
-from model.config  import Config
-from model.utils   import plotResults
-from model.loss    import l1_loss, l2_loss
-from model.warp    import warping
-from model.statistic import calculate_statistic
+from model.config import Config
+from model.utils import plotResults
+from model.loss import l1_loss, l2_loss
+from model.warp import warping
+from model.statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 import torch.nn.functional as F
 
 
@@ -57,10 +57,10 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
         model[sub_model].train()
         # model[sub_model].load_state_dict(torch.load('./model_out/STDN_OULU_STDN_%s_6/%s/%s.ckpt' %(pre_protocol, pre_epoch, sub_model)))
         model[sub_model] = torch.nn.DataParallel(model[sub_model].cuda())
-        optimizer[sub_model] = optim.Adam(model[sub_model].parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_AVERAGE_DECAY)
-        exp_lr_scheduler[sub_model] = lr_scheduler.StepLR(optimizer[sub_model], step_size=config.NUM_EPOCHS_PER_DECAY, gamma=config.GAMMA)
-
-
+        optimizer[sub_model] = optim.Adam(model[sub_model].parameters(), lr=config.LEARNING_RATE,
+                                          weight_decay=config.WEIGHT_AVERAGE_DECAY)
+        exp_lr_scheduler[sub_model] = lr_scheduler.StepLR(optimizer[sub_model], step_size=config.NUM_EPOCHS_PER_DECAY,
+                                                          gamma=config.GAMMA)
 
     for epoch in range(current_epoch, num_epochs):
 
@@ -135,15 +135,15 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     traces_a = s_a * image + b_a + F.interpolate(C_a, [imsize, imsize]) + T_a
 
                     # loss computation
-                    d1_rl, _, d1_sl, _ = torch.split(dis_1l, dis_1l.shape[0]//4)
-                    d2_rl, _, d2_sl, _ = torch.split(dis_2l, dis_2l.shape[0]//4)
-                    d3_rl, _, d3_sl, _ = torch.split(dis_3l, dis_3l.shape[0]//4)
-                    _, d1_rs, _, d1_ss = torch.split(dis_1s, dis_1s.shape[0]//4)
-                    _, d2_rs, _, d2_ss = torch.split(dis_2s, dis_2s.shape[0]//4)
-                    _, d3_rs, _, d3_ss = torch.split(dis_3s, dis_3s.shape[0]//4)
+                    d1_rl, _, d1_sl, _ = torch.split(dis_1l, dis_1l.shape[0] // 4)
+                    d2_rl, _, d2_sl, _ = torch.split(dis_2l, dis_2l.shape[0] // 4)
+                    d3_rl, _, d3_sl, _ = torch.split(dis_3l, dis_3l.shape[0] // 4)
+                    _, d1_rs, _, d1_ss = torch.split(dis_1s, dis_1s.shape[0] // 4)
+                    _, d2_rs, _, d2_ss = torch.split(dis_2s, dis_2s.shape[0] // 4)
+                    _, d3_rs, _, d3_ss = torch.split(dis_3s, dis_3s.shape[0] // 4)
 
                     # loss for step 1
-                    M_li, M_sp = torch.split(M, M.shape[0]//2, dim=0)
+                    M_li, M_sp = torch.split(M, M.shape[0] // 2, dim=0)
                     esr_loss = l1_loss(M_li, -1) + l1_loss(M_sp, 1)
                     gan_loss = l2_loss(d1_sl, 1) + l2_loss(d2_sl, 1) + l2_loss(d3_sl, 1) + \
                                l2_loss(d1_ss, 1) + l2_loss(d2_ss, 1) + l2_loss(d3_ss, 1)
@@ -175,10 +175,17 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                         optimizer[sub_model].step()
                     if (i + 1) % train_num == 0:
                         log.write(
-                            '**Epoch {}/{} Train {}/{}: g_loss: {:.4f} d_loss: {:.4f} a_loss: {:.4f}\n'.format(epoch, num_epochs - 1,
-                            i, len(dataloader[phase]), g_loss, d_loss, a_loss))
+                            '**Epoch {}/{} Train {}/{}: g_loss: {:.4f} d_loss: {:.4f} a_loss: {:.4f}\n'.format(epoch,
+                                                                                                               num_epochs - 1,
+                                                                                                               i,
+                                                                                                               len(
+                                                                                                                   dataloader[
+                                                                                                                       phase]),
+                                                                                                               g_loss,
+                                                                                                               d_loss,
+                                                                                                               a_loss))
                         # synth = torch.cat((recon1[:bsize, ...], synth1), dim=0)
-                        fig = [image, (M+1)/2, s*5, b*5, C*5, T*5, recon1, trace*5]
+                        fig = [image, (M + 1) / 2, s * 5, b * 5, C * 5, T * 5, recon1, trace * 5]
                         fig = plotResults(fig).data.numpy()
                         fig_name = os.path.join(model_dir + str(epoch), str(i) + '.jpg')
                         cv2.imwrite(fig_name, fig)
@@ -197,16 +204,17 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     score = score.data.cpu().numpy()
                     score = np.where(score > 0, 0, 1)
                     label = label.data.cpu().numpy()
-            
+
                     y_scores.extend(score)
                     y_labels.extend(label)
                     if (i + 1) % train_num == 0:
-                        accuracy = accuracy_score(y_labels, y_scores)
+                        accuracy = calculate_accuracy_score(y_labels, y_scores)
                         log.write(
                             '**Epoch {}/{} Test {}/{}: Accuracy: {:.4f}\n'.format(epoch, num_epochs - 1,
-                            i, len(dataloader[phase]), accuracy))
+                                                                                  i, len(dataloader[phase]), accuracy))
 
-                APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=epoch, num_epochs=num_epochs)
+                APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=epoch,
+                                                          num_epochs=num_epochs)
                 log.write('Epoch {}/{} Time {}s\n'.format(epoch, num_epochs - 1, time.time() - epoch_start))
                 log.write('***************************************************')
                 if ACER < best_ACER:
@@ -214,13 +222,15 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                     best_epoch = epoch
                     for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
                         torch.save(model[sub_model].module.state_dict(), model_path[sub_model])
-                log.write('Best epoch is {}. The ACER of best epoch is {}, current epoch is {}\n'.format(best_epoch, best_ACER, epoch))
+                log.write('Best epoch is {}. The ACER of best epoch is {}, current epoch is {}\n'.format(best_epoch,
+                                                                                                         best_ACER,
+                                                                                                         epoch))
 
 
 def val_model(scores, labels, current_epoch, num_epochs):
     labels, scores = np.array(labels), np.array(scores)
     APCER, NPCER, ACER, ACC, HTER = calculate_statistic(scores, labels)
-    AUC = roc_auc_score(labels, scores)
+    AUC = calculate_roc_auc_score(labels, scores)
     log.write(
         '\n *********Epoch {}/{}: APCER: {:.4f} NPCER: {:.4f} ACER: {:.4f} HTER: {:.4f} AUC: {:.4f} \n'.format(
             current_epoch,
@@ -256,6 +266,7 @@ def get_train_data(csv_file):
     log.write(str(len(list_sp) + len(list_li)) + '\n')
     return list_li, list_sp
 
+
 def get_test_data(csv_file):
     image_list = []
     label_list = []
@@ -269,6 +280,7 @@ def get_test_data(csv_file):
     log.write(str(len(image_list)) + '\n')
     return image_list, label_list
 
+
 if __name__ == '__main__':
 
     config = Config(gpu='1',
@@ -277,7 +289,7 @@ if __name__ == '__main__':
 
     # Modify the following directories to yourselves
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE
-    database = config.DATABASE      #OULU, CASIA_FASD, MSU_MFSD, RE
+    database = config.DATABASE  # OULU, CASIA_FASD, MSU_MFSD, RE
     start = time.time()
     current_epoch = 0
     batch_size = config.BATCH_SIZE
@@ -285,10 +297,13 @@ if __name__ == '__main__':
     crop_size = config.CROP_SIZE
     interval = config.INTERVAL
 
-    train_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
-    test_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/test%s_%s.csv' % (database, crop_size, Protocol, interval)  # The validation split file
+    train_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train%s_%s.csv' % (
+    database, crop_size, Protocol, interval)  # The train split file
+    test_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/test%s_%s.csv' % (
+    database, crop_size, Protocol, interval)  # The validation split file
 
-    train_map_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train_map%s_%s.csv' % (database, crop_size, Protocol, interval)  # The train split file
+    train_map_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/train_map%s_%s.csv' % (
+    database, crop_size, Protocol, interval)  # The train split file
     test_map_csv = r'E:/zsw/Data/%s/CSV_rsf/%s/test_map%s_%s.csv' % (
         database, crop_size, Protocol, interval)  # The validation split file
 
@@ -329,7 +344,6 @@ if __name__ == '__main__':
     # over sampling
     image_datasets['train'] = data.DataLoader(train_set, batch_size=batch_size, **params, drop_last=True)
     image_datasets['test'] = data.DataLoader(test_set, batch_size=batch_size, **params, drop_last=True)
-
 
     dataloaders = {x: image_datasets[x] for x in ['train', 'test']}
     datasets_sizes = {x: len(image_datasets[x]) for x in ['train', 'test']}

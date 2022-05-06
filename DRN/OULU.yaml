@@ -2,35 +2,35 @@
 
 
 # logger options
-image_save_iter: 500         # How often do you want to save output images during training
+image_save_iter: 30         # How often do you want to save output images during training
 image_display_iter: 10000       # How often do you want to display output images during training
 display_size: 4               # How many images do you want to display each time
-snapshot_save_iter: 1000     # How often do you want to save trained models
-log_iter: 10                   # How often do you want to log the training stats
+snapshot_save_iter: 1500     # How often do you want to save trained models
+log_iter: 300                   # How often do you want to log the training stats
 
 # optimization options
-max_iter: 100000             # maximum number of training iterations
+max_iter: 30000             # maximum number of training iterations
 batch_size: 1                 # batch size
 weight_decay: 0.0001          # weight decay
 beta1: 0.5                    # Adam parameter
 beta2: 0.999                  # Adam parameter
 init: kaiming                 # initialization [gaussian/kaiming/xavier/orthogonal]
-lr: 0.0001                    # initial learning rate
+lr: 0.001                    # initial learning rate
 lr_policy: step               # learning rate scheduler
-step_size: 1000               # how often to decay learning rate
+step_size: 300               # how often to decay learning rate
 gamma: 0.5                    # how much to decay learning rate
-gan_w: 1                      # weight of adversarial loss
-recon_x_w: 10                 # weight of image reconstruction loss
-recon_s_w: 1                  # weight of style reconstruction loss
-recon_c_w: 1                  # weight of content reconstruction loss
-recon_x_cyc_w: 1              # weight of explicit style augmented cycle consistency loss
-est_o_w: 1                    # weight of original depth estimator loss
-est_s_w: 1                    # weight of swap depth estimator loss
+gan_w: 10                      # weight of adversarial loss
+recon_x_w: 50                 # weight of image reconstruction loss
+recon_s_w: 50                  # weight of style reconstruction loss
+recon_c_w: 10                  # weight of content reconstruction loss
+recon_x_cyc_w: 10              # weight of explicit style augmented cycle consistency loss
+est_o_w: 100                    # weight of original depth estimator loss
+est_s_w: 100                    # weight of swap depth estimator loss
 
 # model options
 gen:
   dim: 64                     # number of filters in the bottommost layer
-  style_dim: 8                # length of style code
+  style_dim: 1024                # length of style code
   n_downsample: 2             # number of downsampling layers in content encoder
   n_resblock: 4                    # number of residual blocks in content encoder/decoder
   mlp_dim: 256                # number of filters in MLP
@@ -47,7 +47,7 @@ dis:
 est:
   dim: 1                     # number of channels for depth map
   n_layer: 3                  # number of layers in E
-  layer_type: cdconv             # estimator type [conv/cdconv/rgconv]
+  layer_type: conv             # estimator type [conv/cdconv/rgconv]
   norm: bn                  # normalization layer [none/bn/in/ln]
   act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: peflect           # padding type [zero/reflect]
