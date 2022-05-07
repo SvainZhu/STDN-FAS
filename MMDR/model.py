@@ -30,7 +30,13 @@ class Generator(nn.Module):
         self.enc = Encoder(input_c=input_c, output_c=feature_c, n_downsample=n_downsample, n_blocks=n_blocks, norm=norm, act=act, pad_type=pad_type)
 
         # content-style decoder
-        self.dec = Decoder(input_c=feature_c, output_c=input_c, n_upsample=n_downsample, n_blocks= n_blocks, norm=norm, act=act, pad_type=pad_type)
+        self.dec = Decoder(input_c=feature_c, output_c=output_c, n_upsample=n_downsample, n_blocks= n_blocks, norm=norm, act=act, pad_type=pad_type)
+
+    def encode(self, images):
+        return self.enc(images)
+
+    def decode(self, content_map, style_maps):
+        return self.dec(content_map, style_maps)
 
     def forward(self, images):
         # reconstruct an image
@@ -44,29 +50,25 @@ class Generator(nn.Module):
 
 class MultiScaleDis(nn.Module):
     # Multi-scale discriminator architecture
-    def __init__(self, input_c, output_c, num_scales, n_layer, gan_type, norm, act, pad_type):
+    def __init__(self, input_c, output_c, num_scales=3, num_layer=3, norm='bn', act='prelu', pad_type='zero'):
         super(MultiScaleDis, self).__init__()
         self.input_c = input_c
         self.output_c = output_c
         self.num_scales = num_scales
-        self.n_layer = n_layer
-        self.gan_type = gan_type
         self.norm = norm
         self.act = act
-        self.pad_type = pad_type
-        self.downsample = nn.AvgPool2d(3, stride=2, padding=[1, 1], count_include_pad=False)
+        self.downsample = nn.AvgPool2d(kernel_size=2, stride=2)
         self.cnns = nn.ModuleList()
+        self.channels = [32, 64, 96, 96]
         for _ in range(self.num_scales):
             self.cnns.append(self._make_net())
 
-    def _make_net(self):
-        output_c = self.output_c
-        cnn_x = []
-        cnn_x += [ConvNormAct(self.input_c, output_c, kernel_size=4, stride=2, padding=1, norm='none', act=self.act, pad_type=self.pad_type)]
-        for i in range(self.n_layer - 1):
-            cnn_x += [ConvNormAct(output_c, output_c * 2, kernel_size=4, stride=2, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type)]
-            output_c *= 2
-        cnn_x += [nn.Conv2d(in_channels=output_c, out_channels=1, kernel_size=1, stride=1, padding=0)]
+    def _make_net(self, last_net=False):
+        cnn_x = [ConvNormAct(self.input_c, self.channels[0], kernel_size=3, stride=1, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type)]
+        for i in range(self.num_layer):
+            cnn_x += [ConvNormAct(self.channels[i], self.channels[i], kernel_size=3, stride=1, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type),
+                      ConvNormAct(self.channels[i], self.channels[i+1], kernel_size=3, stride=2, padding=1, norm=self.norm, act=self.act, pad_type=self.pad_type)]
+        cnn_x += [ConvNormAct(self.channels[-1], self.output_c, kernel_size=3, stride=1, padding=0)]
         cnn_x = nn.Sequential(*cnn_x)
         return cnn_x
 
@@ -77,41 +79,9 @@ class MultiScaleDis(nn.Module):
             x = self.downsample(x)
         return outputs
 
-    def calc_dis_loss(self, input_fake, input_real):
-        # calculate the loss to train D
-        outs_fake = self.forward(input_fake)
-        outs_real = self.forward(input_real)
-        loss = 0
-
-        for it, (out_fake, out_real) in enumerate(zip(outs_fake, outs_real)):
-            if self.gan_type == 'lsgan':
-                loss += torch.mean((out_fake - 0)**2) + torch.mean((out_real - 1)**2)
-            elif self.gan_type == 'nsgan':
-                all_fake = Variable(torch.zeros_like(out_fake.data).cuda(), requires_grad=False)
-                all_real = Variable(torch.ones_like(out_real.data).cuda(), requires_grad=False)
-                loss += torch.mean(F.binary_cross_entropy(F.sigmoid(out_fake), all_fake) +
-                                   F.binary_cross_entropy(F.sigmoid(out_real), all_real))
-            else:
-                assert 0, "Unsupported GAN type: {}".format(self.gan_type)
-        return loss
-
-    def calc_gen_loss(self, input_fake):
-        # calculate the loss to train G
-        outs_fake = self.forward(input_fake)
-        loss = 0
-        for it, (out_fake) in enumerate(outs_fake):
-            if self.gan_type == 'lsgan':
-                loss += torch.mean((out_fake - 1)**2) # LSGAN
-            elif self.gan_type == 'nsgan':
-                all_fake = Variable(torch.ones_like(out_fake.data).cuda(), requires_grad=False)
-                loss += torch.mean(F.binary_cross_entropy(F.sigmoid(out_fake), all_fake))
-            else:
-                assert 0, "Unsupported GAN type: {}".format(self.gan_type)
-        return loss
-
 
 ##################################################################################
-# Depth Map Estimator
+# Feature Map Estimator
 ##################################################################################
 
 class FeatureEstimator(nn.Module):
@@ -119,8 +89,8 @@ class FeatureEstimator(nn.Module):
                  input_c,
                  output_c,
                  n_layer=3,
-                 norm='none',
-                 act='relu',
+                 norm='bn',
+                 act='prelu',
                  pad_type='zero'):
         super(FeatureEstimator, self).__init__()
         self.norm = norm
@@ -141,72 +111,6 @@ class FeatureEstimator(nn.Module):
             maps += [F.interpolate(x[i], [32, 32])]
         map = torch.cat(maps, dim=1)
         return self.est(map)
-
-    def calc_map_loss(self, maps_est, maps_gt):
-        # calculate the loss
-
-        maps_est = maps_est.squeeze(0)
-        loss = 0
-        for it, (map_est, map_gt) in enumerate(zip(maps_est, maps_gt)):
-
-            if self.layer_type == 'cdconv':
-                contrast_est = self.contrast_depth_conv(map_est.unsqueeze(0))
-                contrast_gt = self.contrast_depth_conv(map_gt.unsqueeze(0))
-                loss = loss + F.mse_loss(contrast_est, contrast_gt)
-            elif self.layer_type == 'rgconv':
-                adjacent_est = self.adjacent_depth_conv(map_est)
-                adjacent_gt = self.adjacent_depth_conv(map_gt)
-                loss = loss + F.mse_loss(adjacent_est, adjacent_gt)
-            elif self.layer_type == 'conv':
-                l2_loss = nn.MSELoss()
-                loss = loss + l2_loss(map_est, map_gt)
-        return loss
-
-    def contrast_depth_conv(self, input):
-        ''' compute contrast depth in both of (out, label) '''
-        '''
-            input  32x32
-            output 8x32x32
-        '''
-
-        kernel_filter_list = [
-            [[1, 0, 0], [0, -1, 0], [0, 0, 0]], [[0, 1, 0], [0, -1, 0], [0, 0, 0]], [[0, 0, 1], [0, -1, 0], [0, 0, 0]],
-            [[0, 0, 0], [1, -1, 0], [0, 0, 0]], [[0, 0, 0], [0, -1, 1], [0, 0, 0]],
-            [[0, 0, 0], [0, -1, 0], [1, 0, 0]], [[0, 0, 0], [0, -1, 0], [0, 1, 0]], [[0, 0, 0], [0, -1, 0], [0, 0, 1]]
-        ]
-
-        kernel_filter = np.array(kernel_filter_list, np.float32)
-
-        kernel_filter = torch.from_numpy(kernel_filter.astype(np.float32)).float().cuda()
-        # weights (in_channel, out_channel, kernel, kernel)
-        kernel_filter = kernel_filter.unsqueeze(dim=1)
-
-        input = input.unsqueeze(dim=1).expand(input.shape[0], 8, input.shape[1], input.shape[2])
-
-        contrast_depth = F.conv2d(input, weight=kernel_filter, groups=8)  # depthwise conv
-
-        return contrast_depth
-
-    def adjacent_depth_conv(self, input):
-        ''' compute adjacent depth in both of (out, label) '''
-        '''
-            input  32x32
-            output 8x32x32
-        '''
-
-        kernel_filter_list = [[0.5, 1, 0.5], [1, -6, 1], [0.5, 1, 0.5]]
-
-        kernel_filter = np.array(kernel_filter_list, np.float32)
-
-        kernel_filter = torch.from_numpy(kernel_filter.astype(np.float32)).float().cuda()
-        # weights (in_channel, out_channel, kernel, kernel)
-        kernel_filter = kernel_filter.unsqueeze(dim=0).unsqueeze(dim=0)
-
-        input = input.unsqueeze(dim=1).expand(input.shape[0], 1, input.shape[1], input.shape[2])
-
-        adjacent_depth = F.conv2d(input, weight=kernel_filter, groups=1)  # depthwise conv
-
-        return adjacent_depth
 
     def _make_block(self, output_cs, n_layer):
         block_x = []
@@ -712,7 +616,6 @@ class CDConvNormAct(nn.Module):
             out = self.dropout(out)
 
         return out
-
 
 class Upsample(nn.Module):
     def __init__(self,
