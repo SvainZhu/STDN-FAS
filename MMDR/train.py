@@ -4,7 +4,6 @@ import sys
 import time
 import numpy as np
 import os
-from albumentations import *
 import random
 import cv2
 import torch
@@ -20,7 +19,7 @@ from model import Generator, MultiScaleDis, FeatureEstimator
 from loss import l1_loss, l2_loss
 from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 
-from utils import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, write_loss, get_config, write_2images,
+from utils import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, write_loss, get_config, write_2images
 
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
@@ -222,7 +221,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 est.eval()
 
                 y_scores, y_labels = [], []
-                for i, (image, im_name, label) in enumerate(loader['test_loader']):
+                for i, (image, label) in enumerate(loader['test_loader']):
                     image, label = image.cuda(), torch.LongTensor(label).cuda()
                     content, style = gen.encode(image)
                     style_est = est(style)

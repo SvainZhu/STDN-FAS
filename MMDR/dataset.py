@@ -21,7 +21,7 @@ class ImageLabelFilelist_train(data.Dataset):
         sample_s = {'image': image_s, 'map': map_s, 'label': label}
         if self.transform is not None:
             sample_s = self.transform(sample_s)
-        return sample_r['image'], sample_r['map'], sample_s['image'], sample_s['map']
+        return sample_r['image'], sample_s['image']
 
     def __len__(self):
         return len(self.images_r)
