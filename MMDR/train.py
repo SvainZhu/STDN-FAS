@@ -69,11 +69,11 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
         print('Resume from iteration %d' % iterations)
         return iterations
 
-    def save(snapshot_dir, iterations):
+    def save(snapshot_dir, currect_epoch):
         # Save generators, discriminators, and optimizers
-        gen_name = os.path.join(snapshot_dir, 'gen_%08d.pt' % (iterations + 1))
-        dis_name = os.path.join(snapshot_dir, 'dis_%08d.pt' % (iterations + 1))
-        est_name = os.path.join(snapshot_dir, 'est_%08d.pt' % (iterations + 1))
+        gen_name = os.path.join(snapshot_dir, 'gen_%08d.pt' % (currect_epoch + 1))
+        dis_name = os.path.join(snapshot_dir, 'dis_%08d.pt' % (currect_epoch + 1))
+        est_name = os.path.join(snapshot_dir, 'est_%08d.pt' % (currect_epoch + 1))
         opt_name = os.path.join(snapshot_dir, 'optimizer.pt')
         torch.save(gen.state_dict(), gen_name)
         torch.save(dis.state_dict(), dis_name)
@@ -185,7 +185,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     dis_loss.backward(retain_graph=True)
                     update_learning_rate()
 
-                    if (i + 1) % train_num == 0:
+                    if (i + 1) % config['log_iter'] == 0:
                         log.write(
                             '**Epoch {}/{} Train {}/{}: gen_loss: {:.4f} dis_loss: {:.4f} recon_loss: {:.4f}\n'.format(epoch,
                             max_epochs - 1, i, len(dataloader[phase]), gen_loss, dis_loss, recon_loss))
@@ -193,15 +193,33 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     # Write images
 
                     if (iterations + 1) % config['image_save_iter'] == 0:
+                        train_display_images_r = torch.stack(
+                            [loader['train_loader'].dataset[i][0] for i in range(display_size)]).cuda()
+                        train_display_images_s = torch.stack(
+                            [loader['train_loader'].dataset[i][1] for i in range(display_size)]).cuda()
                         with torch.no_grad():
-                            train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256)),
-                                                   images_s, images_r, recon_r, recon_s_exchange, F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))]
+                            # disentangle the content-style feature of live and spoof faces
+                            content_r, style_r = gen.encode(train_display_images_r)
+                            content_s, style_s = gen.encode(train_display_images_s)
+
+                            # reconstruct the liveness faces and synthesize the spoof faces
+                            recon_r = gen.decode(content_s, style_r)
+                            synth_s = gen.decode(content_r, style_s)
+
+                            content_recon_r, style_recon_r = gen.encode(recon_r)
+                            content_synth_s, style_synth_s = gen.encode(synth_s)
+                            recon_r_exchange = gen.decode(content_synth_s, style_recon_r)
+                            recon_s_exchange = gen.decode(content_recon_r, style_synth_s)
+
+                            # estimate the feature style
+                            est_r, est_s = est(style_r), est(style_s)
+                            est_recon_r, est_synth_s = est(style_recon_r), est(style_synth_s)
+                            est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256))
+                            est_recon_r, est_synth_s = F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))
+                            train_image_outputs = [images_r, synth_s, recon_r_exchange, est_r, est_s,
+                                                   images_s, images_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s] * 255
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
-
-                    # Save network weights
-                    if (iterations + 1) % config['snapshot_save_iter'] == 0:
-                        save(checkpoint_dir, iterations)
 
                     iterations += 1
                     if iterations >= config['max_iters']:
@@ -225,7 +243,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
 
                     y_scores.extend(score)
                     y_labels.extend(label)
-                    if (i + 1) % train_num == 0:
+                    if (i + 1) % config['log_iter'] == 0:
                         accuracy = calculate_accuracy_score(y_labels, y_scores)
                         log.write(
                             '**Epoch {}/{} Test {}/{}: Accuracy: {:.4f}\n'.format(epoch, max_epochs - 1,
@@ -238,6 +256,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 if ACER < best_ACER:
                     best_ACER = ACER
                     best_epoch = epoch
+                    save(checkpoint_dir, epoch)
                 log.write('Best epoch is {}. The ACER of best epoch is {}, current epoch is {}\n'.format(best_epoch,
                                                                                                          best_ACER,
                                                                                                          epoch))
