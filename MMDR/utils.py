@@ -87,16 +87,22 @@ def eformat(f, prec):
     # add 1 to digits as 1 is taken by sign +/-
     return "%se%d"%(mantissa, int(exp))
 
-def __write_images(image_outputs, display_image_num, file_name):
-    image_tensor = torch.cat([images[:display_image_num] for images in image_outputs], 0)
+def __write_images(image_outputs, display_image_num, n_row, file_name):
+    image_outputs = [images.expand(-1, 3, -1, -1) for images in image_outputs] # expand gray-scale images to 3 channels
+    display_images = []
+    for i in range(display_image_num):
+        display_images.append([images[i] for images in image_outputs[:n_row]])
+    for i in range(display_image_num):
+        display_images.append([images[i] for images in image_outputs[n_row:]])
+
+    image_tensor = torch.cat(display_images, dim=0)
     image_grid = vutils.make_grid(image_tensor.data, nrow=display_image_num, padding=0, normalize=True)
     vutils.save_image(image_grid, file_name, nrow=1)
 
 
 def write_2images(image_outputs, display_image_num, image_directory, postfix):
     n = len(image_outputs)
-    __write_images(image_outputs[0:n//2], display_image_num, '%s/gen_r2s_%s.jpg' % (image_directory, postfix))
-    __write_images(image_outputs[n//2:n], display_image_num, '%s/gen_s2r_%s.jpg' % (image_directory, postfix))
+    __write_images(image_outputs, display_image_num, n//2, '%s/gen_%s.jpg' % (image_directory, postfix))
 
 def prepare_sub_folder(output_directory):
     image_directory = os.path.join(output_directory, 'images')

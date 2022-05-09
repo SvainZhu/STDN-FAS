@@ -193,30 +193,30 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     # Write images
 
                     if (iterations + 1) % config['image_save_iter'] == 0:
-                        train_display_images_r = torch.stack(
-                            [loader['train_loader'].dataset[i][0] for i in range(display_size)]).cuda()
-                        train_display_images_s = torch.stack(
-                            [loader['train_loader'].dataset[i][1] for i in range(display_size)]).cuda()
+                        # train_display_images_r = torch.stack(
+                        #     [loader['train_loader'].dataset[i][0] for i in range(display_size)]).cuda()
+                        # train_display_images_s = torch.stack(
+                        #     [loader['train_loader'].dataset[i][1] for i in range(display_size)]).cuda()
                         with torch.no_grad():
-                            # disentangle the content-style feature of live and spoof faces
-                            content_r, style_r = gen.encode(train_display_images_r)
-                            content_s, style_s = gen.encode(train_display_images_s)
-
-                            # reconstruct the liveness faces and synthesize the spoof faces
-                            recon_r = gen.decode(content_s, style_r)
-                            synth_s = gen.decode(content_r, style_s)
-
-                            content_recon_r, style_recon_r = gen.encode(recon_r)
-                            content_synth_s, style_synth_s = gen.encode(synth_s)
-                            recon_r_exchange = gen.decode(content_synth_s, style_recon_r)
-                            recon_s_exchange = gen.decode(content_recon_r, style_synth_s)
-
-                            # estimate the feature style
-                            est_r, est_s = est(style_r), est(style_s)
-                            est_recon_r, est_synth_s = est(style_recon_r), est(style_synth_s)
+                            # # disentangle the content-style feature of live and spoof faces
+                            # content_r, style_r = gen.encode(train_display_images_r)
+                            # content_s, style_s = gen.encode(train_display_images_s)
+                            #
+                            # # reconstruct the liveness faces and synthesize the spoof faces
+                            # recon_r = gen.decode(content_s, style_r)
+                            # synth_s = gen.decode(content_r, style_s)
+                            #
+                            # content_recon_r, style_recon_r = gen.encode(recon_r)
+                            # content_synth_s, style_synth_s = gen.encode(synth_s)
+                            # recon_r_exchange = gen.decode(content_synth_s, style_recon_r)
+                            # recon_s_exchange = gen.decode(content_recon_r, style_synth_s)
+                            #
+                            # # estimate the feature style
+                            # est_r, est_s = est(style_r), est(style_s)
+                            # est_recon_r, est_synth_s = est(style_recon_r), est(style_synth_s)
                             est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256))
                             est_recon_r, est_synth_s = F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))
-                            train_image_outputs = [images_r, synth_s, recon_r_exchange, est_r, est_s,
+                            train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, est_r, est_s,
                                                    images_s, images_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s] * 255
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
