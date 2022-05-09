@@ -84,8 +84,6 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
     best_ACER = 1.0
     best_epoch = 0
     train_num = 100
-    bsize = config['batch_size']
-    imsize = config['input_size']
     display_size = config['display_size']
 
     gen_config = config['gen']
@@ -93,14 +91,14 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
     est_config = config['est']
 
     gen = Generator(config['input_channel'], config['input_channel'], gen_config['feature_c'],
-                    gen_config['n_downsample'], gen_config['norm'], gen_config['act'], gen_config['pad_type'])
+                    gen_config['n_downsample'], gen_config['n_block'], gen_config['norm'], gen_config['act'], gen_config['pad_type'])
     dis = MultiScaleDis(dis_config['input_c'], dis_config['output_c'], dis_config['num_scales'],
                     dis_config['n_layer'], dis_config['norm'], dis_config['act'], dis_config['pad_type'])
-    est = FeatureEstimator(gen_config['feature_c'], 1,
+    est = FeatureEstimator(est_config['input_c'], est_config['output_c'],
                            est_config['n_layer'], est_config['norm'], est_config['act'], est_config['pad_type'])
-    gen = nn.DataParallel(gen.cuda())
-    dis = nn.DataParallel(dis.cuda())
-    est = nn.DataParallel(est.cuda())
+    gen = gen.cuda()
+    dis = dis.cuda()
+    est = est.cuda()
 
     # Setup the optimizers
     beta1, beta2, lr, weight_decay = config['beta1'], config['beta2'], config['lr'], config['weight_decay']
@@ -161,7 +159,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     # loss for step 1
                     gan_loss = 0
                     for i in range(dis_config['num_scales']):
-                        gan_loss += (l2_loss(dis_recon_r, 1) + l2_loss(dis_synth_s, 1))
+                        gan_loss += (l2_loss(dis_recon_r[i], 1) + l2_loss(dis_synth_s[i], 1))
                     est_loss = l1_loss(est_r, 0) + l1_loss(est_s, 1)
                     reg_loss_r = reg_loss_s = 0
                     for i in range(3):
@@ -173,7 +171,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     # loss for step2
                     dis_loss = 0
                     for i in range(dis_config['num_scales']):
-                        loss = (l2_loss(dis_recon_r, 0) + l2_loss(dis_synth_s, 0) + l2_loss(dis_recon_r_exchange, 1) + l2_loss(dis_recon_s_exchange, 1)) / 4.0
+                        loss = (l2_loss(dis_recon_r[i], 0) + l2_loss(dis_synth_s[i], 0) + l2_loss(dis_recon_r_exchange[i], 1) + l2_loss(dis_recon_s_exchange[i], 1)) / 4.0
                         dis_loss += loss
 
                     # loss for step3
@@ -186,23 +184,18 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     gen_loss.backward(retain_graph=True)
                     dis_loss.backward(retain_graph=True)
                     update_learning_rate()
+
                     if (i + 1) % train_num == 0:
                         log.write(
                             '**Epoch {}/{} Train {}/{}: gen_loss: {:.4f} dis_loss: {:.4f} recon_loss: {:.4f}\n'.format(epoch,
-                                                                                                               max_epochs - 1,
-                                                                                                               i,
-                                                                                                               len(
-                                                                                                                   dataloader[
-                                                                                                                       phase]),
-                                                                                                               gen_loss,
-                                                                                                               dis_loss,
-                                                                                                               recon_loss))
+                            max_epochs - 1, i, len(dataloader[phase]), gen_loss, dis_loss, recon_loss))
 
                     # Write images
+
                     if (iterations + 1) % config['image_save_iter'] == 0:
                         with torch.no_grad():
-                            train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, est_r, est_recon_r,
-                                                   images_s, images_r, recon_r, recon_s_exchange, est_s, est_synth_s]
+                            train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256)),
+                                                   images_s, images_r, recon_r, recon_s_exchange, F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))]
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
 
@@ -211,7 +204,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                         save(checkpoint_dir, iterations)
 
                     iterations += 1
-                    if iterations >= config['max_iter']:
+                    if iterations >= config['max_iters']:
                         sys.exit('Finish training')
 
 
@@ -273,7 +266,7 @@ if __name__ == '__main__':
 
     # Load experiment setting
     config = get_config(opts.config)
-    os.environ["CUDA_VISIBLE_DEVICES"] = config['GPU_USAGE']
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(config['GPU_USAGE'])
     use_cuda = torch.cuda.is_available()  # check if GPU exists
     device = torch.device("cuda" if use_cuda else "cpu")  # use CPU or GPU
     start = time.time()
@@ -286,7 +279,7 @@ if __name__ == '__main__':
     checkpoint_directory, image_directory = prepare_sub_folder(output_directory)
 
     log_name = model_name + '.log'
-    log_dir = os.path.join(log_name, log_name)
+    log_dir = os.path.join(checkpoint_directory, log_name)
     if os.path.exists(log_dir):
         os.remove(log_dir)
         print('The log file is exit!')

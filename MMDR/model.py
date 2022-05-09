@@ -55,8 +55,10 @@ class MultiScaleDis(nn.Module):
         self.input_c = input_c
         self.output_c = output_c
         self.num_scales = num_scales
+        self.num_layer = num_layer
         self.norm = norm
         self.act = act
+        self.pad_type = pad_type
         self.downsample = nn.AvgPool2d(kernel_size=2, stride=2)
         self.cnns = nn.ModuleList()
         self.channels = [32, 64, 96, 96]
@@ -150,7 +152,7 @@ class Encoder(nn.Module):
         self.act = act
         self.pad_type = pad_type
         self.n_downsample = n_downsample
-        channels = [output_c, output_c * 1.5, output_c * 2]
+        channels = [output_c, int(output_c * 1.5), output_c * 2]
 
         # content encoder
         self.content_encoder = []
@@ -160,7 +162,7 @@ class Encoder(nn.Module):
         self.content_encoder = nn.Sequential(*self.content_encoder)
 
         # style encoders
-        self.style_encoders = []
+        self.style_encoders = [ConvNormAct(channels[0], channels[1], 3, 1, 1, norm=norm, act=act, pad_type=pad_type).cuda()]
         layer_channels = [channels[1], channels[2], channels[1]]
         for i in range(n_downsample):
             self.style_encoders += [self._make_block(layer_channels, 2, 'downsample')]
@@ -173,8 +175,9 @@ class Encoder(nn.Module):
         content_map = out
 
         # style encode
+        out = self.style_encoders[0](out)
         style_maps = []
-        for i in range(self.n_downsample):
+        for i in range(1, self.n_downsample+1):
             out = self.style_encoders[i](out)
             style_maps += [out]
         return content_map, style_maps
@@ -210,21 +213,25 @@ class Decoder(nn.Module):
                  act='prelu',
                  pad_type='zero'):
         super(Decoder, self).__init__()
+        self.n_downsample = n_upsample
+        self.norm = norm
+        self.act = act
+        self.pad_type = pad_type
 
         # style decoder
         self.style_decoder = []
-        channels = [input_c // 4, input_c, input_c * 1.5]
+        channels = [input_c // 4, input_c, int(input_c * 1.5)]
         layer_channels = [channels[2], channels[1], channels[1] + channels[2], channels[1], channels[1] + channels[2],
                           channels[1]]
         for i in range(n_upsample):
             self.style_decoder += [Upsample(layer_channels[2 * i], layer_channels[2 * i + 1], stride=2, norm=norm, act=act,
                                      pad_type=pad_type)]
 
-        # style act
-        self.style_act = []
-        layer_channels = [channels[1], channels[0], output_c]
-        for i in range(n_upsample):
-            self.style_act += [self._make_block(layer_channels, 2, 'act')]
+        # # style act
+        # self.style_act = []
+        # layer_channels = [channels[1], channels[0], output_c]
+        # for i in range(n_upsample):
+        #     self.style_act += [self._make_block(layer_channels, 2, 'act')]
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
 
         # content decoder
@@ -236,7 +243,26 @@ class Decoder(nn.Module):
         self.content_decoder += [ConvNormAct(input_c=input_c, output_c=output_c, kernel_size=3, stride=1, padding=1, norm=norm, act=act, pad_type=pad_type)]
         self.content_decoder = nn.Sequential(*self.content_decoder)
 
+    def _make_block(self, output_cs, n_layer, last_layer='downsample'):
+        block_x = []
+        if last_layer == 'act':
+            for i in range(n_layer-1):
+                block_x += [ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, padding=1, norm=self.norm,
+                                act=self.act, pad_type=self.pad_type)]
+            block_x += [ConvNormAct(output_cs[-2], output_cs[-1], kernel_size=3, stride=1, padding=1, norm='none',
+                                    act='none', pad_type=self.pad_type)]
+            block_x += [nn.Tanh()]
+        else:
+            for i in range(n_layer):
+                block_x += [
+                    ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, stride=1, padding=1, norm=self.norm,
+                                act=self.act, pad_type=self.pad_type)]
+            if last_layer == 'downsample':
+                block_x += [ConvNormAct(output_cs[-1], output_cs[-1], kernel_size=3, stride=2, padding=1, norm=self.norm,
+                                    act=self.act, pad_type=self.pad_type)]
 
+        block_x = nn.Sequential(*block_x)
+        return block_x.cuda()
 
     def forward(self, content_x, style_x):
         # style decode
@@ -247,15 +273,15 @@ class Decoder(nn.Module):
             out = self.style_decoder[i](style_in)
             style_decode += [out]
 
-        # style act
-        style_act = []
-        for i in range(self.n_downsample):
-            style_act += [self.style_act[i](style_decode[i])]
+        # # style act
+        # style_act = []
+        # for i in range(self.n_downsample):
+        #     style_act += [self.style_act[i](style_decode[i])]
 
         # style feature
-        style_out = content_x * torch.mean(style_act[0], dim=[2, 3], keepdim=True)
-        style_out += F.interpolate(self.avg_pool(style_act[1]), (256, 256))
-        style_out += style_act[2]
+        style_out = content_x * torch.mean(style_decode[0], dim=[2, 3], keepdim=True)
+        style_out += F.interpolate(self.avg_pool(style_decode[1]), (256, 256))
+        style_out += style_decode[2]
 
         return self.content_decoder(content_x+style_out)
 
@@ -383,6 +409,8 @@ class ConvNormAct(nn.Module):
 
         if apply_dropout:
             self.dropout = nn.Dropout(p=0.3)
+        else:
+            self.dropout = None
 
     def forward(self, x):
         out = self.conv(self.pad(x))
@@ -633,19 +661,20 @@ class Upsample(nn.Module):
 
         # initialize convolution
         self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size,
-                                       stride=stride, padding=padding, output_padding=1, bias=True)
+                                       stride=stride, padding=padding, output_padding=1, bias=True).cuda()
+
 
         # initialize normalization
         norm_c = output_c
         if norm == 'bn':
-            self.norm = nn.BatchNorm2d(norm_c)
+            self.norm = nn.BatchNorm2d(norm_c).cuda()
         elif norm == 'in':
             # self.norm = nn.InstanceNorm2d(norm_dim, track_running_stats=True)
-            self.norm = nn.InstanceNorm2d(norm_c)
+            self.norm = nn.InstanceNorm2d(norm_c).cuda()
         elif norm == 'ln':
-            self.norm = LayerNorm(norm_c)
+            self.norm = LayerNorm(norm_c).cuda()
         elif norm == 'adain':
-            self.norm = AdaptiveInstanceNorm2d(norm_c)
+            self.norm = AdaptiveInstanceNorm2d(norm_c).cuda()
         elif norm == 'none' or norm == 'sn':
             self.norm = None
         else:
@@ -653,22 +682,22 @@ class Upsample(nn.Module):
 
         # initialize activation
         if act == 'relu':
-            self.act = nn.ReLU(inplace=True)
+            self.act = nn.ReLU(inplace=True).cuda()
         elif act == 'lrelu':
-            self.act = nn.LeakyReLU(0.2, inplace=True)
+            self.act = nn.LeakyReLU(0.2, inplace=True).cuda()
         elif act == 'prelu':
-            self.act = nn.PReLU()
+            self.act = nn.PReLU().cuda()
         elif act == 'selu':
-            self.act = nn.SELU(inplace=True)
+            self.act = nn.SELU(inplace=True).cuda()
         elif act == 'tanh':
-            self.act = nn.Tanh()
+            self.act = nn.Tanh().cuda()
         elif act == 'none':
             self.act = None
         else:
             assert 0, "Unsupported activation: {}".format(act)
 
     def forward(self, x):
-        out = self.conv(self.pad(x))
+        out = self.conv(x)
         if self.norm:
             out = self.norm(out)
         if self.act:
