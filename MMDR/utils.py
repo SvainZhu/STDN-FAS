@@ -3,6 +3,7 @@ from torch.optim import lr_scheduler
 from torchvision import transforms
 from dataset import ImageLabelFilelist_train, ImageLabelFilelist_test
 import torch
+import torch.nn.functional as F
 import os
 import math
 import torchvision.utils as vutils
@@ -36,12 +37,20 @@ def get_all_data_loaders(conf):
 
 def get_data_loader_csv(csv_file, batch_size, train, num_workers=4, mode='train'):
     if mode == 'train':
-        transform_list = []
-        # transform_list = transform_list + [RandomErasing(), ] if crop else transform_list
-        # transform_list = transform_list + [RandomHorizontalFlip(), ] if train else transform_list
-        transform_list = transform_list + [ToTensor(), ]
-        # transform_list = transform_list + [Cutout(), ] if crop else transform_list
-        transform_list = transform_list + [Normaliztion()]
+        # transform_list = []
+        # # transform_list = transform_list + [RandomErasing(), ] if crop else transform_list
+        # # transform_list = transform_list + [RandomHorizontalFlip(), ] if train else transform_list
+        # transform_list = transform_list + [ToTensor(), ]
+        # # transform_list = transform_list + [Cutout(), ] if crop else transform_list
+        # transform_list = transform_list + [Normaliztion()]
+        # transform = transforms.Compose(transform_list)
+
+        transform_list = [transforms.ToTensor(),
+                          transforms.Normalize((0.5, 0.5, 0.5),
+                                               (0.5, 0.5, 0.5))]
+        # transform_list = [transforms.RandomCrop((height, width))] + transform_list if crop else transform_list
+        # transform_list = [transforms.Resize(new_size)] + transform_list if new_size is not None else transform_list
+        transform_list = [transforms.RandomHorizontalFlip()] + transform_list if train else transform_list
         transform = transforms.Compose(transform_list)
 
         list_r, list_s = [], []
@@ -66,12 +75,16 @@ def get_data_loader_csv(csv_file, batch_size, train, num_workers=4, mode='train'
 
         dataset = ImageLabelFilelist_train(list_r, list_s, transform=transform)
     else:
+        transform_list = [transforms.ToTensor(),
+                          transforms.Normalize((0.5, 0.5, 0.5),
+                                               (0.5, 0.5, 0.5))]
+        transform = transforms.Compose(transform_list)
         list_data = []
         frame_reader = open(csv_file, 'r')
         csv_reader = csv.reader(frame_reader)
         for f in csv_reader:
             list_data.append(f)
-        dataset = ImageLabelFilelist_test(list_data, transform=None)
+        dataset = ImageLabelFilelist_test(list_data, transform=transform)
     loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=train, drop_last=True, num_workers=num_workers)
     return loader
 
@@ -87,22 +100,65 @@ def eformat(f, prec):
     # add 1 to digits as 1 is taken by sign +/-
     return "%se%d"%(mantissa, int(exp))
 
-def __write_images(image_outputs, display_image_num, n_row, file_name):
-    image_outputs = [images.expand(-1, 3, -1, -1) for images in image_outputs] # expand gray-scale images to 3 channels
-    display_images = []
-    for i in range(display_image_num):
-        display_images.append([images[i] for images in image_outputs[:n_row]])
-    for i in range(display_image_num):
-        display_images.append([images[i] for images in image_outputs[n_row:]])
 
-    image_tensor = torch.cat(display_images, dim=0)
-    image_grid = vutils.make_grid(image_tensor.data, nrow=display_image_num, padding=0, normalize=True)
+def __write_images(image_outputs, display_image_num, file_name):
+    n = len(image_outputs)
+    image_outputs = [images.expand(-1, 3, -1, -1) for images in image_outputs] # expand gray-scale images to 3 channels
+    image_tensor = torch.cat([images[:display_image_num] for images in image_outputs], 0)
+    image_grid = vutils.make_grid(image_tensor.data, nrow=n, padding=0, normalize=True)
     vutils.save_image(image_grid, file_name, nrow=1)
 
+def clip_by_tensor(t, t_min, t_max):
+    """
+    clip_by_tensor
+    :param t: tensor
+    :param t_min: min
+    :param t_max: max
+    :return: cliped tensor
+    """
+    t = t.float()
+
+    result = (t >= t_min).to(torch.float32).cuda() * t + (t < t_min).to(torch.float32).cuda() * t_min
+    result = (result <= t_max).to(torch.float32).cuda() * result + (result > t_max).to(torch.float32).cuda() * t_max
+    return result
 
 def write_2images(image_outputs, display_image_num, image_directory, postfix):
-    n = len(image_outputs)
-    __write_images(image_outputs, display_image_num, n//2, '%s/gen_%s.jpg' % (image_directory, postfix))
+    # n = len(image_outputs)
+    # __write_images(image_outputs[:n//2], display_image_num, '%s/gen_r2s_%s.jpg' % (image_directory, postfix))
+    # __write_images(image_outputs[n//2:], display_image_num, '%s/gen_s2r_%s.jpg' % (image_directory, postfix))
+    column = []
+    for i in range(len(image_outputs)//2):
+        fig = image_outputs[i]
+        fig = clip_by_tensor(fig, 0.0, 1.0)
+        if fig.shape[1] == 1:
+            fig = torch.cat((fig, fig, fig), dim=1)
+        else:
+            r, g, b = torch.split(fig, fig.shape[1] // 3, 1)
+            fig = torch.cat((b, g, r), dim=1)
+        fig = F.interpolate(fig, [256, 256])
+        row_r = torch.split(fig, 1)
+        row_r = torch.cat(row_r, dim=3)
+
+        fig = image_outputs[i+len(image_outputs)//2]
+        fig = clip_by_tensor(fig, 0.0, 1.0)
+        if fig.shape[1] == 1:
+            fig = torch.cat((fig, fig, fig), dim=1)
+        else:
+            r, g, b = torch.split(fig, fig.shape[1] // 3, 1)
+            fig = torch.cat((b, g, r), dim=1)
+        fig = F.interpolate(fig, [256, 256])
+        row_s = torch.split(fig, 1)
+        row_s = torch.cat(row_s, dim=3)
+        row = torch.cat((row_s, row_r), dim=3)
+        column.append(row[0, :, :, :])
+
+    column = torch.cat(column, dim=1).data.cpu()
+    column = column * 255
+    img = torch.IntTensor(column.int()).permute(1, 2, 0).data.numpy()
+    fig_name = '%s/gen_s2r_%s.jpg' % (image_directory, postfix)
+    cv2.imwrite(fig_name, img)
+
+
 
 def prepare_sub_folder(output_directory):
     image_directory = os.path.join(output_directory, 'images')

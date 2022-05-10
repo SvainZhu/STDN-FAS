@@ -2,6 +2,7 @@ import torch.utils.data as data
 import numpy as np
 import cv2
 import torch
+from PIL import Image
 
 class ImageLabelFilelist_train(data.Dataset):
     def __init__(self, images_r, images_s, transform=None):
@@ -10,18 +11,16 @@ class ImageLabelFilelist_train(data.Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
-        impath, mappath, label = self.images_r[index]
-        image_r, map_r = cv2.imread(impath), cv2.imread(mappath, 0)
-        sample_r = {'image': image_r, 'map': map_r, 'label': label}
+        impath, _, __ = self.images_r[index]
+        image_r = Image.open(impath).convert('RGB')
         if self.transform is not None:
-            sample_r = self.transform(sample_r)
+            image_r = self.transform(image_r)
 
-        impath, mappath, label = self.images_s[index]
-        image_s, map_s = cv2.imread(impath), cv2.imread(mappath, 0)
-        sample_s = {'image': image_s, 'map': map_s, 'label': label}
+        impath, _, __ = self.images_s[index]
+        image_s = Image.open(impath).convert('RGB')
         if self.transform is not None:
-            sample_s = self.transform(sample_s)
-        return sample_r['image'], sample_s['image']
+            image_s = self.transform(image_s)
+        return image_r, image_s
 
     def __len__(self):
         return len(self.images_r)
@@ -32,9 +31,10 @@ class ImageLabelFilelist_test(data.Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
-        image, map, label = self.images[index]
-        image = cv2.imread(image)
-        image = torch.from_numpy(np.array(image, np.float32) / 255.0)
+        impath, _, label = self.images[index]
+        image = Image.open(impath).convert('RGB')
+        if self.transform is not None:
+            image = self.transform(image)
         return image, int(label)
 
     def __len__(self):

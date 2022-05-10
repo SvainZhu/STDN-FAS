@@ -1,21 +1,14 @@
 from __future__ import print_function, division
-import torch.optim as optim
 import sys
 import time
 import numpy as np
 import os
-import random
-import cv2
 import torch
-import torch.nn.functional as F
-from torch.optim import lr_scheduler
-import torch.nn as nn
-from torch.utils import data
 import torch.nn.functional as F
 import argparse
 import shutil
 import tensorboardX
-from model import Generator, MultiScaleDis, FeatureEstimator
+from model_test import Generator, MultiScaleDis, FeatureEstimator
 from loss import l1_loss, l2_loss
 from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 
@@ -35,14 +28,6 @@ class Logger(object):
         pass
 
 def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, current_epoch=0):
-    def update_learning_rate():
-        if gen_scheduler is not None:
-            gen_scheduler.step()
-        if dis_scheduler is not None:
-            dis_scheduler.step()
-        if est_scheduler is not None:
-            est_scheduler.step()
-
     def resume(checkpoint_dir, config):
         # Load generators
         last_model_name = get_model_list(checkpoint_dir, "gen")
@@ -83,7 +68,6 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
 
     best_ACER = 1.0
     best_epoch = 0
-    train_num = 100
     display_size = config['display_size']
 
     gen_config = config['gen']
@@ -127,7 +111,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 dis.train()
                 est.train()
                 iterations = resume(checkpoint_directory, config=config) if opts.resume else 0
-                for i, (images_r, images_s) in enumerate(loader['train_loader']):
+                for i, (images_r, images_s) in enumerate(dataloader['train_loader']):
                     images_r, images_s = images_r.cuda(), images_s.cuda()
 
                     # disentangle the content-style feature of live and spoof faces
@@ -179,16 +163,20 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     pixel_recon_loss = l1_loss(images_r, recon_r_exchange) + l1_loss(images_s, recon_s_exchange)
                     recon_loss = config['est_recon_w'] * est_recon_loss + config['pixel_recon_w'] * pixel_recon_loss
                     gen_loss = g_loss + recon_loss
+                    est_total_loss = est_loss + est_recon_loss
 
 
-                    gen_loss.backward(retain_graph=True)
-                    dis_loss.backward(retain_graph=True)
-                    update_learning_rate()
+                    gen_loss.backward()
+                    dis_loss.backward()
+                    est_total_loss.backward()
+                    gen_scheduler.step()
+                    dis_scheduler.step()
+                    est_scheduler.step()
 
-                    if (i + 1) % config['log_iter'] == 0:
+                    if (iterations + 1) % config['log_iter'] == 0:
                         log.write(
-                            '**Epoch {}/{} Train {}/{}: gen_loss: {:.4f} dis_loss: {:.4f} recon_loss: {:.4f}\n'.format(epoch,
-                            max_epochs - 1, i, len(dataloader[phase]), gen_loss, dis_loss, recon_loss))
+                            '**Epoch {}/{} Train {}/{}: gen_loss: {:.4f} dis_loss: {:.4f} est_loss: {:.4f}\n'.format(epoch,
+                            max_epochs - 1, iterations, len(loader['train_loader']), gen_loss, dis_loss, est_total_loss))
 
                     # Write images
 
@@ -217,7 +205,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                             est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256))
                             est_recon_r, est_synth_s = F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))
                             train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, est_r, est_s,
-                                                   images_s, images_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s] * 255
+                                                   images_s, images_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s]
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
 
@@ -232,6 +220,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 est.eval()
 
                 y_scores, y_labels = [], []
+                iterations = 0
                 for i, (image, label) in enumerate(loader['test_loader']):
                     image, label = image.cuda(), torch.LongTensor(label).cuda()
                     content, style = gen.encode(image)
@@ -243,11 +232,12 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
 
                     y_scores.extend(score)
                     y_labels.extend(label)
-                    if (i + 1) % config['log_iter'] == 0:
+                    if (iterations + 1) % config['log_iter'] == 0:
                         accuracy = calculate_accuracy_score(y_labels, y_scores)
                         log.write(
                             '**Epoch {}/{} Test {}/{}: Accuracy: {:.4f}\n'.format(epoch, max_epochs - 1,
-                                                                                  i, len(dataloader[phase]), accuracy))
+                                                                                  iterations, len(loader['test_loader']), accuracy))
+                    iterations += 1
 
                 APCER, NPCER, ACER, HTER, AUC = val_model(y_scores, y_labels, current_epoch=epoch,
                                                           num_epochs=max_epochs)
@@ -278,9 +268,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
-    parser.add_argument('--output_path', type=str, default='./results/conv/', help="outputs path")
-    parser.add_argument("--resume", action="store_true")
-    parser.add_argument('--trainer', type=str, default='MMDR', help="MMDR/?")
+    parser.add_argument('--output_path', type=str, default='./results_test1/', help="outputs path")
+    parser.add_argument("--resume", action="store_false")
     opts = parser.parse_args()
 
     # Load experiment setting

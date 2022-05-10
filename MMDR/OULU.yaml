@@ -4,10 +4,9 @@
 GPU_USAGE: 1
 
 # logger options
-image_save_iter: 30         # How often do you want to save output images during training
+image_save_iter: 300         # How often do you want to save output images during training
 image_display_iter: 10000       # How often do you want to display output images during training
-display_size: 4               # How many images do you want to display each time
-snapshot_save_iter: 1500     # How often do you want to save trained models
+display_size: 1               # How many images do you want to display each time
 log_iter: 300                   # How often do you want to log the training stats
 
 # optimization options
@@ -17,10 +16,10 @@ batch_size: 1                 # batch size
 weight_decay: 0.0001          # weight decay
 beta1: 0.5                    # Adam parameter
 beta2: 0.999                  # Adam parameter
-init: kaiming                 # initialization [gaussian/kaiming/xavier/orthogonal]
+init: gaussian                 # initialization [gaussian/kaiming/xavier/orthogonal]
 lr: 0.001                    # initial learning rate
 lr_policy: step               # learning rate scheduler
-step_size: 300               # how often to decay learning rate
+step_size: 1200               # how often to decay learning rate
 gamma: 0.5                    # how much to decay learning rate
 reg_loss_r_w: 10            # weight of regularizer loss with liveness style feature
 reg_loss_s_w: 0.0001            # weight of regularizer loss with spoof style feature
@@ -34,7 +33,7 @@ pixel_recon_w: 1                  # weight of image reconstruction loss
 gen:
   feature_c: 64               # number of the channels about content or style feature
   n_downsample: 3             # number of downsampling layers in content
-  n_block: 3                  # number of blocks in encoder
+  n_block: 1                  # number of blocks in encoder
   norm: bn                  # normalization layer [none/bn/in/ln]
   act: relu                 # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: zero           # padding type [zero/reflect]
