@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from torchvision import transforms
-from dataset import ImageLabelFilelist_train, ImageLabelFilelist_test
+from dataset import ImageLabelFilelist
 import torch
 import torch.nn.functional as F
 import os
@@ -31,11 +31,18 @@ import cv2
 def get_all_data_loaders(conf):
     batch_size = conf['batch_size']
     num_workers = conf['num_workers']
-    train_loader = get_data_loader_csv(conf['data_csv_train'], batch_size, True, num_workers, 'train')
-    test_loader = get_data_loader_csv(conf['data_csv_test'], batch_size, False, num_workers, 'test')
+    train_loader = get_data_loader_csv(conf['data_csv_train'], batch_size, num_workers, 'train')
+    test_loader = get_data_loader_csv(conf['data_csv_test'], batch_size, num_workers, 'test')
     return {'train_loader': train_loader, 'test_loader': test_loader}
 
-def get_data_loader_csv(csv_file, batch_size, train, num_workers=4, mode='train'):
+def get_data_loader_csv(csv_file, batch_size, num_workers=4, mode='train'):
+    images_list = []
+    frame_reader = open(csv_file, 'r')
+    csv_reader = csv.reader(frame_reader)
+    transform_list = [transforms.ToTensor(),
+                      transforms.Normalize((0.5, 0.5, 0.5),
+                                           (0.5, 0.5, 0.5))]
+    train = True
     if mode == 'train':
         # transform_list = []
         # # transform_list = transform_list + [RandomErasing(), ] if crop else transform_list
@@ -44,47 +51,18 @@ def get_data_loader_csv(csv_file, batch_size, train, num_workers=4, mode='train'
         # # transform_list = transform_list + [Cutout(), ] if crop else transform_list
         # transform_list = transform_list + [Normaliztion()]
         # transform = transforms.Compose(transform_list)
-
-        transform_list = [transforms.ToTensor(),
-                          transforms.Normalize((0.5, 0.5, 0.5),
-                                               (0.5, 0.5, 0.5))]
         # transform_list = [transforms.RandomCrop((height, width))] + transform_list if crop else transform_list
         # transform_list = [transforms.Resize(new_size)] + transform_list if new_size is not None else transform_list
-        transform_list = [transforms.RandomHorizontalFlip()] + transform_list if train else transform_list
-        transform = transforms.Compose(transform_list)
-
-        list_r, list_s = [], []
-        frame_reader = open(csv_file, 'r')
-        csv_reader = csv.reader(frame_reader)
-
+        transform_list = [transforms.RandomHorizontalFlip()] + transform_list
         for f in csv_reader:
-            if int(f[2]) == 1:
-                list_r.append(f)
-            else:
-                list_s.append(f)
-        len_r = len(list_r)
-        len_s = len(list_s)
-        if len_r < len_s:
-            while len(list_r) < len_s:
-                list_r += random.sample(list_r, len(list_r))
-            list_r = list_r[:len_s]
-        elif len_r > len_s:
-            while len(list_s) < len_r:
-                list_s += random.sample(list_s, len(list_s))
-            list_s = list_s[:len_r]
-
-        dataset = ImageLabelFilelist_train(list_r, list_s, transform=transform)
+            images_list.append(f)
     else:
-        transform_list = [transforms.ToTensor(),
-                          transforms.Normalize((0.5, 0.5, 0.5),
-                                               (0.5, 0.5, 0.5))]
-        transform = transforms.Compose(transform_list)
-        list_data = []
-        frame_reader = open(csv_file, 'r')
-        csv_reader = csv.reader(frame_reader)
         for f in csv_reader:
-            list_data.append(f)
-        dataset = ImageLabelFilelist_test(list_data, transform=transform)
+            images_list.append(f[:len(f)//2])
+            images_list.append(f[len(f)//2:])
+        train = False
+    transform = transforms.Compose(transform_list)
+    dataset = ImageLabelFilelist(images_list, mode, transform=transform)
     loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=train, drop_last=True, num_workers=num_workers)
     return loader
 
@@ -152,10 +130,10 @@ def write_2images(image_outputs, display_image_num, image_directory, postfix):
         row = torch.cat((row_s, row_r), dim=3)
         column.append(row[0, :, :, :])
 
-    column = torch.cat(column, dim=1).data.cpu()
-    column = column * 255
-    img = torch.IntTensor(column.int()).permute(1, 2, 0).data.numpy()
-    fig_name = '%s/gen_s2r_%s.jpg' % (image_directory, postfix)
+    column = torch.cat(column, dim=1) * 255
+    column = column.permute(1, 2, 0).int()
+    img = column.data.cpu().numpy()
+    fig_name = '%s/gen_%s.jpg' % (image_directory, postfix)
     cv2.imwrite(fig_name, img)
 
 

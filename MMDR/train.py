@@ -107,11 +107,21 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
         # for phase in ['test']:
         for phase in ['train', 'test']:
             if phase == 'train':
+                gen_opt.step()
+                dis_opt.step()
+                est_opt.step()
+                gen_scheduler.step()
+                dis_scheduler.step()
+                est_scheduler.step()
                 gen.train()
                 dis.train()
                 est.train()
                 iterations = resume(checkpoint_directory, config=config) if opts.resume else 0
                 for i, (images_r, images_s) in enumerate(dataloader['train_loader']):
+                    gen_opt.zero_grad()
+                    dis_opt.zero_grad()
+                    est_opt.zero_grad()
+
                     images_r, images_s = images_r.cuda(), images_s.cuda()
 
                     # disentangle the content-style feature of live and spoof faces
@@ -119,13 +129,13 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     content_s, style_s = gen.encode(images_s)
 
                     # reconstruct the liveness faces and synthesize the spoof faces
-                    recon_r = gen.decode(content_s, style_r)
-                    synth_s = gen.decode(content_r, style_s)
+                    recon_r, style_out_r, style_act_r = gen.decode(content_s, style_r)
+                    synth_s, style_out_s, style_act_s = gen.decode(content_r, style_s)
 
                     content_recon_r, style_recon_r = gen.encode(recon_r)
                     content_synth_s, style_synth_s = gen.encode(synth_s)
-                    recon_r_exchange = gen.decode(content_synth_s, style_recon_r)
-                    recon_s_exchange = gen.decode(content_recon_r, style_synth_s)
+                    recon_r_exchange, _, style_act_recon_r = gen.decode(content_synth_s, style_recon_r)
+                    recon_s_exchange, _, style_act_synth_s = gen.decode(content_recon_r, style_synth_s)
 
                     # discriminate the image
                     dis_recon_r = dis(recon_r)
@@ -134,10 +144,10 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     dis_recon_s_exchange = dis(recon_s_exchange)
 
                     # estimate the feature style
-                    est_r = est(style_r)
-                    est_s = est(style_s)
-                    est_recon_r = est(style_recon_r)
-                    est_synth_s = est(style_synth_s)
+                    est_r = est(style_act_r)
+                    est_s = est(style_act_s)
+                    est_recon_r = est(style_act_recon_r)
+                    est_synth_s = est(style_act_synth_s)
 
                     # compute the loss
                     # loss for step 1
@@ -145,12 +155,16 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     for i in range(dis_config['num_scales']):
                         gan_loss += (l2_loss(dis_recon_r[i], 1) + l2_loss(dis_synth_s[i], 1))
                     est_loss = l1_loss(est_r, 0) + l1_loss(est_s, 1)
-                    reg_loss_r = reg_loss_s = 0
-                    for i in range(3):
-                        reg_loss_r += l2_loss(style_r[i], 0)
-                        reg_loss_s += l2_loss(style_s[i], 0)
+                    # reg_loss_r = reg_loss_s = 0
+                    # for i in range(3):
+                    #     reg_loss_r += l2_loss(style_r[i], 0)
+                    #     reg_loss_s += l2_loss(style_s[i], 0)
+                    reg_loss_r = l2_loss(style_out_r, 0)
+                    reg_loss_s = l2_loss(style_out_s, 0)
                     reg_loss = config['reg_loss_s_w'] * reg_loss_s + config['reg_loss_r_w'] * reg_loss_r
-                    g_loss = config['est_w'] * est_loss+ config['gan_w'] * gan_loss + config['reg_w'] * reg_loss
+                    pixel_recon_loss = l2_loss(images_r, recon_r_exchange) + l2_loss(images_s, recon_s_exchange)
+                    gen_loss = config['gan_w'] * gan_loss + config['reg_w'] * reg_loss + pixel_recon_loss + \
+                               config['pixel_recon_w'] * pixel_recon_loss
 
                     # loss for step2
                     dis_loss = 0
@@ -160,18 +174,15 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
 
                     # loss for step3
                     est_recon_loss = l1_loss(est_recon_r, 0) + l1_loss(est_synth_s, 1)
-                    pixel_recon_loss = l1_loss(images_r, recon_r_exchange) + l1_loss(images_s, recon_s_exchange)
-                    recon_loss = config['est_recon_w'] * est_recon_loss + config['pixel_recon_w'] * pixel_recon_loss
-                    gen_loss = g_loss + recon_loss
-                    est_total_loss = est_loss + est_recon_loss
+                    est_total_loss = config['est_w'] * est_loss + config['est_recon_w'] * est_recon_loss
 
 
-                    gen_loss.backward()
-                    dis_loss.backward()
-                    est_total_loss.backward()
-                    gen_scheduler.step()
-                    dis_scheduler.step()
-                    est_scheduler.step()
+                    gen_loss.backward(retain_graph=True)
+                    dis_loss.backward(retain_graph=True)
+                    est_total_loss.backward(retain_graph=True)
+                    gen_opt.step()
+                    dis_opt.step()
+                    est_opt.step()
 
                     if (iterations + 1) % config['log_iter'] == 0:
                         log.write(
@@ -202,16 +213,17 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                             # # estimate the feature style
                             # est_r, est_s = est(style_r), est(style_s)
                             # est_recon_r, est_synth_s = est(style_recon_r), est(style_synth_s)
-                            est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_recon_r, (256, 256))
-                            est_recon_r, est_synth_s = F.interpolate(est_s, (256, 256)), F.interpolate(est_synth_s, (256, 256))
-                            train_image_outputs = [images_r, images_s, synth_s, recon_r_exchange, est_r, est_s,
-                                                   images_s, images_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s]
+                            est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_s, (256, 256))
+                            est_recon_r, est_synth_s = F.interpolate(est_recon_r, (256, 256)), F.interpolate(est_synth_s, (256, 256))
+                            train_image_outputs = [images_r, images_s, style_out_r, style_out_s, synth_s, recon_r_exchange, est_r, est_s,
+                                                   images_s, images_r, style_out_s, style_out_r, recon_r, recon_s_exchange, est_recon_r, est_synth_s]
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
 
                     iterations += 1
                     if iterations >= config['max_iters']:
                         sys.exit('Finish training')
+                    save(checkpoint_dir, epoch)
 
 
             else:
@@ -224,7 +236,8 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 for i, (image, label) in enumerate(loader['test_loader']):
                     image, label = image.cuda(), torch.LongTensor(label).cuda()
                     content, style = gen.encode(image)
-                    style_est = est(style)
+                    recon, style_out, style_act = gen.decode(content, style)
+                    style_est = est(style_act)
                     score = torch.mean(style_est, dim=(1, 2, 3))
                     score = score.data.cpu().numpy()
                     score = np.where(score > 0.5, 0, 1)
@@ -246,7 +259,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 if ACER < best_ACER:
                     best_ACER = ACER
                     best_epoch = epoch
-                    save(checkpoint_dir, epoch)
+
                 log.write('Best epoch is {}. The ACER of best epoch is {}, current epoch is {}\n'.format(best_epoch,
                                                                                                          best_ACER,
                                                                                                          epoch))
@@ -269,7 +282,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
     parser.add_argument('--output_path', type=str, default='./results_test1/', help="outputs path")
-    parser.add_argument("--resume", action="store_false")
+    parser.add_argument("--resume", type=bool, default=True, help="pretrain resume")
     opts = parser.parse_args()
 
     # Load experiment setting

@@ -19,15 +19,15 @@ beta2: 0.999                  # Adam parameter
 init: gaussian                 # initialization [gaussian/kaiming/xavier/orthogonal]
 lr: 0.001                    # initial learning rate
 lr_policy: step               # learning rate scheduler
-step_size: 1200               # how often to decay learning rate
+step_size: 3               # how often to decay learning rate
 gamma: 0.5                    # how much to decay learning rate
 reg_loss_r_w: 10            # weight of regularizer loss with liveness style feature
 reg_loss_s_w: 0.0001            # weight of regularizer loss with spoof style feature
-reg_w: 1                      # weight of regularizer loss
-gan_w: 1                      # weight of adversarial loss
-est_w: 50                     # weight of style estimator loss
-est_recon_w: 5                 # weight of style reconstruction estimator loss
-pixel_recon_w: 1                  # weight of image reconstruction loss
+reg_w: 40                      # weight of regularizer loss
+gan_w: 10                      # weight of adversarial loss
+est_w: 20                     # weight of style estimator loss
+est_recon_w: 10                 # weight of style reconstruction estimator loss
+pixel_recon_w: 20                  # weight of image reconstruction loss
 
 # model options
 gen:
@@ -46,8 +46,8 @@ dis:
   act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: zero           # padding type [zero/reflect]
 est:
-  input_c: 96                      # number of input channels
-  output_c: 3                     # number of output channels
+  input_c: 3                      # number of input channels
+  output_c: 1                     # number of output channels
   n_layer: 3                  # number of layers in E
   norm: bn                  # normalization layer [none/bn/in/ln]
   act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
@@ -57,5 +57,5 @@ est:
 input_channel: 3                              # number of image channels [1/3]
 num_workers: 0                              # number of data loading threads
 input_size: 256                               # the size of input image
-data_csv_train: E:\zsw\Data\OULU\CSV_MMDR\2.0\train_1_6.csv     # a train dataset csv location
-data_csv_test: E:\zsw\Data\OULU\CSV_MMDR\2.0\test_1_6.csv     # a test dataset csv location
+data_csv_train: E:\zsw\Data\OULU\CSV_MMDR\1.2\train_1_6.csv     # a train dataset csv location
+data_csv_test: E:\zsw\Data\OULU\CSV_MMDR\1.2\test_1_6.csv     # a test dataset csv location

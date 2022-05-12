@@ -222,8 +222,13 @@ class Decoder(nn.Module):
         channels = [input_c, int(input_c * 1.5), input_c]
         # blocks
         for i in range(n_blocks-1):
-            self.content_decoder += [nn.ConvTranspose2d(in_channels=channels[i], out_channels=channels[i+1], kernel_size=3, stride=1, padding=1, output_padding=0, bias=True)]
-        self.content_decoder += [nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=3, stride=1, padding=1, output_padding=0, bias=True)]
+            # self.content_decoder += [nn.ConvTranspose2d(in_channels=channels[i], out_channels=channels[i+1], kernel_size=3, stride=1, padding=1, output_padding=0, bias=True),
+            #                          nn.ReLU()]
+            self.content_decoder += [ConvNormAct(channels[i], channels[i + 1], kernel_size=3, padding=1, norm=self.norm,
+                                act=self.act, pad_type=self.pad_type)]
+        # self.content_decoder += [nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=3, stride=1, padding=1, output_padding=0, bias=True)]
+        self.content_decoder += [ConvNormAct(input_c, output_c, kernel_size=3, padding=1, norm=self.norm,
+                                             act=self.act, pad_type=self.pad_type)]
         self.content_decoder = nn.Sequential(*self.content_decoder)
 
     def _make_block(self, output_cs, n_layer, last_layer='downsample'):
@@ -269,7 +274,7 @@ class Decoder(nn.Module):
         style_out += F.interpolate(self.avg_pool(style_act[1]), (256, 256))
         style_out += style_act[2]
 
-        return content_out + style_out
+        return content_out - style_out, style_out, style_act
 
 ##################################################################################
 # Sequential Models
