@@ -16,7 +16,7 @@ class Config(object):
     INTERVAL = '6'
 
     # Log and Model Storage Default
-    LOG_DIR = './log/SiW/2.0/'
+    LOG_DIR = '../log/SiW/2.0/'
     LOG_DEVICE_PLACEMENT = False
 
     # Input Data Meta

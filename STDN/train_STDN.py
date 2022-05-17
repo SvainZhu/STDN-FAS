@@ -185,7 +185,7 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                                                                                                                d_loss,
                                                                                                                a_loss))
                         # synth = torch.cat((recon1[:bsize, ...], synth1), dim=0)
-                        fig = [image, (M + 1) / 2, s * 5, b * 5, C * 5, T * 5, recon1, trace * 5]
+                        fig = [image, (M + 1) / 2, s * 5, b * 5, C * 5, T * 5, recon1, trace * 5, torch.cat((image[:bsize, ...], synth1), 0)]
                         fig = plotResults(fig).data.numpy()
                         fig_name = os.path.join(model_dir + str(epoch), str(i) + '.jpg')
                         cv2.imwrite(fig_name, fig)
