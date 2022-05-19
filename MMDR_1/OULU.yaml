@@ -31,11 +31,11 @@ pixel_recon_w: 2                  # weight of image reconstruction loss
 
 # model options
 gen:
-  feature_c: 64               # number of the channels about content or style feature
+  feature_c: 32               # number of the channels about content or style feature
   n_downsample: 3             # number of downsampling layers in content
   n_block: 1                  # number of blocks in encoder
   norm: bn                  # normalization layer [none/bn/in/ln]
-  act: relu                 # activation function [relu/lrelu/prelu/selu/tanh]
+  act: prelu                 # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: zero           # padding type [zero/reflect]
 dis:
   input_c: 3                      # number of input channels
@@ -43,14 +43,14 @@ dis:
   num_scales: 3               # number of scales
   n_layer: 3                  # number of layers in D
   norm: bn                  # normalization layer [none/bn/in/ln]
-  act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
+  act: prelu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: zero           # padding type [zero/reflect]
 est:
-  input_c: 3                      # number of input channels
+  input_c: 32                      # number of input channels
   output_c: 1                     # number of output channels
   n_layer: 3                  # number of layers in E
   norm: bn                  # normalization layer [none/bn/in/ln]
-  act: relu                # activation function [relu/lrelu/prelu/selu/tanh]
+  act: prelu                # activation function [relu/lrelu/prelu/selu/tanh]
   pad_type: reflect           # padding type [zero/reflect]
 
 # data options

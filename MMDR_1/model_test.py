@@ -3,6 +3,8 @@ from torch import nn
 from torch.autograd import Variable
 import torch
 import torch.nn.functional as F
+from CBAM import CBAM
+import cv2
 try:
     from itertools import izip as zip
 except ImportError:     # detect the 3.x series
@@ -35,8 +37,8 @@ class Generator(nn.Module):
     def encode(self, images):
         return self.enc(images)
 
-    def decode(self, content_map, style_maps):
-        return self.dec(content_map, style_maps)
+    def decode(self, content_map, style_maps, mode='reconstruct'):
+        return self.dec(content_map, style_maps, mode)
 
     def forward(self, images):
         # reconstruct an image
@@ -86,6 +88,35 @@ class MultiScaleDis(nn.Module):
 # Feature Map Estimator
 ##################################################################################
 
+# class FeatureEstimator(nn.Module):
+#     def __init__(self,
+#                  input_c,
+#                  output_c,
+#                  n_layer=3,
+#                  norm='bn',
+#                  act='prelu',
+#                  pad_type='zero'):
+#         super(FeatureEstimator, self).__init__()
+#         self.norm = norm
+#         self.act = act
+#         self.pad_type = pad_type
+#
+#         channels = [input_c, 64, output_c]
+#         self.est = nn.Sequential(
+#           ConvNormAct(input_c=channels[0]*3, output_c=channels[0], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+#           ConvNormAct(input_c=channels[0], output_c=channels[1], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+#           ConvNormAct(input_c=channels[1], output_c=channels[1], padding=1, stride=2, norm=norm, act=act, pad_type=pad_type),
+#           ConvNormAct(input_c=channels[1], output_c=channels[2], padding=1, norm='none', act='none', pad_type=pad_type),
+#         )
+#
+#     def forward(self, x):
+#         maps = []
+#         for i in range(3):
+#             maps += [F.interpolate(x[i], [32, 32])]
+#         map = torch.cat(maps, dim=1)
+#         return self.est(map)
+
+
 class FeatureEstimator(nn.Module):
     def __init__(self,
                  input_c,
@@ -99,21 +130,26 @@ class FeatureEstimator(nn.Module):
         self.act = act
         self.pad_type = pad_type
 
-        channels = [input_c, 64, output_c]
+        kernel_szs = [7, 7, 5, 3]
+        gate_channels = [32, 64, 96, 128]
+        self.cbam = []
+        for i in range(4):
+            self.cbam += [CBAM(gate_channels=gate_channels[i], kernel_size=kernel_szs[i]).cuda()]
         self.est = nn.Sequential(
-          ConvNormAct(input_c=channels[0]*3, output_c=channels[0], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
-          ConvNormAct(input_c=channels[0], output_c=channels[1], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
-          ConvNormAct(input_c=channels[1], output_c=channels[1], padding=1, stride=2, norm=norm, act=act, pad_type=pad_type),
-          ConvNormAct(input_c=channels[1], output_c=channels[2], padding=1, norm='none', act='none', pad_type=pad_type),
+          RGConvNormAct(input_c=input_c * 10, output_c=input_c * 4, padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+          RGConvNormAct(input_c=input_c * 4, output_c=input_c, padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
+          RGConvNormAct(input_c=input_c, output_c=output_c, padding=1, norm='none', act='none', pad_type=pad_type),
         )
 
-    def forward(self, x):
+
+    def forward(self, x, u):
+        x = [u] + x
         maps = []
-        for i in range(3):
-            maps += [F.interpolate(x[i], [32, 32])]
+        for i in range(4):
+            out_cbam = self.cbam[i](x[i])
+            maps += [F.interpolate(out_cbam, [32, 32])]
         map = torch.cat(maps, dim=1)
         return self.est(map)
-
 
 ##################################################################################
 # Encoder and Decoders
@@ -134,26 +170,21 @@ class Encoder(nn.Module):
         self.act = act
         self.pad_type = pad_type
         self.n_downsample = n_downsample
-        channels = [output_c, int(output_c * 1.5), output_c * 2]
+        channels = [output_c, output_c * 2, output_c * 3, output_c * 2, output_c * 4, output_c * 3, output_c * 6, output_c * 4]
 
         # content encoder
         self.content_encoder = []
-        output_cs = [channels[0], channels[1], channels[0]]
-        self.content_encoder += [ConvNormAct(input_c, channels[0], 3, 1, 1, norm=norm, act=act, pad_type=pad_type)]
-        for i in range(n_blocks-1):
-            self.content_encoder += [ConvNormAct(output_cs[i], output_cs[i + 1], 3, 1, 1, norm=norm, act=act, pad_type=pad_type)]
+        self.content_encoder += [ConvNormAct(input_c*3, channels[0], 3, 1, 1, norm=norm, act=act, pad_type=pad_type)]
         self.content_encoder = nn.Sequential(*self.content_encoder)
 
         # style encoders
         self.style_encoders = [ConvNormAct(channels[0], channels[1], 3, 1, 1, norm=norm, act=act, pad_type=pad_type).cuda()]
-        layer_channels = [channels[1], channels[2], channels[1]]
         for i in range(n_downsample):
-            self.style_encoders += [self._make_block(layer_channels, 2, 'downsample')]
+            self.style_encoders += [self._make_block([channels[2*i+1], channels[2*i+2], channels[2*i+3]], 2)]
 
     def forward(self, x):
-        # x = torch.cat((x, rgb_to_yuv(x)), dim=1)
-
         # content encode
+        x = decompose_image(x).detach()
         out = self.content_encoder(x)
         content_map = out
 
@@ -165,24 +196,14 @@ class Encoder(nn.Module):
             style_maps += [out]
         return content_map, style_maps
 
-    def _make_block(self, output_cs, n_layer, last_layer='downsample'):
+    def _make_block(self, output_cs, n_layer):
         block_x = []
-        if last_layer == 'act':
-            for i in range(n_layer-1):
-                block_x += [ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, padding=1, norm=self.norm,
+        for i in range(n_layer):
+            block_x += [
+                ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, stride=1, padding=1, norm=self.norm,
+                            act=self.act, pad_type=self.pad_type)]
+        block_x += [ConvNormAct(output_cs[-1], output_cs[-1], kernel_size=3, stride=2, padding=1, norm=self.norm,
                                 act=self.act, pad_type=self.pad_type)]
-            block_x += [ConvNormAct(output_cs[-2], output_cs[-1], kernel_size=3, stride=1, padding=1, norm='none',
-                                    act='none', pad_type=self.pad_type)]
-            block_x += nn.Tanh()
-        else:
-            for i in range(n_layer):
-                block_x += [
-                    ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, stride=1, padding=1, norm=self.norm,
-                                act=self.act, pad_type=self.pad_type)]
-            if last_layer == 'downsample':
-                block_x += [ConvNormAct(output_cs[-1], output_cs[-1], kernel_size=3, stride=2, padding=1, norm=self.norm,
-                                    act=self.act, pad_type=self.pad_type)]
-
         block_x = nn.Sequential(*block_x)
         return block_x.cuda()
 
@@ -203,79 +224,53 @@ class Decoder(nn.Module):
 
         # style decoder
         self.style_decoder = []
-        channels = [input_c // 4, input_c, int(input_c * 1.5)]
-        layer_channels = [channels[2], channels[1], channels[1] + channels[2], channels[1], channels[1] + channels[2],
-                          channels[1]]
+        channels = [input_c * 2, input_c * 3, input_c * 4]
+        layer_channels = [channels[2] + channels[0], input_c, channels[1] + input_c, input_c,
+                          channels[0] + input_c, input_c]
+        self.style_decoder += [Upsample(channels[2], channels[0], stride=1, output_padding=0, norm=norm, act=act, pad_type=pad_type)]
         for i in range(n_upsample):
             self.style_decoder += [Upsample(layer_channels[2 * i], layer_channels[2 * i + 1], stride=2, norm=norm, act=act,
                                      pad_type=pad_type)]
-
-        # style act
-        self.style_act = []
-        layer_channels = [channels[1], channels[0], output_c]
-        for i in range(n_upsample):
-            self.style_act += [self._make_block(layer_channels, 2, 'act')]
-        self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.style_decoder += [ConvNormAct(input_c, 13, kernel_size=3, stride=1, padding=1, norm=self.norm,
+                                act=self.act, pad_type=self.pad_type).cuda()]
 
         # content decoder
         self.content_decoder = []
         channels = [input_c, int(input_c * 1.5), input_c]
         # blocks
         for i in range(n_blocks-1):
-            # self.content_decoder += [nn.ConvTranspose2d(in_channels=channels[i], out_channels=channels[i+1], kernel_size=3, stride=1, padding=1, output_padding=0, bias=True),
-            #                          nn.ReLU()]
-            self.content_decoder += [ConvNormAct(channels[i], channels[i + 1], kernel_size=3, padding=1, norm=self.norm,
-                                act=self.act, pad_type=self.pad_type)]
-        # self.content_decoder += [nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=3, stride=1, padding=1, output_padding=0, bias=True)]
-        self.content_decoder += [ConvNormAct(input_c, output_c, kernel_size=3, padding=1, norm=self.norm,
-                                             act=self.act, pad_type=self.pad_type)]
+            self.content_decoder += [nn.ConvTranspose2d(in_channels=channels[i], out_channels=channels[i+1], kernel_size=3, stride=1, padding=1, output_padding=0, bias=True),
+                                     nn.ReLU()]
+        self.content_decoder += [nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=3, stride=1, padding=1, output_padding=0, bias=True)]
+        # self.content_decoder += [ConvNormAct(input_c, output_c, kernel_size=3, padding=1, norm=self.norm,
+        #                                      act=self.act, pad_type=self.pad_type)]
         self.content_decoder = nn.Sequential(*self.content_decoder)
 
-    def _make_block(self, output_cs, n_layer, last_layer='downsample'):
-        block_x = []
-        if last_layer == 'act':
-            for i in range(n_layer-1):
-                block_x += [ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, padding=1, norm=self.norm,
-                                act=self.act, pad_type=self.pad_type)]
-            block_x += [ConvNormAct(output_cs[-2], output_cs[-1], kernel_size=3, stride=1, padding=1, norm='none',
-                                    act='none', pad_type=self.pad_type)]
-            block_x += [nn.Tanh()]
-        else:
-            for i in range(n_layer):
-                block_x += [
-                    ConvNormAct(output_cs[i], output_cs[i + 1], kernel_size=3, stride=1, padding=1, norm=self.norm,
-                                act=self.act, pad_type=self.pad_type)]
-            if last_layer == 'downsample':
-                block_x += [ConvNormAct(output_cs[-1], output_cs[-1], kernel_size=3, stride=2, padding=1, norm=self.norm,
-                                    act=self.act, pad_type=self.pad_type)]
-
-        block_x = nn.Sequential(*block_x)
-        return block_x.cuda()
-
-    def forward(self, content_x, style_x):
+    def forward(self, content_x, style_x, mode='reconstruct'):
         # style decode
         style_decode = []
+        style_out = self.style_decoder[0](style_x[-1])
         for i in range(self.n_downsample):
-            style_in = style_x[self.n_downsample - i - 1] if i == 0 else torch.cat(
-                (out, style_x[self.n_downsample - i - 1]), dim=1)
-            out = self.style_decoder[i](style_in)
-            style_decode += [out]
+            style_in = torch.cat((style_x[self.n_downsample - i - 1], style_out), dim=1)
+            style_out = self.style_decoder[i+1](style_in)
+        trace = style_out
+        style_out = self.style_decoder[-1](style_out)
 
-        # style act
-        style_act = []
-        for i in range(self.n_downsample):
-            style_act += [self.style_act[i](style_decode[i])]
+        inpaint_re = style_out[:, :1, :, :]
+        inpaint_trace = style_out[:, 1:4, :, :]
+        spoof_trace = style_out[:, 4:7, :, :] + style_out[:, 7:10, :, :] + style_out[:, 10:13, :, :]
 
         # content decode
         content_out = self.content_decoder(content_x)
 
-        # style out
-        # style_out = content_out * torch.mean(style_act[0], dim=[2, 3], keepdim=True)
-        style_out = F.interpolate(torch.mean(style_act[0], dim=[2, 3], keepdim=True), (256, 256))
-        style_out += F.interpolate(self.avg_pool(style_act[1]), (256, 256))
-        style_out += style_act[2]
+        # out
+        if mode == 'reconstruct':
+            out = (1 - inpaint_re) * (content_out - spoof_trace) + inpaint_re * inpaint_trace
+        else:
+            out = (1 - inpaint_re) * (content_out + spoof_trace) + inpaint_re * inpaint_trace
 
-        return content_out - style_out, style_act, style_out
+
+        return out, inpaint_re, inpaint_trace, spoof_trace, trace
 
 ##################################################################################
 # Sequential Models
@@ -532,6 +527,8 @@ class RGConvNormAct(nn.Module):
 
         if apply_dropout:
             self.dropout = nn.Dropout(p=0.3)
+        else:
+            self.dropout = None
 
         self.output_c = output_c
         self.stride = stride
@@ -643,6 +640,7 @@ class Upsample(nn.Module):
                  output_c: int,
                  kernel_size: int = 3,
                  stride: int = 2,
+                 output_padding: int = 1,
                  norm: bool = True,
                  act: bool = True,
                  pad_type='zero'
@@ -653,7 +651,7 @@ class Upsample(nn.Module):
 
         # initialize convolution
         self.conv = nn.ConvTranspose2d(in_channels=input_c, out_channels=output_c, kernel_size=kernel_size,
-                                       stride=stride, padding=padding, output_padding=1, bias=True).cuda()
+                                       stride=stride, padding=padding, output_padding=output_padding, bias=True).cuda()
 
 
         # initialize normalization
@@ -902,3 +900,20 @@ def rgb_to_yuv(input: torch.Tensor, consts='yuv'):
         return torch.stack((u, v), -3)
     else:
         return torch.stack((y, u, v), -3)
+
+def decompose_image(x):
+    b, c, h, w = x.size()
+    images = []
+    for i in range(b):
+        image = x[i,...].permute(1, 2, 0).data.cpu().numpy()
+        image_B = cv2.blur(image, (8, 8))
+        image_C = cv2.blur(image, (2, 2)) - image_B
+        image_T = image - cv2.blur(image, (2, 2))
+        image = np.concatenate((image_B, image_C * 15, image_T * 30), axis=2)
+        images += [np.expand_dims(image, axis=0)]
+    images = np.concatenate(images, axis=0)
+    images = torch.from_numpy(images).float().permute(0, 3, 1, 2).cuda()
+    return images
+
+
+

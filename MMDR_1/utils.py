@@ -39,9 +39,8 @@ def get_data_loader_csv(csv_file, batch_size, num_workers=4, mode='train'):
     images_list = []
     frame_reader = open(csv_file, 'r')
     csv_reader = csv.reader(frame_reader)
-    transform_list = [transforms.ToTensor(),
-                      transforms.Normalize((0.5, 0.5, 0.5),
-                                           (0.5, 0.5, 0.5))]
+    transform_list = [ToTensor(),
+                      Normaliztion()]
     train = True
     if mode == 'train':
         # transform_list = []
@@ -53,7 +52,7 @@ def get_data_loader_csv(csv_file, batch_size, num_workers=4, mode='train'):
         # transform = transforms.Compose(transform_list)
         # transform_list = [transforms.RandomCrop((height, width))] + transform_list if crop else transform_list
         # transform_list = [transforms.Resize(new_size)] + transform_list if new_size is not None else transform_list
-        transform_list = [transforms.RandomHorizontalFlip()] + transform_list
+        transform_list = [RandomHorizontalFlip()] + transform_list
         for f in csv_reader:
             images_list.append(f)
     else:
@@ -110,9 +109,6 @@ def write_2images(image_outputs, display_image_num, image_directory, postfix):
         fig = clip_by_tensor(fig, 0.0, 1.0)
         if fig.shape[1] == 1:
             fig = torch.cat((fig, fig, fig), dim=1)
-        else:
-            r, g, b = torch.split(fig, fig.shape[1] // 3, 1)
-            fig = torch.cat((b, g, r), dim=1)
         fig = F.interpolate(fig, [256, 256])
         row_r = torch.split(fig, 1)
         row_r = torch.cat(row_r, dim=3)
@@ -321,7 +317,7 @@ class Normaliztion(object):
 
     def __call__(self, sample):
         image, map, label = sample['image'], sample['map'], sample['label']
-        new_image = image / 255.0  # [-1,1]
+        new_image = image / 255.0  # [0,1]
         new_map = map / 255.0  # [0,1]
         return {'image': new_image, 'map': new_map, 'label': label}
 

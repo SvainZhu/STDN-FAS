@@ -156,7 +156,7 @@ class Encoder(nn.Module):
 
         # content encoder
         self.content_encoder = []
-        output_cs = [input_c * 2, channels[0], channels[1], channels[0]]
+        output_cs = [input_c, channels[0], channels[1], channels[0]]
         self.content_encoder += [ConvNormAct(input_c*2, channels[0], 3, 1, 1, norm=norm, act=act, pad_type=pad_type)]
         for i in range(n_blocks):
             self.content_encoder += [ConvNormAct(output_cs[i], output_cs[i + 1], 3, 1, 1, norm=norm, act=act, pad_type=pad_type)]
@@ -169,10 +169,10 @@ class Encoder(nn.Module):
             self.style_encoders += [self._make_block(layer_channels, 2, 'downsample')]
 
     def forward(self, x):
-        out = torch.cat((x, rgb_to_yuv(x)), dim=1)
+        # x = torch.cat((x, rgb_to_yuv(x)), dim=1)
 
         # content encode
-        out = self.content_encoder(out)
+        out = self.content_encoder(x)
         content_map = out
 
         # style encode
@@ -230,7 +230,7 @@ class Decoder(nn.Module):
 
         # style act
         self.style_act = []
-        layer_channels = [channels[1], channels[0], channels[1]]
+        layer_channels = [channels[1], channels[0], output_c]
         for i in range(n_upsample):
             self.style_act += [self._make_block(layer_channels, 2, 'act')]
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
@@ -267,24 +267,27 @@ class Decoder(nn.Module):
 
     def forward(self, content_x, style_x):
         # style decode
-        style_decode = []
+        style_decode, style_act, style_out = [], [], []
         for i in range(self.n_downsample):
             style_in = style_x[self.n_downsample - i - 1] if i == 0 else torch.cat(
                 (out, style_x[self.n_downsample - i - 1]), dim=1)
             out = self.style_decoder[i](style_in)
             style_decode += [out]
-
-        # style act
-        style_act = []
-        for i in range(self.n_downsample):
             style_act += [self.style_act[i](style_decode[i])]
+            if i == 0:
+                style_out += [self.avg_pool(style_act[i])]
+            else:
+                style_out += style_act
 
-        # style feature
-        style_out = content_x * torch.mean(style_act[0], dim=[2, 3], keepdim=True)
-        style_out += F.interpolate(self.avg_pool(style_act[1]), (256, 256))
-        style_out += style_act[2]
+        # content decode
+        content_out = self.content_decoder(content_x)
 
-        return self.content_decoder(content_x+style_out)
+        # image out
+        out = content_out
+        for i in range(self.n_downsample):
+            out -= F.interpolate(style_out[i], (256, 256))
+
+        return out, style_out
 
 ##################################################################################
 # Sequential Models
