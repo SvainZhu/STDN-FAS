@@ -285,7 +285,7 @@ if __name__ == '__main__':
 
     config = Config(gpu='1',
                     database='SiW',
-                    protocol='_1')
+                    protocol='_2_1')
 
     # Modify the following directories to yourselves
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE

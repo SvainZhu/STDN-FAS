@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 from CBAM import CBAM
 import cv2
+from warp import warping, generate_offset_map
 try:
     from itertools import izip as zip
 except ImportError:     # detect the 3.x series
@@ -37,8 +38,8 @@ class Generator(nn.Module):
     def encode(self, images):
         return self.enc(images)
 
-    def decode(self, content_map, style_maps, mode='reconstruct'):
-        return self.dec(content_map, style_maps, mode)
+    def decode(self, content_x, style_x_s, style_x_t, landmark_s, landmark_t):
+        return self.dec(content_x, style_x_s, style_x_t, landmark_s, landmark_t)
 
     def forward(self, images):
         # reconstruct an image
@@ -82,40 +83,6 @@ class MultiScaleDis(nn.Module):
             outputs.append(model(x))
             x = self.downsample(x)
         return outputs
-
-
-##################################################################################
-# Feature Map Estimator
-##################################################################################
-
-# class FeatureEstimator(nn.Module):
-#     def __init__(self,
-#                  input_c,
-#                  output_c,
-#                  n_layer=3,
-#                  norm='bn',
-#                  act='prelu',
-#                  pad_type='zero'):
-#         super(FeatureEstimator, self).__init__()
-#         self.norm = norm
-#         self.act = act
-#         self.pad_type = pad_type
-#
-#         channels = [input_c, 64, output_c]
-#         self.est = nn.Sequential(
-#           ConvNormAct(input_c=channels[0]*3, output_c=channels[0], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
-#           ConvNormAct(input_c=channels[0], output_c=channels[1], padding=1, norm=norm, act=act, pad_type=pad_type, apply_dropout=True),
-#           ConvNormAct(input_c=channels[1], output_c=channels[1], padding=1, stride=2, norm=norm, act=act, pad_type=pad_type),
-#           ConvNormAct(input_c=channels[1], output_c=channels[2], padding=1, norm='none', act='none', pad_type=pad_type),
-#         )
-#
-#     def forward(self, x):
-#         maps = []
-#         for i in range(3):
-#             maps += [F.interpolate(x[i], [32, 32])]
-#         map = torch.cat(maps, dim=1)
-#         return self.est(map)
-
 
 class FeatureEstimator(nn.Module):
     def __init__(self,
@@ -246,30 +213,38 @@ class Decoder(nn.Module):
         #                                      act=self.act, pad_type=self.pad_type)]
         self.content_decoder = nn.Sequential(*self.content_decoder)
 
-    def forward(self, content_x, style_x, mode='reconstruct'):
-        # style decode
-        style_decode = []
-        style_out = self.style_decoder[0](style_x[-1])
+    def forward(self, content_x, style_s_x, style_t_x, landmark_s=torch.Tensor(), landmark_t=torch.Tensor()):
+        # style source decode
+        style_out = self.style_decoder[0](style_s_x[-1])
         for i in range(self.n_downsample):
-            style_in = torch.cat((style_x[self.n_downsample - i - 1], style_out), dim=1)
+            style_in = torch.cat((style_s_x[self.n_downsample - i - 1], style_out), dim=1)
             style_out = self.style_decoder[i+1](style_in)
         style_out = self.style_decoder[-1](style_out)
+        spoof_s_trace = style_out[:, 4:7, :, :] + style_out[:, 7:10, :, :] + style_out[:, 10:13, :, :]
 
-        inpaint_re = style_out[:, :1, :, :]
-        inpaint_trace = style_out[:, 1:4, :, :]
-        spoof_trace = style_out[:, 4:7, :, :] + style_out[:, 7:10, :, :] + style_out[:, 10:13, :, :]
+        # style target decode
+        style_out = self.style_decoder[0](style_t_x[-1])
+        for i in range(self.n_downsample):
+            style_in = torch.cat((style_t_x[self.n_downsample - i - 1], style_out), dim=1)
+            style_out = self.style_decoder[i + 1](style_in)
+        style_out = self.style_decoder[-1](style_out)
 
+        inpaint_t_re = style_out[:, :1, :, :]
+        inpaint_t_trace = style_out[:, 1:4, :, :]
+        spoof_t_trace = style_out[:, 4:7, :, :] + style_out[:, 7:10, :, :] + style_out[:, 10:13, :, :]
         # content decode
         content_out = self.content_decoder(content_x)
 
         # out
-        if mode == 'reconstruct':
-            out = (1 - inpaint_re) * (content_out - spoof_trace) + inpaint_re * inpaint_trace
-        else:
-            out = (1 - inpaint_re) * (content_out + spoof_trace) + inpaint_re * inpaint_trace
+        # if not len(landmark_t) == 0:
+            # reg_map = torch.from_numpy(generate_offset_map(landmark_t, landmark_s)).float().permute(2, 0, 1).unsqueeze(0)
+            # warp_spoof_trace = warping(spoof_t_trace, reg_map, 256)
+        #     out = (1 - inpaint_t_re) * (content_out - spoof_s_trace + spoof_t_trace) + inpaint_t_re * inpaint_t_trace
+        # else:
+        #     out = (1 - inpaint_t_re) * (content_out - spoof_s_trace + spoof_t_trace) + inpaint_t_re * inpaint_t_trace
+        out = (1 - inpaint_t_re) * (content_out - spoof_s_trace + spoof_t_trace) + inpaint_t_re * inpaint_t_trace
 
-
-        return out, inpaint_re, inpaint_trace, spoof_trace
+        return out, inpaint_t_re, inpaint_t_trace, spoof_s_trace, spoof_t_trace
 
 ##################################################################################
 # Sequential Models

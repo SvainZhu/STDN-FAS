@@ -90,7 +90,7 @@ def Oulu_process(crop_size):
 
     oulu_base_process(image_dir=train_image_dir, map_dir=train_map_dir, list=train_list,
                       data_csv=train_csv)
-    oulu_base_process(image_dir=val_image_dir, map_dir=val_map_dir, list=val_list,
+    oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
                       data_csv=test_csv)
     # oulu_base_process(image_dir=test_image_dir, map_dir=test_map_dir, list=test_list,
     #                   image_csv=test_csv, map_csv=test_map_csv)
@@ -330,7 +330,7 @@ def RE_process(crop_size):
 
 if __name__ == '__main__':
     # Modify the following directories to yourselves
-    crop_size = '1.2'
+    crop_size = '1.6'
     Oulu_process(crop_size)
     # SiW_process(crop_size)
     # CASIA_FASD_process(crop_size)

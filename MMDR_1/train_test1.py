@@ -8,11 +8,11 @@ import torch.nn.functional as F
 import argparse
 import shutil
 import tensorboardX
-from model_test import Generator, MultiScaleDis, FeatureEstimator
+from model_test1 import Generator, MultiScaleDis, FeatureEstimator
 from loss import l1_loss, l2_loss
 from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 
-from utils import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, write_loss, get_config, write_2images
+from utils_test1 import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, get_config, write_2images
 
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
@@ -116,25 +116,26 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 gen.train()
                 dis.train()
                 est.train()
-                for i, (images_r, maps_r, images_s, maps_s) in enumerate(dataloader['train_loader']):
+                for i, (images_r, maps_r, landmark_r, images_s, maps_s, landmark_s) in enumerate(dataloader['train_loader']):
                     gen_opt.zero_grad()
                     dis_opt.zero_grad()
                     est_opt.zero_grad()
 
                     images_r, maps_r, images_s, maps_s = images_r.cuda(), maps_r.cuda(), images_s.cuda(), maps_s.cuda()
+                    landmark_s, landmark_r = landmark_s.squeeze(0), landmark_r.squeeze(0)
 
                     # disentangle the content-style feature of live and spoof faces
                     content_r, style_r = gen.encode(images_r)
                     content_s, style_s = gen.encode(images_s)
 
                     # reconstruct the liveness faces and synthesize the spoof faces
-                    recon_r, inpaint_re_r, inpaint_trace_r, spoof_trace_r = gen.decode(content_s, style_r, 'reconstruct')
-                    synth_s, inpaint_re_s, inpaint_trace_s, spoof_trace_s = gen.decode(content_r, style_s, 'synthesize')
+                    recon_r, inpaint_re_re, inpaint_trace_re, spoof_trace_s, spoof_trace_r = gen.decode(content_s, style_s, style_r, landmark_s, landmark_r)
+                    synth_s, inpaint_syn_re, inpaint_trace_syn, spoof_trace_r, spoof_trace_s = gen.decode(content_r, style_r, style_s, landmark_r, landmark_s)
 
                     content_recon_r, style_recon_r = gen.encode(recon_r)
                     content_synth_s, style_synth_s = gen.encode(synth_s)
-                    recon_r_exchange, inpaint_re_r_exchange, inpaint_trace_r_exchange, spoof_trace_r_exchange = gen.decode(content_synth_s, style_recon_r, 'synthesize')
-                    recon_s_exchange, inpaint_re_s_exchange, inpaint_trace_s_exchange, spoof_trace_s_exchange = gen.decode(content_recon_r, style_synth_s, 'synthesize')
+                    recon_r_exchange, inpaint_re_r_exchange, inpaint_trace_r_exchange, spoof_trace_s_exchange, spoof_trace_r_exchange = gen.decode(content_synth_s, style_synth_s, style_recon_r, landmark_s, landmark_r)
+                    recon_s_exchange, inpaint_re_s_exchange, inpaint_trace_s_exchange, _, _ = gen.decode(content_recon_r, style_recon_r, style_synth_s, landmark_r, landmark_s)
 
                     # discriminate the image
                     dis_recon_r = dis(recon_r)
@@ -166,6 +167,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                     for i in range(dis_config['num_scales']):
                         loss = (l2_loss(dis_recon_r[i], 0) + l2_loss(dis_synth_s[i], 1) + l2_loss(dis_recon_r_exchange[i], 0) + l2_loss(dis_recon_s_exchange[i], 1)) / 4.0
                         dis_loss += loss
+                    dis_loss *= 10
 
                     # loss for step3
                     est_recon_loss = l1_loss(est_recon_r, maps_r) + l1_loss(est_synth_s, maps_s)
@@ -210,8 +212,8 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                             # est_recon_r, est_synth_s = est(style_recon_r), est(style_synth_s)
                             est_r, est_s = F.interpolate(est_r, (256, 256)), F.interpolate(est_s, (256, 256))
                             est_recon_r, est_synth_s = F.interpolate(est_recon_r, (256, 256)), F.interpolate(est_synth_s, (256, 256))
-                            train_image_outputs = [images_r, inpaint_re_r, inpaint_trace_r, spoof_trace_r, synth_s, recon_r_exchange, est_r, est_synth_s,
-                                                   images_s, inpaint_re_s, inpaint_trace_s, spoof_trace_s, recon_r, recon_s_exchange, est_s, est_recon_r]
+                            train_image_outputs = [images_r, inpaint_syn_re, inpaint_trace_syn, spoof_trace_r, synth_s, recon_r_exchange, est_r, est_synth_s,
+                                                   images_s, inpaint_re_re, inpaint_trace_re, spoof_trace_s, recon_r, recon_s_exchange, est_s, est_recon_r]
                             write_2images(train_image_outputs, display_size, image_dir,
                                           'train_%08d' % (iterations + 1))
 
@@ -231,8 +233,7 @@ def train_model(config, dataloader, checkpoint_dir, image_dir, max_epochs=20, cu
                 for i, (image, label) in enumerate(loader['test_loader']):
                     image, label = image.cuda(), torch.LongTensor(label).cuda()
                     content, style = gen.encode(image)
-                    recon, inpaint_re, inpaint_trace, spoof_trace = gen.decode(content, style,
-                                                                                                'reconstruct')
+                    recon, inpaint_re, inpaint_trace, spoof_trace, _ = gen.decode(content, style, style, None, None)
 
                     style_est = est(style)
                     score = l1_loss(inpaint_trace, 0) + l1_loss(spoof_trace, 0) - l1_loss(style_est, 0)
@@ -278,7 +279,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
-    parser.add_argument('--output_path', type=str, default='./results_test0/', help="outputs path")
+    parser.add_argument('--output_path', type=str, default='./results_test1/', help="outputs path")
     parser.add_argument("--resume", type=bool, default=False, help="pretrain resume")
     opts = parser.parse_args()
 

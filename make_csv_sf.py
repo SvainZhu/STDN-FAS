@@ -96,8 +96,8 @@ def Oulu_process(crop_size):
 
 
 def SiW_process(crop_size):
-    Protocol = '1'
-    sub_Protocol = ''
+    Protocol = '2'
+    sub_Protocol = '_1'
 
     train_image_dir = 'E:/zsw/Data/SiW/CropFace256/%s/Train/' % crop_size
     test_image_dir = 'E:/zsw/Data/SiW/CropFace256/%s/Test/' % crop_size
@@ -330,7 +330,7 @@ def RE_process(crop_size):
 if __name__ == '__main__':
     # Modify the following directories to yourselves
     interval = 6
-    crop_size = '2.0'
+    crop_size = '1.6'
     # Oulu_process(crop_size)
     SiW_process(crop_size)
     # CASIA_FASD_process(crop_size)

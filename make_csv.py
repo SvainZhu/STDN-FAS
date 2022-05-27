@@ -100,8 +100,8 @@ def Oulu_process(crop_size):
                       image_csv=test_csv, map_csv=test_map_csv)
 
 def SiW_process(crop_size):
-    Protocol = '1'
-    sub_Protocol = ''
+    Protocol = '2'
+    sub_Protocol = '_1'
 
     train_image_dir = 'E:/zsw/Data/SiW/CropFace256/%s/Train/' % crop_size
     test_image_dir = 'E:/zsw/Data/SiW/CropFace256/%s/Test/' % crop_size
