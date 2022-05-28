@@ -12,32 +12,31 @@ class Generator(nn.Module):
                  ):
         super(Generator, self).__init__()
 
-        channels = [16, 64, 94, 128]
+        channels = [16, 64, 64, 96, ]
 
         self.stem_conv = nn.Sequential(
           ConvBNAct(input_c=in_c * 2, output_c=channels[1]),
-          ConvBNAct(input_c=channels[1], output_c=channels[2]),
         )
 
         # Block 1
         self.Block1 = nn.Sequential(
+          ConvBNAct(input_c=channels[1], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          ConvBNAct(input_c=channels[3], output_c=channels[2]),
-          Downsample(input_c=channels[2], output_c=channels[2]),
+          Downsample(input_c=channels[3], output_c=channels[2]),
         )
 
         # Block 2
         self.Block2 = nn.Sequential(
+          ConvBNAct(input_c=channels[2], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          ConvBNAct(input_c=channels[3], output_c=channels[2]),
-          Downsample(input_c=channels[2], output_c=channels[2]),
+          Downsample(input_c=channels[3], output_c=channels[2]),
         )
 
         # Block 3
         self.Block3 = nn.Sequential(
+          ConvBNAct(input_c=channels[2], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          ConvBNAct(input_c=channels[3], output_c=channels[2]),
-          Downsample(input_c=channels[2], output_c=channels[2]),
+          Downsample(input_c=channels[3], output_c=channels[2]),
         )
 
         # Decoder
@@ -64,7 +63,7 @@ class Generator(nn.Module):
         self.ESR = nn.Sequential(
           ConvBNAct(input_c=channels[2] * 3, output_c=channels[2], apply_dropout=True),
           ConvBNAct(input_c=channels[2], output_c=channels[1], apply_dropout=True),
-          Downsample(input_c=channels[1], output_c=channels[1]),
+          # Downsample(input_c=channels[1], output_c=channels[1]),
           ConvBNAct(input_c=channels[1], output_c=1, act=False, norm=False),
         )
 
@@ -109,26 +108,26 @@ class Discrinator(nn.Module):
                  ):
         super(Discrinator, self).__init__()
 
-        channels = [16, 32, 64, 96]
+        channels = [16, 32, 64, 96, ]
 
-        self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
+        # self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
 
         # Block 1
         self.Block1 = nn.Sequential(
-            ConvBNAct(input_c=channels[1], output_c=channels[1]),
-            Downsample(input_c=channels[1], output_c=channels[2]),
+            ConvBNAct(input_c=in_c*2, output_c=channels[1]),
+            Downsample(input_c=channels[1], output_c=channels[1]),
         )
 
         # Block 2
         self.Block2 = nn.Sequential(
-            ConvBNAct(input_c=channels[2], output_c=channels[2]),
-            Downsample(input_c=channels[2], output_c=channels[3]),
+            ConvBNAct(input_c=channels[1], output_c=channels[2]),
+            Downsample(input_c=channels[2], output_c=channels[2]),
         )
 
         # Block 3
         self.Block3 = nn.Sequential(
-            ConvBNAct(input_c=channels[3], output_c=channels[3]),
-            Downsample(input_c=channels[3], output_c=channels[3]),
+            ConvBNAct(input_c=channels[2], output_c=channels[2]),
+            Downsample(input_c=channels[2], output_c=channels[3]),
         )
 
         # Block 4
@@ -139,9 +138,9 @@ class Discrinator(nn.Module):
 
     def forward(self, x):
         x = torch.cat((x, rgb_to_yuv(x)), dim=1)
-        out = self.stem_conv(x)
+        # out = self.stem_conv(x)
 
-        out1 = self.Block1(out)
+        out1 = self.Block1(x)
         out2 = self.Block2(out1)
         out3 = self.Block3(out2)
         out4 = self.Block4(out3)
@@ -156,18 +155,18 @@ class Discrinator_s(nn.Module):
                  ):
         super(Discrinator_s, self).__init__()
 
-        channels = [16, 32, 64, 96]
+        channels = [16, 32, 64, 96, ]
 
-        self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
+        # self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
 
         # Block 1
-        self.Block1 = Downsample(input_c=channels[1], output_c=channels[2])
+        self.Block1 = Downsample(input_c=in_c*2, output_c=channels[1])
 
         # Block 2
-        self.Block2 = Downsample(input_c=channels[2], output_c=channels[3])
+        self.Block2 = Downsample(input_c=channels[1], output_c=channels[2])
 
         # Block 3
-        self.Block3 = Downsample(input_c=channels[3], output_c=channels[3])
+        self.Block3 = Downsample(input_c=channels[2], output_c=channels[3])
 
         # Block 4
         self.Block4 = ConvBNAct(input_c=channels[3], output_c=channels[3])

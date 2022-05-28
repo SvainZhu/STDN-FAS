@@ -284,7 +284,7 @@ def get_test_data(csv_file):
 if __name__ == '__main__':
 
     config = Config(gpu='1',
-                    database='SiW',
+                    database='OULU',
                     protocol='_2_1')
 
     # Modify the following directories to yourselves

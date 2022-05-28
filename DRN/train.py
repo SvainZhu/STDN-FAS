@@ -49,6 +49,7 @@ train_writer = tensorboardX.SummaryWriter(os.path.join(opts.output_path + "/logs
 output_directory = os.path.join(opts.output_path + "/outputs", model_name)
 checkpoint_directory, image_directory = prepare_sub_folder(output_directory)
 shutil.copy(opts.config, os.path.join(output_directory, 'config.yaml')) # copy config file to output folder
+torch.randn()
 
 # Start training
 iterations = trainer.resume(checkpoint_directory, hyperparameters=config) if opts.resume else 0
