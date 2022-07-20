@@ -18,7 +18,7 @@ def warping(x, offsets, imsize):
     yy = yy.view(1, 1, xsize, xsize).repeat(bsize, 1, 1, 1)
     t_coords = torch.cat((xx, yy), dim=1).float().cuda()
 
-    # find the coordinates in the source image to copy pixels
+    # find the coordinates in the source_models image to copy pixels
     s_coords = t_coords + offsets
     # scale grid to [-1, 1]
     s_coords[:, 0, :, :] = 2.0 * s_coords[:, 0, :, :].clone() / max(xsize - 1, 1) - 1.0

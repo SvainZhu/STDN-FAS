@@ -4,35 +4,6 @@ import json
 import random
 import pandas as pd
 
-def base_process(image_dir, map_dir, image_csv, map_csv):
-    map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
-    map_csv_writer = csv.writer(map_csv_a)
-    with open(image_csv, 'a', encoding='utf-8', newline='') as f:
-        csv_writer = csv.writer(f)
-        for i in os.listdir(map_dir):
-            file_path1 = os.path.join(map_dir, i)
-            if i == 'attack_face':
-                label = 0
-            else:
-                label = 1
-            for j in os.listdir(file_path1):
-                file_path2 = os.path.join(file_path1, j)
-                count = -1
-                for k in os.listdir(file_path2):
-                    count += 1
-                    if count % interval != 0:
-                        continue
-                    face_name = '_'.join(k.split('_')[:-1]) + '.jpg'
-                    map_path = os.path.join(file_path2, k)
-                    image_path = os.path.join(os.path.join(image_dir, i), j)
-                    face_path = os.path.join(image_path, face_name)
-                    csv_writer.writerow([face_path, label])
-                    map_csv_writer.writerow([map_path, label])
-
-                else:
-                    continue
-    map_csv_a.close()
-
 
 def Oulu_process(crop_size):
     Protocol = '1'

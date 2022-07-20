@@ -214,7 +214,7 @@ class Decoder(nn.Module):
         self.content_decoder = nn.Sequential(*self.content_decoder)
 
     def forward(self, content_x, style_s_x, style_t_x, landmark_s=torch.Tensor(), landmark_t=torch.Tensor()):
-        # style source decode
+        # style source_models decode
         style_out = self.style_decoder[0](style_s_x[-1])
         for i in range(self.n_downsample):
             style_in = torch.cat((style_s_x[self.n_downsample - i - 1], style_out), dim=1)

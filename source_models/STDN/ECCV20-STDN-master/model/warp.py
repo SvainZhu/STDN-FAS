@@ -45,7 +45,7 @@ def warping(x, offsets, imsize):
     t_coords = tf.cast(t_coords, tf.float32)
     t_coords = tf.reshape(t_coords, (-1, 2))
     t_coords = tf_repeat_2d(t_coords, bsize)
-    # find the coordinates in the source image to copy pixels
+    # find the coordinates in the source_models image to copy pixels
     s_coords = t_coords + offsets
     s_coords = tf.clip_by_value(s_coords, 0, tf.cast(xsize-1, tf.float32))
 
