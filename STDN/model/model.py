@@ -3,7 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .utils import rgb_to_yuv, rgb_to_hsv, ConvBNAct, Upsample, Downsample
-
+import cv2
+import numpy as np
 
 class Generator(nn.Module):
     def __init__(self,
@@ -12,31 +13,32 @@ class Generator(nn.Module):
                  ):
         super(Generator, self).__init__()
 
-        channels = [16, 64, 64, 96, ]
+        channels = [16, 64, 94, 128]
 
         self.stem_conv = nn.Sequential(
-          ConvBNAct(input_c=in_c * 2, output_c=channels[1]),
+          ConvBNAct(input_c=in_c * 3, output_c=channels[1]),
+          ConvBNAct(input_c=channels[1], output_c=channels[2]),
         )
 
         # Block 1
         self.Block1 = nn.Sequential(
-          ConvBNAct(input_c=channels[1], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          Downsample(input_c=channels[3], output_c=channels[2]),
+          ConvBNAct(input_c=channels[3], output_c=channels[2]),
+          Downsample(input_c=channels[2], output_c=channels[2]),
         )
 
         # Block 2
         self.Block2 = nn.Sequential(
-          ConvBNAct(input_c=channels[2], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          Downsample(input_c=channels[3], output_c=channels[2]),
+          ConvBNAct(input_c=channels[3], output_c=channels[2]),
+          Downsample(input_c=channels[2], output_c=channels[2]),
         )
 
         # Block 3
         self.Block3 = nn.Sequential(
-          ConvBNAct(input_c=channels[2], output_c=channels[2]),
           ConvBNAct(input_c=channels[2], output_c=channels[3]),
-          Downsample(input_c=channels[3], output_c=channels[2]),
+          ConvBNAct(input_c=channels[3], output_c=channels[2]),
+          Downsample(input_c=channels[2], output_c=channels[2]),
         )
 
         # Decoder
@@ -70,7 +72,8 @@ class Generator(nn.Module):
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
 
     def forward(self, x):
-        x = torch.cat((x, rgb_to_yuv(x)), dim=1)
+        # x = torch.cat((x, rgb_to_yuv(x)), dim=1)
+        x = decompose_image(x)
         out = self.stem_conv(x)
 
         # encoder
@@ -108,26 +111,26 @@ class Discrinator(nn.Module):
                  ):
         super(Discrinator, self).__init__()
 
-        channels = [16, 32, 64, 96, ]
+        channels = [16, 32, 64, 96]
 
-        # self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
+        self.stem_conv = ConvBNAct(input_c=in_c*3, output_c=channels[1])
 
         # Block 1
         self.Block1 = nn.Sequential(
-            ConvBNAct(input_c=in_c*2, output_c=channels[1]),
-            Downsample(input_c=channels[1], output_c=channels[1]),
+            ConvBNAct(input_c=channels[1], output_c=channels[1]),
+            Downsample(input_c=channels[1], output_c=channels[2]),
         )
 
         # Block 2
         self.Block2 = nn.Sequential(
-            ConvBNAct(input_c=channels[1], output_c=channels[2]),
-            Downsample(input_c=channels[2], output_c=channels[2]),
+            ConvBNAct(input_c=channels[2], output_c=channels[2]),
+            Downsample(input_c=channels[2], output_c=channels[3]),
         )
 
         # Block 3
         self.Block3 = nn.Sequential(
-            ConvBNAct(input_c=channels[2], output_c=channels[2]),
-            Downsample(input_c=channels[2], output_c=channels[3]),
+            ConvBNAct(input_c=channels[3], output_c=channels[3]),
+            Downsample(input_c=channels[3], output_c=channels[3]),
         )
 
         # Block 4
@@ -137,9 +140,10 @@ class Discrinator(nn.Module):
 
 
     def forward(self, x):
-        x = torch.cat((x, rgb_to_yuv(x)), dim=1)
-        # out = self.stem_conv(x)
+        # x = torch.cat((x, rgb_to_yuv(x)), dim=1)
 
+        x = decompose_image(x)
+        x = self.stem_conv(x)
         out1 = self.Block1(x)
         out2 = self.Block2(out1)
         out3 = self.Block3(out2)
@@ -155,18 +159,18 @@ class Discrinator_s(nn.Module):
                  ):
         super(Discrinator_s, self).__init__()
 
-        channels = [16, 32, 64, 96, ]
+        channels = [16, 32, 64, 96]
 
-        # self.stem_conv = ConvBNAct(input_c=in_c*2, output_c=channels[1])
+        self.stem_conv = ConvBNAct(input_c=in_c*3, output_c=channels[1])
 
         # Block 1
-        self.Block1 = Downsample(input_c=in_c*2, output_c=channels[1])
+        self.Block1 = Downsample(input_c=channels[1], output_c=channels[2])
 
         # Block 2
-        self.Block2 = Downsample(input_c=channels[1], output_c=channels[2])
+        self.Block2 = Downsample(input_c=channels[2], output_c=channels[3])
 
         # Block 3
-        self.Block3 = Downsample(input_c=channels[2], output_c=channels[3])
+        self.Block3 = Downsample(input_c=channels[3], output_c=channels[3])
 
         # Block 4
         self.Block4 = ConvBNAct(input_c=channels[3], output_c=channels[3])
@@ -174,10 +178,12 @@ class Discrinator_s(nn.Module):
         self.Block4s = ConvBNAct(input_c=channels[3], output_c=out_c // 2, act=False, norm=False)
 
     def forward(self, x):
-        x = torch.cat((x, rgb_to_yuv(x)), dim=1)
-        out = self.stem_conv(x)
+        # x = torch.cat((x, rgb_to_yuv(x)), dim=1)
 
-        out1 = self.Block1(out)
+        x = decompose_image(x)
+
+        x = self.stem_conv(x)
+        out1 = self.Block1(x)
         out2 = self.Block2(out1)
         out3 = self.Block3(out2)
         out4 = self.Block4(out3)
@@ -185,4 +191,17 @@ class Discrinator_s(nn.Module):
         return self.Block4l(out4), self.Block4s(out4)
 
 
+def decompose_image(x):
+    b, c, h, w = x.size()
+    images = []
+    for i in range(b):
+        image = x[i,...].permute(1, 2, 0).data.cpu().numpy()
+        image_B = cv2.blur(image, (8, 8))
+        image_C = cv2.blur(image, (2, 2)) - image_B
+        image_T = image - cv2.blur(image, (2, 2))
+        image = np.concatenate((image_B, image_C * 15, image_T * 30), axis=2)
+        images += [np.expand_dims(image, axis=0)]
+    images = np.concatenate(images, axis=0)
+    images = torch.from_numpy(images).float().permute(0, 3, 1, 2).cuda()
+    return images
 

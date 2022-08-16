@@ -123,9 +123,9 @@ def plotResults(result_list):
         fig = clip_by_tensor(fig, 0.0, 1.0)
         if shape[1] == 1:
             fig = torch.cat((fig, fig, fig), dim=1)
-        else:
-            r, g, b = torch.split(fig, shape[1] // 3, 1)
-            fig = torch.cat((b, g, r), dim=1)
+        # else:
+        #     r, g, b = torch.split(fig, shape[1] // 3, 1)
+        #     fig = torch.cat((b, g, r), dim=1)
         fig = F.interpolate(fig, [256, 256])
         row = torch.split(fig, 1)
         row = torch.cat(row, dim=3)
@@ -133,7 +133,7 @@ def plotResults(result_list):
 
     column = torch.cat(column, dim=1).data.cpu()
     column = column * 255
-    img = torch.IntTensor(column.int()).permute(1, 2, 0)
+    img = column.permute(1, 2, 0)
     return img
 
 

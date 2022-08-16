@@ -41,7 +41,7 @@ class Logger(object):
 def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
     best_ACER = 1.0
     best_epoch = 0
-    train_num = 100
+    train_num = 300
     bsize = config.BATCH_SIZE
     imsize = config.IMAGE_SIZE
     im2size = 160
@@ -72,8 +72,8 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
 
         log.write('------------------------------------------------------------------------\n')
         # Each epoch has a training and validation phase
-        # for phase in ['test']:
-        for phase in ['train', 'test']:
+        for phase in ['test']:
+        # for phase in ['train', 'test']:
             if phase == 'train':
                 for sub_model in ['gen', 'dis_1', 'dis_2', 'dis_3']:
                     exp_lr_scheduler[sub_model].step()
@@ -188,6 +188,7 @@ def train_model(config, dataloader, model_dir, num_epochs=20, current_epoch=0):
                         fig = [image, (M + 1) / 2, s * 5, b * 5, C * 5, T * 5, recon1, trace * 5, torch.cat((image[:bsize, ...], synth1), 0)]
                         fig = plotResults(fig).data.numpy()
                         fig_name = os.path.join(model_dir + str(epoch), str(i) + '.jpg')
+                        fig = cv2.cvtColor(fig, cv2.COLOR_RGB2BGR)
                         cv2.imwrite(fig_name, fig)
 
 
@@ -285,7 +286,7 @@ if __name__ == '__main__':
 
     config = Config(gpu='1',
                     database='OULU',
-                    protocol='_2_1')
+                    protocol='_1')
 
     # Modify the following directories to yourselves
     os.environ["CUDA_VISIBLE_DEVICES"] = config.GPU_USAGE
@@ -308,7 +309,7 @@ if __name__ == '__main__':
         database, crop_size, Protocol, interval)  # The validation split file
 
     #  Output path
-    model_dir = 'model_out/STDN_%s_%s%s_%s_mrga_test/' % (database, crop_size, Protocol, interval)
+    model_dir = 'model_out/STDN_%s_%s%s_%s_mrga_test1/' % (database, crop_size, Protocol, interval)
 
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

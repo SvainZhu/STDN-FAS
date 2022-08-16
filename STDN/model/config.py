@@ -12,7 +12,7 @@ class Config(object):
     GPU_USAGE = '0'
     DATABASE = 'OULU'
     PROTOCOL = '_1'
-    CROP_SIZE = '2.0'
+    CROP_SIZE = '1.6'
     INTERVAL = '6'
 
     # Log and Model Storage Default
@@ -24,12 +24,12 @@ class Config(object):
     MAP_SIZE = 32
 
     # Training Meta
-    BATCH_SIZE = 2
+    BATCH_SIZE = 5
     G_D_RATIO = 2
-    LEARNING_RATE = 5e-4
+    LEARNING_RATE = 5e-5
     LEARNING_MOMENTUM = 0.999
-    MAX_EPOCH = 50
-    NUM_EPOCHS_PER_DECAY = 5.0
+    MAX_EPOCH = 30
+    NUM_EPOCHS_PER_DECAY = 3
     WEIGHT_AVERAGE_DECAY = 5e-5
     GAMMA = 0.3
 
@@ -42,9 +42,9 @@ class Config(object):
 
     def compile(self):
         if not os.path.isdir(self.LOG_DIR):
-            os.mkdir(self.LOG_DIR)
+            os.makedirs(self.LOG_DIR)
         if not os.path.isdir(self.LOG_DIR + '/test'):
-            os.mkdir(self.LOG_DIR + '/test')
+            os.makedirs(self.LOG_DIR + '/test')
         """Display Configuration values."""
         print("\nConfigurations:")
         for a in dir(self):
