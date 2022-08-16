@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from torchvision import transforms
-from dataset_test1 import ImageLabelFilelist
+from MMDR_experiment1.data.dataset import ImageLabelFilelist
 import torch
 import torch.nn.functional as F
 import os
@@ -201,6 +201,7 @@ def get_scheduler(optimizer, hyperparameters, iterations=-1):
         return NotImplementedError('learning rate policy [%s] is not implemented', hyperparameters['lr_policy'])
     return scheduler
 
+
 def weights_init(init_type='gaussian'):
     def init_fun(m):
         classname = m.__class__.__name__
@@ -236,6 +237,75 @@ class Timer:
         print(self.msg % (time.time() - self.start_time))
 
 
+class RandomErasing(object):
+    '''
+    Class that performs Random Erasing in Random Erasing Data Augmentation by Zhong et al.
+    -------------------------------------------------------------------------------------
+    probability: The probability that the operation will be performed.
+    sl: min erasing area
+    sh: max erasing area
+    r1: min aspect ratio
+    mean: erasing value
+    -------------------------------------------------------------------------------------
+    '''
+
+    def __init__(self, probability=0.5, sl=0.01, sh=0.05, r1=0.5, mean=[0.4914, 0.4822, 0.4465]):
+        self.probability = probability
+        self.mean = mean
+        self.sl = sl
+        self.sh = sh
+        self.r1 = r1
+
+    def __call__(self, sample):
+        img, map, label = sample['image'], sample['map'], sample['label']
+
+        if random.uniform(0, 1) < self.probability:
+            attempts = np.random.randint(1, 3)
+            for attempt in range(attempts):
+                area = img.shape[0] * img.shape[1]
+
+                target_area = random.uniform(self.sl, self.sh) * area
+                aspect_ratio = random.uniform(self.r1, 1 / self.r1)
+
+                h = int(round(math.sqrt(target_area * aspect_ratio)))
+                w = int(round(math.sqrt(target_area / aspect_ratio)))
+
+                if w < img.shape[1] and h < img.shape[0]:
+                    x1 = random.randint(0, img.shape[0] - h)
+                    y1 = random.randint(0, img.shape[1] - w)
+
+                    img[x1:x1 + h, y1:y1 + w, 0] = self.mean[0]
+                    img[x1:x1 + h, y1:y1 + w, 1] = self.mean[1]
+                    img[x1:x1 + h, y1:y1 + w, 2] = self.mean[2]
+
+        return {'image': img, 'map': map, 'label': label}
+
+
+# Tensor
+class Cutout(object):
+    def __init__(self, length=50):
+        self.length = length
+
+    def __call__(self, sample):
+        img, map, label = sample['image'], sample['map'], sample['label']
+        h, w = img.shape[1], img.shape[2]  # Tensor [1][2],  nparray [0][1]
+        mask = np.ones((h, w), np.float32)
+        y = np.random.randint(h)
+        x = np.random.randint(w)
+        length_new = np.random.randint(1, self.length)
+
+        y1 = np.clip(y - length_new // 2, 0, h)
+        y2 = np.clip(y + length_new // 2, 0, h)
+        x1 = np.clip(x - length_new // 2, 0, w)
+        x2 = np.clip(x + length_new // 2, 0, w)
+
+        mask[y1: y2, x1: x2] = 0.
+        mask = torch.from_numpy(mask)
+        mask = mask.expand_as(img)
+        img *= mask
+        return {'image': img, 'map': map, 'label': label}
+
+
 class Normaliztion(object):
     """
         same as mxnet, normalize into [-1, 1]
@@ -243,19 +313,19 @@ class Normaliztion(object):
     """
 
     def __call__(self, sample):
-        image, map, landmark, label = sample['image'], sample['map'], sample['landmark'], sample['label']
+        image, map, label = sample['image'], sample['map'], sample['label']
         new_image = image / 255.0  # [0,1]
         new_map = map / 255.0  # [0,1]
-        return {'image': new_image, 'map': new_map, 'landmark': landmark, 'label': label}
+        return {'image': new_image, 'map': new_map, 'label': label}
 
 
 class RandomHorizontalFlip(object):
     """Horizontally flip the given Image randomly with a probability of 0.5."""
 
     def __call__(self, sample):
-        image, map, landmark, label = sample['image'], sample['map'], sample['landmark'], sample['label']
+        image, map, label = sample['image'], sample['map'], sample['label']
 
-        new_image = np.zeros((256, 256, 3))
+        new_image = np.zeros((224, 224, 3))
         new_map = np.zeros((32, 32))
 
         p = random.random()
@@ -264,12 +334,11 @@ class RandomHorizontalFlip(object):
 
             new_image = cv2.flip(image, 1)
             new_map = cv2.flip(map, 1)
-            new_landmark = cv2.flip(landmark, 1)
 
-            return {'image': new_image, 'map': new_map, 'landmark': new_landmark, 'label': label}
+            return {'image': new_image, 'map': new_map, 'label': label}
         else:
             # print('no Flip')
-            return {'image': image, 'map': map, 'landmark': landmark,  'label': label}
+            return {'image': image, 'map': map, 'label': label}
 
 
 class ToTensor(object):
@@ -279,7 +348,7 @@ class ToTensor(object):
     """
 
     def __call__(self, sample):
-        image, map, landmark, label = sample['image'], sample['map'], sample['landmark'], sample['label']
+        image, map, label = sample['image'], sample['map'], sample['label']
 
         # swap color axis because
         # numpy image: (batch_size) x H x W x C
@@ -294,6 +363,5 @@ class ToTensor(object):
 
         return {'image': torch.from_numpy(image.astype(np.float)).float(),
                 'map': torch.from_numpy(map.astype(np.float)).float(),
-                'landmark': torch.from_numpy(landmark.astype(np.float)).float(),
                 'label': torch.from_numpy(label_np.astype(np.long)).long()}
 
