@@ -8,11 +8,11 @@ import torch.nn.functional as F
 import argparse
 import shutil
 import tensorboardX
-from model_test1 import Generator, MultiScaleDis, FeatureEstimator
-from loss import l1_loss, l2_loss
-from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
+from MMDR_experiment1.model.model_test1 import Generator, MultiScaleDis, FeatureEstimator
+from MMDR_experiment1.utils.loss import l1_loss, l2_loss
+from MMDR_experiment1.data.statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 
-from utils_test1 import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, get_config, write_2images
+from MMDR_experiment1.utils.utils_test1 import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, get_config, write_2images
 
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
