@@ -1,7 +1,7 @@
 ### The config of the MMDR network training and testing
 
 # cuda options
-GPU_USAGE: 1
+GPU_USAGE: 0
 
 # logger options
 image_save_iter: 300         # How often do you want to save output images during training
@@ -57,5 +57,5 @@ est:
 input_channel: 3                              # number of image channels [1/3]
 num_workers: 0                              # number of data loading threads
 input_size: 256                               # the size of input image
-data_csv_train: E:\zsw\Data\OULU\CSV_MMDR\1.6\train_1_6.csv     # a train dataset csv location
-data_csv_test: E:\zsw\Data\OULU\CSV_MMDR\1.6\test_1_6.csv     # a test dataset csv location
+data_csv_train: /media/l228/数据/zsw/Data/OULU/CSV_MMDR/1.6/train_1_6.csv      # a train dataset csv location
+data_csv_test: /media/l228/数据/zsw/Data/OULU/CSV_MMDR/1.6/test_1_6.csv     # a test dataset csv location

@@ -1,0 +1,5 @@
+model: MMDR   batch_size: 1 frames_sample: 3 
+pretrain: False   input_size: 256*56*3
+loading train data
+------------------------------------------------------------------------
+**Epoch 0/29 Train 299/2880: gen_loss: 112.2100 dis_loss: 3.6269 est_loss: 2.5736

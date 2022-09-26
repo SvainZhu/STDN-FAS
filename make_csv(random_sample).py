@@ -9,29 +9,29 @@ def Oulu_process(crop_size):
     Protocol = '1'
     sub_Protocol = ''
 
-    train_image_dir = 'E:/zsw/Data/OULU/CropFace256/%s/Train_files/' % crop_size
-    val_image_dir = 'E:/zsw/Data/OULU/CropFace256/%s/Dev_files/' % crop_size
-    test_image_dir = 'E:/zsw/Data/OULU/CropFace256/%s/Test_files/' % crop_size
+    train_image_dir = '/media/l228/数据/zsw/Data/OULU/CropFace256/%s/Train_files/' % crop_size
+    val_image_dir = '/media/l228/数据/zsw/Data/OULU/CropFace256/%s/Dev_files/' % crop_size
+    test_image_dir = '/media/l228/数据/zsw/Data/OULU/CropFace256/%s/Test_files/' % crop_size
 
-    train_map_dir = 'E:/zsw/Data/OULU/Face_Depth_Map/%s/Train_files/' % crop_size
-    val_map_dir = 'E:/zsw/Data/OULU/Face_Depth_Map/%s/Dev_files/' % crop_size
-    test_map_dir = 'E:/zsw/Data/OULU/Face_Depth_Map/%s/Test_files/' % crop_size
+    train_map_dir = '/media/l228/数据/zsw/Data/OULU/Face_Depth_Map/%s/Train_files/' % crop_size
+    val_map_dir = '/media/l228/数据/zsw/Data/OULU/Face_Depth_Map/%s/Dev_files/' % crop_size
+    test_map_dir = '/media/l228/数据/zsw/Data/OULU/Face_Depth_Map/%s/Test_files/' % crop_size
 
-    train_list = 'E:/zsw/Data/OULU/Protocols/Protocol_%s/Train%s.txt' % (Protocol, sub_Protocol)
-    val_list = 'E:/zsw/Data/OULU/Protocols/Protocol_%s/Dev%s.txt' % (Protocol, sub_Protocol)
-    test_list = 'E:/zsw/Data/OULU/Protocols/Protocol_%s/Test%s.txt' % (Protocol, sub_Protocol)
+    train_list = '/media/l228/数据/zsw/Data/OULU/Protocols/Protocol_%s/Train%s.txt' % (Protocol, sub_Protocol)
+    val_list = '/media/l228/数据/zsw/Data/OULU/Protocols/Protocol_%s/Dev%s.txt' % (Protocol, sub_Protocol)
+    test_list = '/media/l228/数据/zsw/Data/OULU/Protocols/Protocol_%s/Test%s.txt' % (Protocol, sub_Protocol)
 
-    train_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/train_%s%s_%s.csv' % (
+    train_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/train_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, interval)  # the train split file
-    val_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/val_%s%s_%s.csv' % (
+    val_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/val_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, interval)  # the validation split file
-    test_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, interval)
+    test_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, interval)
 
-    train_map_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/train_map_%s%s_%s.csv' % (
+    train_map_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/train_map_%s%s_%s.csv' % (
         crop_size, Protocol, sub_Protocol, interval)  # the train split file
-    val_map_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/val_map_%s%s_%s.csv' % (
+    val_map_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/val_map_%s%s_%s.csv' % (
         crop_size, Protocol, sub_Protocol, interval)  # the validation split file
-    test_map_csv = r'E:/zsw/Data/OULU/CSV_rsf/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, interval)
+    test_map_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_rsf/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, interval)
 
     def oulu_base_process(image_dir, map_dir, list, image_csv, map_csv):
         set = pd.read_csv(list, delimiter=',', header=None)
@@ -48,7 +48,7 @@ def Oulu_process(crop_size):
                     labels = 0
 
                 faces_name = os.listdir(os.path.join(image_dir, video_name))
-                for face_name in random.sample(faces_name, 1):
+                for face_name in random.sample(faces_name, 12):
                     face_name = face_name.split('.')[0] + '.jpg'
                     map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
                     map_path = os.path.join(os.path.join(map_dir, video_name), map_name)
@@ -302,8 +302,8 @@ if __name__ == '__main__':
     # Modify the following directories to yourselves
     interval = 6
     crop_size = '1.6'
-    # Oulu_process(crop_size)
-    SiW_process(crop_size)
+    Oulu_process(crop_size)
+    # SiW_process(crop_size)
     # CASIA_FASD_process(crop_size)
     # RE_process(crop_size)
 

@@ -1,0 +1,1324 @@
+model: MMDR   batch_size: 1 frames_sample: 3 
+pretrain: False   input_size: 256*56*3
+loading train data
+------------------------------------------------------------------------
+**Epoch 0/29 Train 299/5760: gen_loss: 151.7502 dis_loss: 9.6902 est_loss: 2.5362
+**Epoch 0/29 Train 599/5760: gen_loss: 97.8938 dis_loss: 8.3589 est_loss: 3.2455
+**Epoch 0/29 Train 899/5760: gen_loss: 86.7310 dis_loss: 5.7829 est_loss: 2.2813
+**Epoch 0/29 Train 1199/5760: gen_loss: 82.0782 dis_loss: 4.6435 est_loss: 1.5648
+**Epoch 0/29 Train 1499/5760: gen_loss: 76.8836 dis_loss: 8.2131 est_loss: 1.6185
+**Epoch 0/29 Train 1799/5760: gen_loss: 76.2055 dis_loss: 5.0073 est_loss: 1.4292
+**Epoch 0/29 Train 2099/5760: gen_loss: 74.4271 dis_loss: 3.2243 est_loss: 1.4339
+**Epoch 0/29 Train 2399/5760: gen_loss: 74.8554 dis_loss: 3.6256 est_loss: 1.3660
+**Epoch 0/29 Train 2699/5760: gen_loss: 78.1115 dis_loss: 11.5827 est_loss: 1.4599
+**Epoch 0/29 Train 2999/5760: gen_loss: 74.0731 dis_loss: 2.7848 est_loss: 1.4923
+**Epoch 0/29 Train 3299/5760: gen_loss: 74.8349 dis_loss: 4.3485 est_loss: 1.3269
+**Epoch 0/29 Train 3599/5760: gen_loss: 73.2808 dis_loss: 0.8553 est_loss: 1.3551
+**Epoch 0/29 Train 3899/5760: gen_loss: 73.7922 dis_loss: 1.5779 est_loss: 1.8223
+**Epoch 0/29 Train 4199/5760: gen_loss: 72.9797 dis_loss: 0.7102 est_loss: 1.6127
+**Epoch 0/29 Train 4499/5760: gen_loss: 73.0527 dis_loss: 1.1777 est_loss: 1.3124
+**Epoch 0/29 Train 4799/5760: gen_loss: 75.5195 dis_loss: 3.9381 est_loss: 1.5953
+**Epoch 0/29 Train 5099/5760: gen_loss: 73.7932 dis_loss: 3.2618 est_loss: 1.5491
+**Epoch 0/29 Train 5399/5760: gen_loss: 75.2258 dis_loss: 3.4586 est_loss: 1.5095
+**Epoch 0/29 Train 5699/5760: gen_loss: 75.2936 dis_loss: 2.9204 est_loss: 1.3984
+**Epoch 0/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 0/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 0/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 0/29 Time 3492.6229462623596s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 0
+------------------------------------------------------------------------
+**Epoch 1/29 Train 5999/5760: gen_loss: 73.0116 dis_loss: 0.3044 est_loss: 1.4455
+**Epoch 1/29 Train 6299/5760: gen_loss: 73.2907 dis_loss: 0.3412 est_loss: 1.4882
+**Epoch 1/29 Train 6599/5760: gen_loss: 72.8231 dis_loss: 0.3971 est_loss: 1.4064
+**Epoch 1/29 Train 6899/5760: gen_loss: 72.8955 dis_loss: 0.9019 est_loss: 1.4104
+**Epoch 1/29 Train 7199/5760: gen_loss: 73.3372 dis_loss: 2.4853 est_loss: 1.5770
+**Epoch 1/29 Train 7499/5760: gen_loss: 72.1626 dis_loss: 0.2868 est_loss: 1.3631
+**Epoch 1/29 Train 7799/5760: gen_loss: 72.7260 dis_loss: 0.5219 est_loss: 1.7545
+**Epoch 1/29 Train 8099/5760: gen_loss: 72.9516 dis_loss: 1.4844 est_loss: 1.4622
+**Epoch 1/29 Train 8399/5760: gen_loss: 73.4093 dis_loss: 3.8984 est_loss: 1.5729
+**Epoch 1/29 Train 8699/5760: gen_loss: 73.3180 dis_loss: 1.3742 est_loss: 1.6590
+**Epoch 1/29 Train 8999/5760: gen_loss: 74.1267 dis_loss: 0.4736 est_loss: 1.7330
+**Epoch 1/29 Train 9299/5760: gen_loss: 73.2269 dis_loss: 0.3150 est_loss: 1.5614
+**Epoch 1/29 Train 9599/5760: gen_loss: 74.5407 dis_loss: 4.3893 est_loss: 1.7177
+**Epoch 1/29 Train 9899/5760: gen_loss: 73.2275 dis_loss: 1.2689 est_loss: 2.2458
+**Epoch 1/29 Train 10199/5760: gen_loss: 73.5573 dis_loss: 1.9385 est_loss: 1.6126
+**Epoch 1/29 Train 10499/5760: gen_loss: 72.3031 dis_loss: 0.3288 est_loss: 1.6807
+**Epoch 1/29 Train 10799/5760: gen_loss: 72.1067 dis_loss: 2.3606 est_loss: 1.3002
+**Epoch 1/29 Train 11099/5760: gen_loss: 72.5876 dis_loss: 0.2431 est_loss: 1.4291
+**Epoch 1/29 Train 11399/5760: gen_loss: 72.7609 dis_loss: 1.1744 est_loss: 1.3998
+**Epoch 1/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 1/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 1/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 1/29 Time 3427.7260138988495s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 1
+------------------------------------------------------------------------
+**Epoch 2/29 Train 5999/5760: gen_loss: 71.8895 dis_loss: 0.3018 est_loss: 1.3403
+**Epoch 2/29 Train 6299/5760: gen_loss: 72.3904 dis_loss: 0.4869 est_loss: 1.2704
+**Epoch 2/29 Train 6599/5760: gen_loss: 72.0273 dis_loss: 0.1857 est_loss: 1.9819
+**Epoch 2/29 Train 6899/5760: gen_loss: 71.9735 dis_loss: 0.2222 est_loss: 1.6407
+**Epoch 2/29 Train 7199/5760: gen_loss: 72.0245 dis_loss: 0.2239 est_loss: 1.5308
+**Epoch 2/29 Train 7499/5760: gen_loss: 71.6870 dis_loss: 0.2074 est_loss: 1.3627
+**Epoch 2/29 Train 7799/5760: gen_loss: 72.8172 dis_loss: 1.0393 est_loss: 1.2193
+**Epoch 2/29 Train 8099/5760: gen_loss: 72.1152 dis_loss: 0.3262 est_loss: 1.6803
+**Epoch 2/29 Train 8399/5760: gen_loss: 72.3161 dis_loss: 0.2034 est_loss: 1.5870
+**Epoch 2/29 Train 8699/5760: gen_loss: 71.7529 dis_loss: 0.3231 est_loss: 1.5470
+**Epoch 2/29 Train 8999/5760: gen_loss: 71.9365 dis_loss: 0.3390 est_loss: 1.6466
+**Epoch 2/29 Train 9299/5760: gen_loss: 72.0631 dis_loss: 0.2586 est_loss: 1.3985
+**Epoch 2/29 Train 9599/5760: gen_loss: 73.0103 dis_loss: 3.7563 est_loss: 1.6052
+**Epoch 2/29 Train 9899/5760: gen_loss: 72.2082 dis_loss: 0.1979 est_loss: 1.4987
+**Epoch 2/29 Train 10199/5760: gen_loss: 71.9166 dis_loss: 0.2009 est_loss: 1.6858
+**Epoch 2/29 Train 10499/5760: gen_loss: 72.5219 dis_loss: 0.2322 est_loss: 1.4848
+**Epoch 2/29 Train 10799/5760: gen_loss: 72.1293 dis_loss: 0.1885 est_loss: 1.4461
+**Epoch 2/29 Train 11099/5760: gen_loss: 72.0027 dis_loss: 0.7200 est_loss: 1.5730
+**Epoch 2/29 Train 11399/5760: gen_loss: 71.8459 dis_loss: 0.2099 est_loss: 1.4386
+**Epoch 2/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 2/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 2/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 2/29 Time 2790.1948239803314s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 2
+------------------------------------------------------------------------
+**Epoch 3/29 Train 5999/5760: gen_loss: 71.9180 dis_loss: 0.2026 est_loss: 1.4718
+**Epoch 3/29 Train 6299/5760: gen_loss: 72.7395 dis_loss: 2.0395 est_loss: 1.2948
+**Epoch 3/29 Train 6599/5760: gen_loss: 74.6837 dis_loss: 3.9189 est_loss: 1.4533
+**Epoch 3/29 Train 6899/5760: gen_loss: 71.9988 dis_loss: 0.2155 est_loss: 1.5114
+**Epoch 3/29 Train 7199/5760: gen_loss: 72.0208 dis_loss: 0.2905 est_loss: 2.0921
+**Epoch 3/29 Train 7499/5760: gen_loss: 73.2543 dis_loss: 3.1356 est_loss: 1.3318
+**Epoch 3/29 Train 7799/5760: gen_loss: 72.0561 dis_loss: 0.2032 est_loss: 1.8156
+**Epoch 3/29 Train 8099/5760: gen_loss: 71.7748 dis_loss: 0.1916 est_loss: 1.5120
+**Epoch 3/29 Train 8399/5760: gen_loss: 72.3698 dis_loss: 0.5358 est_loss: 1.4216
+**Epoch 3/29 Train 8699/5760: gen_loss: 72.0346 dis_loss: 1.2778 est_loss: 1.5877
+**Epoch 3/29 Train 8999/5760: gen_loss: 71.8841 dis_loss: 0.2598 est_loss: 1.4515
+**Epoch 3/29 Train 9299/5760: gen_loss: 71.9485 dis_loss: 0.2603 est_loss: 1.7249
+**Epoch 3/29 Train 9599/5760: gen_loss: 72.8822 dis_loss: 1.8221 est_loss: 1.4749
+**Epoch 3/29 Train 9899/5760: gen_loss: 71.7016 dis_loss: 0.1903 est_loss: 1.6549
+**Epoch 3/29 Train 10199/5760: gen_loss: 71.9528 dis_loss: 0.4501 est_loss: 1.3549
+**Epoch 3/29 Train 10499/5760: gen_loss: 71.7716 dis_loss: 0.1835 est_loss: 1.4696
+**Epoch 3/29 Train 10799/5760: gen_loss: 71.7764 dis_loss: 0.1818 est_loss: 1.3449
+**Epoch 3/29 Train 11099/5760: gen_loss: 72.4473 dis_loss: 0.4749 est_loss: 1.6874
+**Epoch 3/29 Train 11399/5760: gen_loss: 73.0471 dis_loss: 2.6201 est_loss: 1.4986
+**Epoch 3/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 3/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 3/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 3/29 Time 2846.7061371803284s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 3
+------------------------------------------------------------------------
+**Epoch 4/29 Train 5999/5760: gen_loss: 74.2143 dis_loss: 3.4603 est_loss: 2.0156
+**Epoch 4/29 Train 6299/5760: gen_loss: 71.7872 dis_loss: 0.1987 est_loss: 1.7075
+**Epoch 4/29 Train 6599/5760: gen_loss: 71.6806 dis_loss: 0.1745 est_loss: 1.8529
+**Epoch 4/29 Train 6899/5760: gen_loss: 72.0130 dis_loss: 0.1827 est_loss: 1.4867
+**Epoch 4/29 Train 7199/5760: gen_loss: 71.8926 dis_loss: 0.1787 est_loss: 1.4228
+**Epoch 4/29 Train 7499/5760: gen_loss: 71.6652 dis_loss: 0.2006 est_loss: 1.4390
+**Epoch 4/29 Train 7799/5760: gen_loss: 72.0929 dis_loss: 0.1849 est_loss: 1.4300
+**Epoch 4/29 Train 8099/5760: gen_loss: 74.2275 dis_loss: 8.0603 est_loss: 1.4949
+**Epoch 4/29 Train 8399/5760: gen_loss: 71.8739 dis_loss: 0.2081 est_loss: 2.4518
+**Epoch 4/29 Train 8699/5760: gen_loss: 72.0939 dis_loss: 1.1621 est_loss: 1.6436
+**Epoch 4/29 Train 8999/5760: gen_loss: 71.8608 dis_loss: 0.2081 est_loss: 1.4277
+**Epoch 4/29 Train 9299/5760: gen_loss: 71.9376 dis_loss: 0.2203 est_loss: 1.3757
+**Epoch 4/29 Train 9599/5760: gen_loss: 71.7935 dis_loss: 0.1910 est_loss: 1.6111
+**Epoch 4/29 Train 9899/5760: gen_loss: 72.0691 dis_loss: 0.1860 est_loss: 1.4984
+**Epoch 4/29 Train 10199/5760: gen_loss: 71.7025 dis_loss: 0.3292 est_loss: 1.5320
+**Epoch 4/29 Train 10499/5760: gen_loss: 71.7873 dis_loss: 0.1866 est_loss: 1.3175
+**Epoch 4/29 Train 10799/5760: gen_loss: 73.3439 dis_loss: 2.1366 est_loss: 2.4500
+**Epoch 4/29 Train 11099/5760: gen_loss: 71.9310 dis_loss: 0.3862 est_loss: 1.3762
+**Epoch 4/29 Train 11399/5760: gen_loss: 71.5658 dis_loss: 0.1845 est_loss: 1.1827
+**Epoch 4/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 4/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 4/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 4/29 Time 2845.281212091446s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 4
+------------------------------------------------------------------------
+**Epoch 5/29 Train 5999/5760: gen_loss: 71.8174 dis_loss: 0.1961 est_loss: 1.5047
+**Epoch 5/29 Train 6299/5760: gen_loss: 71.5725 dis_loss: 0.1861 est_loss: 1.4481
+**Epoch 5/29 Train 6599/5760: gen_loss: 71.4168 dis_loss: 0.0137 est_loss: 1.6828
+**Epoch 5/29 Train 6899/5760: gen_loss: 71.5185 dis_loss: 0.0123 est_loss: 1.7046
+**Epoch 5/29 Train 7199/5760: gen_loss: 71.8067 dis_loss: 0.0112 est_loss: 1.6064
+**Epoch 5/29 Train 7499/5760: gen_loss: 71.5023 dis_loss: 0.2200 est_loss: 1.2335
+**Epoch 5/29 Train 7799/5760: gen_loss: 71.4576 dis_loss: 0.0081 est_loss: 1.2792
+**Epoch 5/29 Train 8099/5760: gen_loss: 71.9871 dis_loss: 0.1225 est_loss: 1.5117
+**Epoch 5/29 Train 8399/5760: gen_loss: 71.6831 dis_loss: 0.0052 est_loss: 1.4976
+**Epoch 5/29 Train 8699/5760: gen_loss: 71.5119 dis_loss: 0.0084 est_loss: 1.7159
+**Epoch 5/29 Train 8999/5760: gen_loss: 71.4035 dis_loss: 0.0135 est_loss: 1.8374
+**Epoch 5/29 Train 9299/5760: gen_loss: 71.6748 dis_loss: 0.0902 est_loss: 1.0856
+**Epoch 5/29 Train 9599/5760: gen_loss: 71.4410 dis_loss: 0.0964 est_loss: 1.4685
+**Epoch 5/29 Train 9899/5760: gen_loss: 71.5585 dis_loss: 0.0150 est_loss: 1.5065
+**Epoch 5/29 Train 10199/5760: gen_loss: 71.5051 dis_loss: 0.0257 est_loss: 1.4610
+**Epoch 5/29 Train 10499/5760: gen_loss: 71.6270 dis_loss: 0.0224 est_loss: 1.5959
+**Epoch 5/29 Train 10799/5760: gen_loss: 71.6487 dis_loss: 0.0045 est_loss: 1.6161
+**Epoch 5/29 Train 11099/5760: gen_loss: 71.5648 dis_loss: 0.0063 est_loss: 1.6192
+**Epoch 5/29 Train 11399/5760: gen_loss: 71.8414 dis_loss: 0.0320 est_loss: 1.7241
+**Epoch 5/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 5/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 5/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 5/29 Time 2847.6184215545654s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 5
+------------------------------------------------------------------------
+**Epoch 6/29 Train 5999/5760: gen_loss: 71.6071 dis_loss: 0.0135 est_loss: 1.6961
+**Epoch 6/29 Train 6299/5760: gen_loss: 71.5451 dis_loss: 0.0181 est_loss: 1.9110
+**Epoch 6/29 Train 6599/5760: gen_loss: 71.9173 dis_loss: 0.0124 est_loss: 1.5041
+**Epoch 6/29 Train 6899/5760: gen_loss: 71.6202 dis_loss: 0.0391 est_loss: 1.4565
+**Epoch 6/29 Train 7199/5760: gen_loss: 71.6862 dis_loss: 0.0413 est_loss: 1.4302
+**Epoch 6/29 Train 7499/5760: gen_loss: 71.3071 dis_loss: 1.0180 est_loss: 1.4973
+**Epoch 6/29 Train 7799/5760: gen_loss: 71.9504 dis_loss: 0.0251 est_loss: 1.7182
+**Epoch 6/29 Train 8099/5760: gen_loss: 71.3286 dis_loss: 0.0063 est_loss: 2.1543
+**Epoch 6/29 Train 8399/5760: gen_loss: 71.3965 dis_loss: 0.0074 est_loss: 1.4826
+**Epoch 6/29 Train 8699/5760: gen_loss: 71.4696 dis_loss: 0.0105 est_loss: 1.4438
+**Epoch 6/29 Train 8999/5760: gen_loss: 71.3476 dis_loss: 0.0094 est_loss: 1.8641
+**Epoch 6/29 Train 9299/5760: gen_loss: 71.5467 dis_loss: 0.0115 est_loss: 1.2496
+**Epoch 6/29 Train 9599/5760: gen_loss: 71.7484 dis_loss: 0.0174 est_loss: 1.5910
+**Epoch 6/29 Train 9899/5760: gen_loss: 71.6179 dis_loss: 0.0729 est_loss: 1.7113
+**Epoch 6/29 Train 10199/5760: gen_loss: 71.5727 dis_loss: 0.0123 est_loss: 1.5499
+**Epoch 6/29 Train 10499/5760: gen_loss: 71.5132 dis_loss: 0.0265 est_loss: 1.4451
+**Epoch 6/29 Train 10799/5760: gen_loss: 71.3384 dis_loss: 0.0228 est_loss: 1.3857
+**Epoch 6/29 Train 11099/5760: gen_loss: 71.6407 dis_loss: 0.0218 est_loss: 1.5706
+**Epoch 6/29 Train 11399/5760: gen_loss: 71.5076 dis_loss: 0.0051 est_loss: 1.3380
+**Epoch 6/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 6/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 6/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 6/29 Time 2850.9932413101196s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 6
+------------------------------------------------------------------------
+**Epoch 7/29 Train 5999/5760: gen_loss: 71.5982 dis_loss: 0.0061 est_loss: 1.5448
+**Epoch 7/29 Train 6299/5760: gen_loss: 71.5011 dis_loss: 0.2910 est_loss: 1.4482
+**Epoch 7/29 Train 6599/5760: gen_loss: 71.2813 dis_loss: 0.0554 est_loss: 1.5119
+**Epoch 7/29 Train 6899/5760: gen_loss: 71.4760 dis_loss: 0.0095 est_loss: 1.4867
+**Epoch 7/29 Train 7199/5760: gen_loss: 71.2892 dis_loss: 0.0049 est_loss: 1.4181
+**Epoch 7/29 Train 7499/5760: gen_loss: 71.6560 dis_loss: 0.0106 est_loss: 1.3156
+**Epoch 7/29 Train 7799/5760: gen_loss: 71.5648 dis_loss: 0.0763 est_loss: 1.3727
+**Epoch 7/29 Train 8099/5760: gen_loss: 71.7113 dis_loss: 0.8719 est_loss: 1.5889
+**Epoch 7/29 Train 8399/5760: gen_loss: 71.4978 dis_loss: 0.6644 est_loss: 1.2541
+**Epoch 7/29 Train 8699/5760: gen_loss: 71.3812 dis_loss: 0.0158 est_loss: 1.4372
+**Epoch 7/29 Train 8999/5760: gen_loss: 72.2878 dis_loss: 0.0103 est_loss: 1.4751
+**Epoch 7/29 Train 9299/5760: gen_loss: 71.2514 dis_loss: 0.0059 est_loss: 1.8656
+**Epoch 7/29 Train 9599/5760: gen_loss: 71.5289 dis_loss: 0.0052 est_loss: 1.6205
+**Epoch 7/29 Train 9899/5760: gen_loss: 71.9734 dis_loss: 0.0515 est_loss: 1.4209
+**Epoch 7/29 Train 10199/5760: gen_loss: 71.5997 dis_loss: 0.0452 est_loss: 2.1930
+**Epoch 7/29 Train 10499/5760: gen_loss: 71.4418 dis_loss: 0.0077 est_loss: 1.4491
+**Epoch 7/29 Train 10799/5760: gen_loss: 71.8140 dis_loss: 0.0088 est_loss: 1.4452
+**Epoch 7/29 Train 11099/5760: gen_loss: 71.7210 dis_loss: 0.3148 est_loss: 1.6387
+**Epoch 7/29 Train 11399/5760: gen_loss: 71.6265 dis_loss: 0.0292 est_loss: 1.2962
+**Epoch 7/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 7/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 7/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 7/29 Time 2875.0723564624786s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 7
+------------------------------------------------------------------------
+**Epoch 8/29 Train 5999/5760: gen_loss: 71.5366 dis_loss: 0.0047 est_loss: 1.4241
+**Epoch 8/29 Train 6299/5760: gen_loss: 71.5742 dis_loss: 0.0047 est_loss: 1.3929
+**Epoch 8/29 Train 6599/5760: gen_loss: 71.5360 dis_loss: 0.0038 est_loss: 1.9027
+**Epoch 8/29 Train 6899/5760: gen_loss: 71.3081 dis_loss: 0.1983 est_loss: 1.4929
+**Epoch 8/29 Train 7199/5760: gen_loss: 71.3500 dis_loss: 0.0028 est_loss: 1.7008
+**Epoch 8/29 Train 7499/5760: gen_loss: 71.5941 dis_loss: 0.1908 est_loss: 1.3412
+**Epoch 8/29 Train 7799/5760: gen_loss: 71.3772 dis_loss: 0.1086 est_loss: 1.5633
+**Epoch 8/29 Train 8099/5760: gen_loss: 71.3554 dis_loss: 0.0124 est_loss: 1.5724
+**Epoch 8/29 Train 8399/5760: gen_loss: 71.5478 dis_loss: 0.0068 est_loss: 1.7713
+**Epoch 8/29 Train 8699/5760: gen_loss: 71.8271 dis_loss: 0.2949 est_loss: 1.5967
+**Epoch 8/29 Train 8999/5760: gen_loss: 71.3545 dis_loss: 0.0076 est_loss: 2.1347
+**Epoch 8/29 Train 9299/5760: gen_loss: 71.2084 dis_loss: 0.0171 est_loss: 1.4717
+**Epoch 8/29 Train 9599/5760: gen_loss: 71.4711 dis_loss: 0.0052 est_loss: 1.2323
+**Epoch 8/29 Train 9899/5760: gen_loss: 71.8331 dis_loss: 0.0136 est_loss: 1.5356
+**Epoch 8/29 Train 10199/5760: gen_loss: 71.5635 dis_loss: 0.1061 est_loss: 1.4116
+**Epoch 8/29 Train 10499/5760: gen_loss: 71.2580 dis_loss: 0.0486 est_loss: 1.5131
+**Epoch 8/29 Train 10799/5760: gen_loss: 71.4582 dis_loss: 0.0034 est_loss: 1.6632
+**Epoch 8/29 Train 11099/5760: gen_loss: 71.3358 dis_loss: 0.0036 est_loss: 1.5812
+**Epoch 8/29 Train 11399/5760: gen_loss: 71.5496 dis_loss: 0.0062 est_loss: 1.5516
+**Epoch 8/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 8/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 8/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 8/29 Time 2893.0516464710236s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 8
+------------------------------------------------------------------------
+**Epoch 9/29 Train 5999/5760: gen_loss: 71.3016 dis_loss: 0.0088 est_loss: 1.6508
+**Epoch 9/29 Train 6299/5760: gen_loss: 72.6259 dis_loss: 2.2669 est_loss: 1.4853
+**Epoch 9/29 Train 6599/5760: gen_loss: 71.2551 dis_loss: 0.0140 est_loss: 1.4797
+**Epoch 9/29 Train 6899/5760: gen_loss: 71.1942 dis_loss: 0.0077 est_loss: 1.5193
+**Epoch 9/29 Train 7199/5760: gen_loss: 71.3986 dis_loss: 0.0026 est_loss: 1.2037
+**Epoch 9/29 Train 7499/5760: gen_loss: 71.3745 dis_loss: 0.0035 est_loss: 1.3223
+**Epoch 9/29 Train 7799/5760: gen_loss: 71.3448 dis_loss: 0.0044 est_loss: 1.5254
+**Epoch 9/29 Train 8099/5760: gen_loss: 71.3799 dis_loss: 0.0137 est_loss: 1.4660
+**Epoch 9/29 Train 8399/5760: gen_loss: 71.4950 dis_loss: 0.0061 est_loss: 1.3686
+**Epoch 9/29 Train 8699/5760: gen_loss: 71.6237 dis_loss: 0.0114 est_loss: 1.4970
+**Epoch 9/29 Train 8999/5760: gen_loss: 71.3358 dis_loss: 0.0023 est_loss: 1.4482
+**Epoch 9/29 Train 9299/5760: gen_loss: 71.3276 dis_loss: 0.0045 est_loss: 1.3228
+**Epoch 9/29 Train 9599/5760: gen_loss: 71.2677 dis_loss: 0.0020 est_loss: 1.3144
+**Epoch 9/29 Train 9899/5760: gen_loss: 71.3299 dis_loss: 0.0038 est_loss: 1.8784
+**Epoch 9/29 Train 10199/5760: gen_loss: 71.4725 dis_loss: 0.0101 est_loss: 1.5172
+**Epoch 9/29 Train 10499/5760: gen_loss: 71.8276 dis_loss: 0.0057 est_loss: 1.6364
+**Epoch 9/29 Train 10799/5760: gen_loss: 71.7981 dis_loss: 0.0052 est_loss: 1.3431
+**Epoch 9/29 Train 11099/5760: gen_loss: 71.3031 dis_loss: 0.0073 est_loss: 1.4161
+**Epoch 9/29 Train 11399/5760: gen_loss: 71.5552 dis_loss: 0.0147 est_loss: 1.4095
+**Epoch 9/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 9/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 9/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 9/29 Time 2892.058717727661s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 9
+------------------------------------------------------------------------
+**Epoch 10/29 Train 5999/5760: gen_loss: 71.5601 dis_loss: 0.0254 est_loss: 1.4608
+**Epoch 10/29 Train 6299/5760: gen_loss: 71.3811 dis_loss: 0.0028 est_loss: 1.3418
+**Epoch 10/29 Train 6599/5760: gen_loss: 71.9381 dis_loss: 0.1719 est_loss: 1.2859
+**Epoch 10/29 Train 6899/5760: gen_loss: 71.8108 dis_loss: 0.3621 est_loss: 1.3674
+**Epoch 10/29 Train 7199/5760: gen_loss: 71.2933 dis_loss: 0.0053 est_loss: 1.5077
+**Epoch 10/29 Train 7499/5760: gen_loss: 71.5919 dis_loss: 0.0091 est_loss: 1.5835
+**Epoch 10/29 Train 7799/5760: gen_loss: 71.1113 dis_loss: 0.0135 est_loss: 1.4881
+**Epoch 10/29 Train 8099/5760: gen_loss: 71.3424 dis_loss: 0.0031 est_loss: 1.3234
+**Epoch 10/29 Train 8399/5760: gen_loss: 71.6742 dis_loss: 0.0040 est_loss: 1.3705
+**Epoch 10/29 Train 8699/5760: gen_loss: 71.5522 dis_loss: 0.0038 est_loss: 1.6718
+**Epoch 10/29 Train 8999/5760: gen_loss: 71.3144 dis_loss: 0.0143 est_loss: 1.4402
+**Epoch 10/29 Train 9299/5760: gen_loss: 71.3021 dis_loss: 0.0193 est_loss: 1.5039
+**Epoch 10/29 Train 9599/5760: gen_loss: 71.1862 dis_loss: 0.0101 est_loss: 1.3936
+**Epoch 10/29 Train 9899/5760: gen_loss: 71.5310 dis_loss: 0.0035 est_loss: 1.6111
+**Epoch 10/29 Train 10199/5760: gen_loss: 71.2407 dis_loss: 0.0033 est_loss: 1.5233
+**Epoch 10/29 Train 10499/5760: gen_loss: 71.3968 dis_loss: 0.0026 est_loss: 1.5325
+**Epoch 10/29 Train 10799/5760: gen_loss: 71.3936 dis_loss: 0.0041 est_loss: 1.4120
+**Epoch 10/29 Train 11099/5760: gen_loss: 72.5851 dis_loss: 1.4903 est_loss: 1.2222
+**Epoch 10/29 Train 11399/5760: gen_loss: 71.2406 dis_loss: 0.0432 est_loss: 1.3365
+**Epoch 10/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 10/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 10/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 10/29 Time 2863.044577598572s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 10
+------------------------------------------------------------------------
+**Epoch 11/29 Train 5999/5760: gen_loss: 71.3306 dis_loss: 0.0118 est_loss: 1.7345
+**Epoch 11/29 Train 6299/5760: gen_loss: 71.2381 dis_loss: 0.0077 est_loss: 1.3357
+**Epoch 11/29 Train 6599/5760: gen_loss: 71.3307 dis_loss: 0.0024 est_loss: 1.8524
+**Epoch 11/29 Train 6899/5760: gen_loss: 71.3061 dis_loss: 0.0019 est_loss: 1.3486
+**Epoch 11/29 Train 7199/5760: gen_loss: 71.2870 dis_loss: 0.0025 est_loss: 1.5429
+**Epoch 11/29 Train 7499/5760: gen_loss: 71.2732 dis_loss: 0.0019 est_loss: 1.6305
+**Epoch 11/29 Train 7799/5760: gen_loss: 71.3051 dis_loss: 0.0017 est_loss: 1.5003
+**Epoch 11/29 Train 8099/5760: gen_loss: 71.2874 dis_loss: 0.0025 est_loss: 1.4153
+**Epoch 11/29 Train 8399/5760: gen_loss: 71.3330 dis_loss: 0.0086 est_loss: 1.5671
+**Epoch 11/29 Train 8699/5760: gen_loss: 71.3863 dis_loss: 0.0033 est_loss: 1.6441
+**Epoch 11/29 Train 8999/5760: gen_loss: 71.2841 dis_loss: 0.0022 est_loss: 1.6101
+**Epoch 11/29 Train 9299/5760: gen_loss: 71.2136 dis_loss: 0.0021 est_loss: 1.1641
+**Epoch 11/29 Train 9599/5760: gen_loss: 71.2301 dis_loss: 0.0051 est_loss: 2.0833
+**Epoch 11/29 Train 9899/5760: gen_loss: 71.5236 dis_loss: 0.8719 est_loss: 1.1528
+**Epoch 11/29 Train 10199/5760: gen_loss: 71.3721 dis_loss: 0.0029 est_loss: 1.5889
+**Epoch 11/29 Train 10499/5760: gen_loss: 71.4650 dis_loss: 0.0033 est_loss: 1.2602
+**Epoch 11/29 Train 10799/5760: gen_loss: 71.4924 dis_loss: 0.0049 est_loss: 1.6532
+**Epoch 11/29 Train 11099/5760: gen_loss: 71.4074 dis_loss: 0.0033 est_loss: 1.7821
+**Epoch 11/29 Train 11399/5760: gen_loss: 71.3741 dis_loss: 0.0015 est_loss: 1.4605
+**Epoch 11/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 11/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 11/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 11/29 Time 2871.600054502487s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 11
+------------------------------------------------------------------------
+**Epoch 12/29 Train 5999/5760: gen_loss: 71.4553 dis_loss: 0.0020 est_loss: 1.5209
+**Epoch 12/29 Train 6299/5760: gen_loss: 71.5252 dis_loss: 0.0017 est_loss: 1.4008
+**Epoch 12/29 Train 6599/5760: gen_loss: 71.2999 dis_loss: 0.0042 est_loss: 1.7856
+**Epoch 12/29 Train 6899/5760: gen_loss: 71.7575 dis_loss: 0.0562 est_loss: 1.4227
+**Epoch 12/29 Train 7199/5760: gen_loss: 71.2505 dis_loss: 0.0031 est_loss: 1.3393
+**Epoch 12/29 Train 7499/5760: gen_loss: 71.3639 dis_loss: 0.0031 est_loss: 1.6353
+**Epoch 12/29 Train 7799/5760: gen_loss: 71.3854 dis_loss: 0.0017 est_loss: 1.7372
+**Epoch 12/29 Train 8099/5760: gen_loss: 71.5854 dis_loss: 0.1906 est_loss: 1.5849
+**Epoch 12/29 Train 8399/5760: gen_loss: 71.1732 dis_loss: 0.0178 est_loss: 1.3957
+**Epoch 12/29 Train 8699/5760: gen_loss: 70.9900 dis_loss: 0.0047 est_loss: 1.5469
+**Epoch 12/29 Train 8999/5760: gen_loss: 71.4238 dis_loss: 0.0024 est_loss: 1.4551
+**Epoch 12/29 Train 9299/5760: gen_loss: 71.2792 dis_loss: 0.0059 est_loss: 1.4947
+**Epoch 12/29 Train 9599/5760: gen_loss: 71.3706 dis_loss: 0.0149 est_loss: 1.9878
+**Epoch 12/29 Train 9899/5760: gen_loss: 71.3583 dis_loss: 0.0014 est_loss: 1.6223
+**Epoch 12/29 Train 10199/5760: gen_loss: 71.3332 dis_loss: 0.0051 est_loss: 1.7026
+**Epoch 12/29 Train 10499/5760: gen_loss: 71.0626 dis_loss: 0.0162 est_loss: 1.5128
+**Epoch 12/29 Train 10799/5760: gen_loss: 71.3539 dis_loss: 0.0038 est_loss: 1.5984
+**Epoch 12/29 Train 11099/5760: gen_loss: 71.7815 dis_loss: 0.0204 est_loss: 1.5899
+**Epoch 12/29 Train 11399/5760: gen_loss: 71.2812 dis_loss: 0.0030 est_loss: 1.6796
+**Epoch 12/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 12/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 12/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 12/29 Time 2878.0940940380096s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 12
+------------------------------------------------------------------------
+**Epoch 13/29 Train 5999/5760: gen_loss: 71.3881 dis_loss: 0.0071 est_loss: 1.6323
+**Epoch 13/29 Train 6299/5760: gen_loss: 71.2574 dis_loss: 0.0036 est_loss: 1.7457
+**Epoch 13/29 Train 6599/5760: gen_loss: 71.3725 dis_loss: 0.0040 est_loss: 1.6781
+**Epoch 13/29 Train 6899/5760: gen_loss: 71.3883 dis_loss: 0.0116 est_loss: 1.4241
+**Epoch 13/29 Train 7199/5760: gen_loss: 71.2619 dis_loss: 0.0023 est_loss: 1.4996
+**Epoch 13/29 Train 7499/5760: gen_loss: 71.0821 dis_loss: 0.0059 est_loss: 1.4625
+**Epoch 13/29 Train 7799/5760: gen_loss: 71.7743 dis_loss: 0.0404 est_loss: 1.5332
+**Epoch 13/29 Train 8099/5760: gen_loss: 71.2678 dis_loss: 0.0015 est_loss: 1.4595
+**Epoch 13/29 Train 8399/5760: gen_loss: 71.5110 dis_loss: 0.0020 est_loss: 1.7606
+**Epoch 13/29 Train 8699/5760: gen_loss: 72.0099 dis_loss: 0.0065 est_loss: 1.8942
+**Epoch 13/29 Train 8999/5760: gen_loss: 71.1956 dis_loss: 0.0032 est_loss: 1.2718
+**Epoch 13/29 Train 9299/5760: gen_loss: 71.2887 dis_loss: 0.0043 est_loss: 1.3204
+**Epoch 13/29 Train 9599/5760: gen_loss: 71.3861 dis_loss: 0.0359 est_loss: 1.4811
+**Epoch 13/29 Train 9899/5760: gen_loss: 71.3218 dis_loss: 0.0597 est_loss: 1.4100
+**Epoch 13/29 Train 10199/5760: gen_loss: 71.5471 dis_loss: 0.0286 est_loss: 1.6264
+**Epoch 13/29 Train 10499/5760: gen_loss: 71.3160 dis_loss: 0.0806 est_loss: 2.0928
+**Epoch 13/29 Train 10799/5760: gen_loss: 71.2835 dis_loss: 0.0016 est_loss: 1.3197
+**Epoch 13/29 Train 11099/5760: gen_loss: 71.0566 dis_loss: 0.0027 est_loss: 1.2995
+**Epoch 13/29 Train 11399/5760: gen_loss: 71.3841 dis_loss: 0.0017 est_loss: 1.4134
+**Epoch 13/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 13/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 13/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 13/29 Time 2882.1854767799377s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 13
+------------------------------------------------------------------------
+**Epoch 14/29 Train 5999/5760: gen_loss: 71.3096 dis_loss: 0.0022 est_loss: 1.7856
+**Epoch 14/29 Train 6299/5760: gen_loss: 71.3958 dis_loss: 0.0025 est_loss: 1.3797
+**Epoch 14/29 Train 6599/5760: gen_loss: 71.2685 dis_loss: 0.0022 est_loss: 1.4522
+**Epoch 14/29 Train 6899/5760: gen_loss: 71.2703 dis_loss: 0.0020 est_loss: 1.3574
+**Epoch 14/29 Train 7199/5760: gen_loss: 71.4929 dis_loss: 0.0039 est_loss: 1.2653
+**Epoch 14/29 Train 7499/5760: gen_loss: 71.3798 dis_loss: 0.0014 est_loss: 1.4163
+**Epoch 14/29 Train 7799/5760: gen_loss: 71.3156 dis_loss: 0.0273 est_loss: 1.4927
+**Epoch 14/29 Train 8099/5760: gen_loss: 71.2575 dis_loss: 0.0023 est_loss: 1.4465
+**Epoch 14/29 Train 8399/5760: gen_loss: 71.7476 dis_loss: 0.0033 est_loss: 1.4407
+**Epoch 14/29 Train 8699/5760: gen_loss: 71.4945 dis_loss: 0.0009 est_loss: 1.3789
+**Epoch 14/29 Train 8999/5760: gen_loss: 71.2681 dis_loss: 0.0017 est_loss: 1.6554
+**Epoch 14/29 Train 9299/5760: gen_loss: 71.3410 dis_loss: 0.0016 est_loss: 1.5889
+**Epoch 14/29 Train 9599/5760: gen_loss: 71.1628 dis_loss: 0.0014 est_loss: 1.6104
+**Epoch 14/29 Train 9899/5760: gen_loss: 71.1196 dis_loss: 0.0019 est_loss: 1.5965
+**Epoch 14/29 Train 10199/5760: gen_loss: 71.3461 dis_loss: 0.0011 est_loss: 1.4001
+**Epoch 14/29 Train 10499/5760: gen_loss: 71.3942 dis_loss: 0.0037 est_loss: 1.7045
+**Epoch 14/29 Train 10799/5760: gen_loss: 71.2196 dis_loss: 0.0275 est_loss: 1.2973
+**Epoch 14/29 Train 11099/5760: gen_loss: 71.1231 dis_loss: 0.0035 est_loss: 1.3973
+**Epoch 14/29 Train 11399/5760: gen_loss: 71.2105 dis_loss: 0.0038 est_loss: 1.4401
+**Epoch 14/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 14/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 14/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 14/29 Time 2886.308912754059s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 14
+------------------------------------------------------------------------
+**Epoch 15/29 Train 5999/5760: gen_loss: 71.3834 dis_loss: 0.0009 est_loss: 1.2649
+**Epoch 15/29 Train 6299/5760: gen_loss: 71.3646 dis_loss: 0.0015 est_loss: 1.4918
+**Epoch 15/29 Train 6599/5760: gen_loss: 71.1806 dis_loss: 0.0024 est_loss: 1.3981
+**Epoch 15/29 Train 6899/5760: gen_loss: 71.3742 dis_loss: 0.0016 est_loss: 1.8029
+**Epoch 15/29 Train 7199/5760: gen_loss: 71.2471 dis_loss: 0.0062 est_loss: 1.4498
+**Epoch 15/29 Train 7499/5760: gen_loss: 71.4200 dis_loss: 0.0013 est_loss: 1.5288
+**Epoch 15/29 Train 7799/5760: gen_loss: 71.3395 dis_loss: 0.0009 est_loss: 1.4031
+**Epoch 15/29 Train 8099/5760: gen_loss: 71.3505 dis_loss: 0.0024 est_loss: 1.2759
+**Epoch 15/29 Train 8399/5760: gen_loss: 71.2711 dis_loss: 0.0020 est_loss: 1.6891
+**Epoch 15/29 Train 8699/5760: gen_loss: 71.4785 dis_loss: 0.0070 est_loss: 1.3849
+**Epoch 15/29 Train 8999/5760: gen_loss: 71.3321 dis_loss: 0.0027 est_loss: 2.0739
+**Epoch 15/29 Train 9299/5760: gen_loss: 71.4799 dis_loss: 0.0033 est_loss: 1.3987
+**Epoch 15/29 Train 9599/5760: gen_loss: 71.3362 dis_loss: 0.0022 est_loss: 1.4433
+**Epoch 15/29 Train 9899/5760: gen_loss: 71.2895 dis_loss: 0.0010 est_loss: 1.1901
+**Epoch 15/29 Train 10199/5760: gen_loss: 71.3077 dis_loss: 0.0023 est_loss: 1.4338
+**Epoch 15/29 Train 10499/5760: gen_loss: 71.4519 dis_loss: 0.0017 est_loss: 1.5256
+**Epoch 15/29 Train 10799/5760: gen_loss: 71.5294 dis_loss: 0.0010 est_loss: 1.3943
+**Epoch 15/29 Train 11099/5760: gen_loss: 71.3350 dis_loss: 0.0018 est_loss: 1.4789
+**Epoch 15/29 Train 11399/5760: gen_loss: 71.4481 dis_loss: 0.0743 est_loss: 2.0892
+**Epoch 15/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 15/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 15/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 15/29 Time 2858.2858095169067s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 15
+------------------------------------------------------------------------
+**Epoch 16/29 Train 5999/5760: gen_loss: 71.2274 dis_loss: 0.0010 est_loss: 1.6319
+**Epoch 16/29 Train 6299/5760: gen_loss: 71.1350 dis_loss: 0.0018 est_loss: 1.5335
+**Epoch 16/29 Train 6599/5760: gen_loss: 71.2700 dis_loss: 0.0046 est_loss: 1.4212
+**Epoch 16/29 Train 6899/5760: gen_loss: 71.5787 dis_loss: 0.0037 est_loss: 1.4407
+**Epoch 16/29 Train 7199/5760: gen_loss: 71.3728 dis_loss: 0.0024 est_loss: 1.6393
+**Epoch 16/29 Train 7499/5760: gen_loss: 71.0880 dis_loss: 0.0028 est_loss: 1.4110
+**Epoch 16/29 Train 7799/5760: gen_loss: 71.2964 dis_loss: 0.0020 est_loss: 1.4775
+**Epoch 16/29 Train 8099/5760: gen_loss: 71.1400 dis_loss: 0.0014 est_loss: 1.5240
+**Epoch 16/29 Train 8399/5760: gen_loss: 71.4526 dis_loss: 0.0059 est_loss: 1.4483
+**Epoch 16/29 Train 8699/5760: gen_loss: 71.2839 dis_loss: 0.0019 est_loss: 1.5795
+**Epoch 16/29 Train 8999/5760: gen_loss: 71.2599 dis_loss: 0.0017 est_loss: 1.4665
+**Epoch 16/29 Train 9299/5760: gen_loss: 71.3851 dis_loss: 0.0013 est_loss: 1.4680
+**Epoch 16/29 Train 9599/5760: gen_loss: 71.2348 dis_loss: 0.0016 est_loss: 1.4151
+**Epoch 16/29 Train 9899/5760: gen_loss: 71.1464 dis_loss: 0.0022 est_loss: 1.4871
+**Epoch 16/29 Train 10199/5760: gen_loss: 71.3002 dis_loss: 0.0016 est_loss: 1.2819
+**Epoch 16/29 Train 10499/5760: gen_loss: 71.3768 dis_loss: 0.0012 est_loss: 1.3124
+**Epoch 16/29 Train 10799/5760: gen_loss: 71.3691 dis_loss: 0.0010 est_loss: 1.4669
+**Epoch 16/29 Train 11099/5760: gen_loss: 71.1415 dis_loss: 0.0114 est_loss: 1.3018
+**Epoch 16/29 Train 11399/5760: gen_loss: 71.0702 dis_loss: 0.0010 est_loss: 1.3514
+**Epoch 16/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 16/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 16/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 16/29 Time 2821.957907438278s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 16
+------------------------------------------------------------------------
+**Epoch 17/29 Train 5999/5760: gen_loss: 71.4272 dis_loss: 0.0026 est_loss: 1.4795
+**Epoch 17/29 Train 6299/5760: gen_loss: 71.3351 dis_loss: 0.0008 est_loss: 1.4599
+**Epoch 17/29 Train 6599/5760: gen_loss: 71.7967 dis_loss: 0.0112 est_loss: 1.7637
+**Epoch 17/29 Train 6899/5760: gen_loss: 71.2674 dis_loss: 0.0051 est_loss: 1.6423
+**Epoch 17/29 Train 7199/5760: gen_loss: 71.3088 dis_loss: 0.0041 est_loss: 1.6867
+**Epoch 17/29 Train 7499/5760: gen_loss: 71.5979 dis_loss: 0.0011 est_loss: 1.5010
+**Epoch 17/29 Train 7799/5760: gen_loss: 71.2201 dis_loss: 0.0012 est_loss: 1.6472
+**Epoch 17/29 Train 8099/5760: gen_loss: 71.2297 dis_loss: 0.0017 est_loss: 1.5708
+**Epoch 17/29 Train 8399/5760: gen_loss: 71.2415 dis_loss: 0.0014 est_loss: 1.6446
+**Epoch 17/29 Train 8699/5760: gen_loss: 71.1683 dis_loss: 0.0154 est_loss: 1.3992
+**Epoch 17/29 Train 8999/5760: gen_loss: 71.4322 dis_loss: 0.0010 est_loss: 1.5103
+**Epoch 17/29 Train 9299/5760: gen_loss: 71.2884 dis_loss: 0.0015 est_loss: 1.6441
+**Epoch 17/29 Train 9599/5760: gen_loss: 71.2496 dis_loss: 0.0014 est_loss: 1.6603
+**Epoch 17/29 Train 9899/5760: gen_loss: 71.3128 dis_loss: 0.0012 est_loss: 1.7658
+**Epoch 17/29 Train 10199/5760: gen_loss: 71.3227 dis_loss: 0.0013 est_loss: 1.8543
+**Epoch 17/29 Train 10499/5760: gen_loss: 71.3185 dis_loss: 0.0011 est_loss: 1.3109
+**Epoch 17/29 Train 10799/5760: gen_loss: 71.3168 dis_loss: 0.0025 est_loss: 1.4433
+**Epoch 17/29 Train 11099/5760: gen_loss: 71.2697 dis_loss: 0.0018 est_loss: 1.4668
+**Epoch 17/29 Train 11399/5760: gen_loss: 71.3759 dis_loss: 0.1271 est_loss: 1.2484
+**Epoch 17/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 17/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 17/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 17/29 Time 2786.3447875976562s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 17
+------------------------------------------------------------------------
+**Epoch 18/29 Train 5999/5760: gen_loss: 71.0789 dis_loss: 0.0015 est_loss: 1.5320
+**Epoch 18/29 Train 6299/5760: gen_loss: 71.2373 dis_loss: 0.0031 est_loss: 2.0618
+**Epoch 18/29 Train 6599/5760: gen_loss: 71.5643 dis_loss: 0.0029 est_loss: 1.5074
+**Epoch 18/29 Train 6899/5760: gen_loss: 71.3773 dis_loss: 0.0011 est_loss: 1.4831
+**Epoch 18/29 Train 7199/5760: gen_loss: 71.2656 dis_loss: 0.0008 est_loss: 1.4418
+**Epoch 18/29 Train 7499/5760: gen_loss: 71.1865 dis_loss: 0.0041 est_loss: 1.4919
+**Epoch 18/29 Train 7799/5760: gen_loss: 71.2431 dis_loss: 0.0090 est_loss: 1.4926
+**Epoch 18/29 Train 8099/5760: gen_loss: 71.4542 dis_loss: 0.0016 est_loss: 1.6122
+**Epoch 18/29 Train 8399/5760: gen_loss: 71.6137 dis_loss: 0.0008 est_loss: 1.4363
+**Epoch 18/29 Train 8699/5760: gen_loss: 71.3567 dis_loss: 0.0028 est_loss: 1.2884
+**Epoch 18/29 Train 8999/5760: gen_loss: 71.2147 dis_loss: 0.0013 est_loss: 1.6930
+**Epoch 18/29 Train 9299/5760: gen_loss: 71.6256 dis_loss: 0.5516 est_loss: 1.6872
+**Epoch 18/29 Train 9599/5760: gen_loss: 71.2432 dis_loss: 0.0026 est_loss: 1.8229
+**Epoch 18/29 Train 9899/5760: gen_loss: 71.3331 dis_loss: 0.0011 est_loss: 1.4365
+**Epoch 18/29 Train 10199/5760: gen_loss: 71.3129 dis_loss: 0.0056 est_loss: 1.6573
+**Epoch 18/29 Train 10499/5760: gen_loss: 71.6800 dis_loss: 0.0029 est_loss: 1.4764
+**Epoch 18/29 Train 10799/5760: gen_loss: 71.4721 dis_loss: 0.0014 est_loss: 1.2872
+**Epoch 18/29 Train 11099/5760: gen_loss: 71.3011 dis_loss: 0.0058 est_loss: 2.0102
+**Epoch 18/29 Train 11399/5760: gen_loss: 71.4620 dis_loss: 0.0034 est_loss: 1.7395
+**Epoch 18/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 18/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 18/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 18/29 Time 2818.138814687729s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 18
+------------------------------------------------------------------------
+**Epoch 19/29 Train 5999/5760: gen_loss: 71.1527 dis_loss: 0.0010 est_loss: 1.2895
+**Epoch 19/29 Train 6299/5760: gen_loss: 71.3237 dis_loss: 0.0007 est_loss: 1.5720
+**Epoch 19/29 Train 6599/5760: gen_loss: 71.2638 dis_loss: 0.0021 est_loss: 1.6060
+**Epoch 19/29 Train 6899/5760: gen_loss: 71.2764 dis_loss: 0.0037 est_loss: 1.3130
+**Epoch 19/29 Train 7199/5760: gen_loss: 71.1681 dis_loss: 0.0031 est_loss: 1.7579
+**Epoch 19/29 Train 7499/5760: gen_loss: 71.2801 dis_loss: 0.0011 est_loss: 1.3996
+**Epoch 19/29 Train 7799/5760: gen_loss: 71.1705 dis_loss: 0.0452 est_loss: 1.2670
+**Epoch 19/29 Train 8099/5760: gen_loss: 71.2491 dis_loss: 0.0013 est_loss: 1.9664
+**Epoch 19/29 Train 8399/5760: gen_loss: 71.2214 dis_loss: 0.0027 est_loss: 1.9982
+**Epoch 19/29 Train 8699/5760: gen_loss: 71.0906 dis_loss: 0.0055 est_loss: 1.4763
+**Epoch 19/29 Train 8999/5760: gen_loss: 71.3833 dis_loss: 0.0007 est_loss: 1.5638
+**Epoch 19/29 Train 9299/5760: gen_loss: 71.3714 dis_loss: 0.0020 est_loss: 1.3358
+**Epoch 19/29 Train 9599/5760: gen_loss: 71.3387 dis_loss: 0.0802 est_loss: 1.7255
+**Epoch 19/29 Train 9899/5760: gen_loss: 71.2094 dis_loss: 0.0013 est_loss: 1.7971
+**Epoch 19/29 Train 10199/5760: gen_loss: 71.1697 dis_loss: 0.0095 est_loss: 1.4470
+**Epoch 19/29 Train 10499/5760: gen_loss: 71.2306 dis_loss: 0.0018 est_loss: 1.6044
+**Epoch 19/29 Train 10799/5760: gen_loss: 71.3890 dis_loss: 0.0012 est_loss: 1.7104
+**Epoch 19/29 Train 11099/5760: gen_loss: 71.3369 dis_loss: 0.0007 est_loss: 1.2086
+**Epoch 19/29 Train 11399/5760: gen_loss: 71.1063 dis_loss: 0.0029 est_loss: 1.7324
+**Epoch 19/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 19/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 19/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 19/29 Time 2822.0294177532196s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 19
+------------------------------------------------------------------------
+**Epoch 20/29 Train 5999/5760: gen_loss: 71.1885 dis_loss: 0.0387 est_loss: 1.4553
+**Epoch 20/29 Train 6299/5760: gen_loss: 71.1441 dis_loss: 0.0011 est_loss: 1.6513
+**Epoch 20/29 Train 6599/5760: gen_loss: 71.2480 dis_loss: 0.0025 est_loss: 1.4911
+**Epoch 20/29 Train 6899/5760: gen_loss: 71.5634 dis_loss: 0.1644 est_loss: 1.4254
+**Epoch 20/29 Train 7199/5760: gen_loss: 71.3584 dis_loss: 0.0008 est_loss: 1.3696
+**Epoch 20/29 Train 7499/5760: gen_loss: 71.3492 dis_loss: 0.0009 est_loss: 1.3797
+**Epoch 20/29 Train 7799/5760: gen_loss: 71.3042 dis_loss: 0.0056 est_loss: 1.6573
+**Epoch 20/29 Train 8099/5760: gen_loss: 71.2844 dis_loss: 0.0052 est_loss: 1.4775
+**Epoch 20/29 Train 8399/5760: gen_loss: 71.2316 dis_loss: 0.0029 est_loss: 1.4646
+**Epoch 20/29 Train 8699/5760: gen_loss: 71.1991 dis_loss: 0.0008 est_loss: 1.4950
+**Epoch 20/29 Train 8999/5760: gen_loss: 71.3030 dis_loss: 0.0009 est_loss: 1.7369
+**Epoch 20/29 Train 9299/5760: gen_loss: 71.5788 dis_loss: 0.0029 est_loss: 1.4184
+**Epoch 20/29 Train 9599/5760: gen_loss: 71.1439 dis_loss: 0.0020 est_loss: 1.4192
+**Epoch 20/29 Train 9899/5760: gen_loss: 71.1833 dis_loss: 0.0016 est_loss: 1.4977
+**Epoch 20/29 Train 10199/5760: gen_loss: 71.1782 dis_loss: 0.0010 est_loss: 1.4171
+**Epoch 20/29 Train 10499/5760: gen_loss: 71.0925 dis_loss: 0.0008 est_loss: 1.6145
+**Epoch 20/29 Train 10799/5760: gen_loss: 71.3226 dis_loss: 0.0029 est_loss: 1.4180
+**Epoch 20/29 Train 11099/5760: gen_loss: 71.5307 dis_loss: 0.0083 est_loss: 1.4469
+**Epoch 20/29 Train 11399/5760: gen_loss: 71.3907 dis_loss: 0.0355 est_loss: 1.2202
+**Epoch 20/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 20/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 20/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 20/29 Time 2823.6503036022186s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 20
+------------------------------------------------------------------------
+**Epoch 21/29 Train 5999/5760: gen_loss: 71.2919 dis_loss: 0.0015 est_loss: 1.2454
+**Epoch 21/29 Train 6299/5760: gen_loss: 71.3034 dis_loss: 0.0011 est_loss: 1.6777
+**Epoch 21/29 Train 6599/5760: gen_loss: 71.6706 dis_loss: 0.0020 est_loss: 1.4938
+**Epoch 21/29 Train 6899/5760: gen_loss: 71.3849 dis_loss: 0.0021 est_loss: 1.4122
+**Epoch 21/29 Train 7199/5760: gen_loss: 71.2778 dis_loss: 0.2625 est_loss: 1.2686
+**Epoch 21/29 Train 7499/5760: gen_loss: 71.3852 dis_loss: 0.0009 est_loss: 1.6296
+**Epoch 21/29 Train 7799/5760: gen_loss: 71.3338 dis_loss: 0.0008 est_loss: 1.5991
+**Epoch 21/29 Train 8099/5760: gen_loss: 71.4543 dis_loss: 0.0014 est_loss: 1.2782
+**Epoch 21/29 Train 8399/5760: gen_loss: 71.2077 dis_loss: 0.0020 est_loss: 2.2260
+**Epoch 21/29 Train 8699/5760: gen_loss: 71.1792 dis_loss: 0.0010 est_loss: 1.5628
+**Epoch 21/29 Train 8999/5760: gen_loss: 71.2383 dis_loss: 0.0017 est_loss: 1.4330
+**Epoch 21/29 Train 9299/5760: gen_loss: 71.4831 dis_loss: 0.0018 est_loss: 1.6263
+**Epoch 21/29 Train 9599/5760: gen_loss: 71.3476 dis_loss: 0.0022 est_loss: 1.7886
+**Epoch 21/29 Train 9899/5760: gen_loss: 71.3826 dis_loss: 0.0013 est_loss: 1.4198
+**Epoch 21/29 Train 10199/5760: gen_loss: 71.6780 dis_loss: 0.0371 est_loss: 1.6556
+**Epoch 21/29 Train 10499/5760: gen_loss: 71.4291 dis_loss: 0.0008 est_loss: 1.6357
+**Epoch 21/29 Train 10799/5760: gen_loss: 71.2436 dis_loss: 0.0008 est_loss: 1.6597
+**Epoch 21/29 Train 11099/5760: gen_loss: 71.0318 dis_loss: 0.0009 est_loss: 1.2962
+**Epoch 21/29 Train 11399/5760: gen_loss: 71.4294 dis_loss: 0.0011 est_loss: 1.3285
+**Epoch 21/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 21/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 21/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 21/29 Time 2777.3614473342896s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 21
+------------------------------------------------------------------------
+**Epoch 22/29 Train 5999/5760: gen_loss: 71.1767 dis_loss: 0.0039 est_loss: 1.6138
+**Epoch 22/29 Train 6299/5760: gen_loss: 71.1368 dis_loss: 0.0047 est_loss: 1.4001
+**Epoch 22/29 Train 6599/5760: gen_loss: 71.7672 dis_loss: 0.0022 est_loss: 1.7008
+**Epoch 22/29 Train 6899/5760: gen_loss: 70.9598 dis_loss: 0.0073 est_loss: 1.4837
+**Epoch 22/29 Train 7199/5760: gen_loss: 71.4668 dis_loss: 0.0012 est_loss: 1.6738
+**Epoch 22/29 Train 7499/5760: gen_loss: 71.4755 dis_loss: 0.0027 est_loss: 1.3490
+**Epoch 22/29 Train 7799/5760: gen_loss: 71.2290 dis_loss: 0.0014 est_loss: 1.5194
+**Epoch 22/29 Train 8099/5760: gen_loss: 71.2903 dis_loss: 0.0041 est_loss: 1.5067
+**Epoch 22/29 Train 8399/5760: gen_loss: 71.2800 dis_loss: 0.0060 est_loss: 1.3997
+**Epoch 22/29 Train 8699/5760: gen_loss: 71.3177 dis_loss: 0.0017 est_loss: 1.6695
+**Epoch 22/29 Train 8999/5760: gen_loss: 71.2255 dis_loss: 0.0013 est_loss: 1.7548
+**Epoch 22/29 Train 9299/5760: gen_loss: 71.2395 dis_loss: 0.0006 est_loss: 1.4011
+**Epoch 22/29 Train 9599/5760: gen_loss: 71.1275 dis_loss: 0.0023 est_loss: 1.3479
+**Epoch 22/29 Train 9899/5760: gen_loss: 71.1511 dis_loss: 0.0026 est_loss: 2.0603
+**Epoch 22/29 Train 10199/5760: gen_loss: 71.2447 dis_loss: 0.0014 est_loss: 1.3176
+**Epoch 22/29 Train 10499/5760: gen_loss: 71.3819 dis_loss: 1.4718 est_loss: 1.3048
+**Epoch 22/29 Train 10799/5760: gen_loss: 71.4305 dis_loss: 0.0032 est_loss: 1.5075
+**Epoch 22/29 Train 11099/5760: gen_loss: 71.4308 dis_loss: 0.0016 est_loss: 1.4229
+**Epoch 22/29 Train 11399/5760: gen_loss: 71.2023 dis_loss: 0.0008 est_loss: 1.3094
+**Epoch 22/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 22/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 22/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 22/29 Time 2840.8437435626984s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 22
+------------------------------------------------------------------------
+**Epoch 23/29 Train 5999/5760: gen_loss: 71.3169 dis_loss: 0.0008 est_loss: 1.2930
+**Epoch 23/29 Train 6299/5760: gen_loss: 71.4697 dis_loss: 0.0027 est_loss: 1.4052
+**Epoch 23/29 Train 6599/5760: gen_loss: 71.2553 dis_loss: 0.0008 est_loss: 1.5868
+**Epoch 23/29 Train 6899/5760: gen_loss: 71.1332 dis_loss: 0.0017 est_loss: 1.6059
+**Epoch 23/29 Train 7199/5760: gen_loss: 71.2317 dis_loss: 0.0009 est_loss: 1.4467
+**Epoch 23/29 Train 7499/5760: gen_loss: 71.2520 dis_loss: 0.0013 est_loss: 1.9385
+**Epoch 23/29 Train 7799/5760: gen_loss: 71.1820 dis_loss: 0.0025 est_loss: 1.8547
+**Epoch 23/29 Train 8099/5760: gen_loss: 71.2658 dis_loss: 0.0018 est_loss: 1.4129
+**Epoch 23/29 Train 8399/5760: gen_loss: 71.2509 dis_loss: 0.0009 est_loss: 1.4726
+**Epoch 23/29 Train 8699/5760: gen_loss: 71.3758 dis_loss: 0.0019 est_loss: 1.6301
+**Epoch 23/29 Train 8999/5760: gen_loss: 71.5562 dis_loss: 0.0235 est_loss: 1.9043
+**Epoch 23/29 Train 9299/5760: gen_loss: 71.1639 dis_loss: 0.0008 est_loss: 1.5403
+**Epoch 23/29 Train 9599/5760: gen_loss: 71.2987 dis_loss: 0.0016 est_loss: 1.2433
+**Epoch 23/29 Train 9899/5760: gen_loss: 71.1628 dis_loss: 0.0021 est_loss: 1.5173
+**Epoch 23/29 Train 10199/5760: gen_loss: 71.2469 dis_loss: 0.0013 est_loss: 1.7302
+**Epoch 23/29 Train 10499/5760: gen_loss: 71.1193 dis_loss: 0.0013 est_loss: 1.4819
+**Epoch 23/29 Train 10799/5760: gen_loss: 71.3204 dis_loss: 0.0009 est_loss: 1.3222
+**Epoch 23/29 Train 11099/5760: gen_loss: 71.3481 dis_loss: 0.0020 est_loss: 1.3660
+**Epoch 23/29 Train 11399/5760: gen_loss: 71.2067 dis_loss: 0.0011 est_loss: 1.5040
+**Epoch 23/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 23/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 23/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 23/29 Time 2841.4542286396027s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 23
+------------------------------------------------------------------------
+**Epoch 24/29 Train 5999/5760: gen_loss: 71.2992 dis_loss: 0.0011 est_loss: 1.4875
+**Epoch 24/29 Train 6299/5760: gen_loss: 71.1446 dis_loss: 0.0015 est_loss: 1.5550
+**Epoch 24/29 Train 6599/5760: gen_loss: 71.2556 dis_loss: 0.0011 est_loss: 1.7267
+**Epoch 24/29 Train 6899/5760: gen_loss: 71.4130 dis_loss: 0.0016 est_loss: 1.5118
+**Epoch 24/29 Train 7199/5760: gen_loss: 71.4622 dis_loss: 0.0019 est_loss: 1.4633
+**Epoch 24/29 Train 7499/5760: gen_loss: 71.6106 dis_loss: 0.0010 est_loss: 1.9722
+**Epoch 24/29 Train 7799/5760: gen_loss: 71.2800 dis_loss: 0.0011 est_loss: 1.3885
+**Epoch 24/29 Train 8099/5760: gen_loss: 71.4701 dis_loss: 0.0007 est_loss: 1.4318
+**Epoch 24/29 Train 8399/5760: gen_loss: 71.2387 dis_loss: 0.0026 est_loss: 1.8428
+**Epoch 24/29 Train 8699/5760: gen_loss: 71.2806 dis_loss: 0.0023 est_loss: 1.1943
+**Epoch 24/29 Train 8999/5760: gen_loss: 71.3223 dis_loss: 0.0012 est_loss: 1.3293
+**Epoch 24/29 Train 9299/5760: gen_loss: 71.5716 dis_loss: 0.0277 est_loss: 1.2778
+**Epoch 24/29 Train 9599/5760: gen_loss: 71.3170 dis_loss: 0.0008 est_loss: 1.4599
+**Epoch 24/29 Train 9899/5760: gen_loss: 71.3741 dis_loss: 0.0007 est_loss: 1.4246
+**Epoch 24/29 Train 10199/5760: gen_loss: 71.2632 dis_loss: 0.0007 est_loss: 1.3208
+**Epoch 24/29 Train 10499/5760: gen_loss: 71.3327 dis_loss: 0.0015 est_loss: 1.4463
+**Epoch 24/29 Train 10799/5760: gen_loss: 71.1268 dis_loss: 0.0008 est_loss: 2.3493
+**Epoch 24/29 Train 11099/5760: gen_loss: 71.2258 dis_loss: 0.0008 est_loss: 1.6246
+**Epoch 24/29 Train 11399/5760: gen_loss: 71.8694 dis_loss: 0.0068 est_loss: 1.6271
+**Epoch 24/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 24/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 24/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 24/29 Time 2844.3747317790985s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 24
+------------------------------------------------------------------------
+**Epoch 25/29 Train 5999/5760: gen_loss: 71.1638 dis_loss: 0.0025 est_loss: 1.8118
+**Epoch 25/29 Train 6299/5760: gen_loss: 71.2888 dis_loss: 0.0005 est_loss: 1.2012
+**Epoch 25/29 Train 6599/5760: gen_loss: 71.2970 dis_loss: 0.0029 est_loss: 2.0005
+**Epoch 25/29 Train 6899/5760: gen_loss: 71.3580 dis_loss: 2.5766 est_loss: 1.5167
+**Epoch 25/29 Train 7199/5760: gen_loss: 71.2014 dis_loss: 0.0013 est_loss: 1.9874
+**Epoch 25/29 Train 7499/5760: gen_loss: 71.1765 dis_loss: 0.0009 est_loss: 1.4522
+**Epoch 25/29 Train 7799/5760: gen_loss: 71.3745 dis_loss: 0.0008 est_loss: 1.4196
+**Epoch 25/29 Train 8099/5760: gen_loss: 71.2314 dis_loss: 0.0009 est_loss: 1.7358
+**Epoch 25/29 Train 8399/5760: gen_loss: 71.1386 dis_loss: 0.0043 est_loss: 1.8191
+**Epoch 25/29 Train 8699/5760: gen_loss: 71.1314 dis_loss: 0.0006 est_loss: 1.5927
+**Epoch 25/29 Train 8999/5760: gen_loss: 71.2377 dis_loss: 0.0007 est_loss: 1.7680
+**Epoch 25/29 Train 9299/5760: gen_loss: 71.1776 dis_loss: 0.0021 est_loss: 2.2453
+**Epoch 25/29 Train 9599/5760: gen_loss: 71.1311 dis_loss: 0.0011 est_loss: 1.3057
+**Epoch 25/29 Train 9899/5760: gen_loss: 71.2099 dis_loss: 0.8047 est_loss: 1.7284
+**Epoch 25/29 Train 10199/5760: gen_loss: 71.1251 dis_loss: 0.0007 est_loss: 1.3852
+**Epoch 25/29 Train 10499/5760: gen_loss: 71.2443 dis_loss: 0.0005 est_loss: 1.4992
+**Epoch 25/29 Train 10799/5760: gen_loss: 71.1616 dis_loss: 0.0014 est_loss: 2.0441
+**Epoch 25/29 Train 11099/5760: gen_loss: 71.3023 dis_loss: 0.0010 est_loss: 1.5065
+**Epoch 25/29 Train 11399/5760: gen_loss: 71.1020 dis_loss: 0.0010 est_loss: 1.7210
+**Epoch 25/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 25/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 25/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 25/29 Time 2806.2542164325714s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 25
+------------------------------------------------------------------------
+**Epoch 26/29 Train 5999/5760: gen_loss: 71.2919 dis_loss: 0.0016 est_loss: 1.3941
+**Epoch 26/29 Train 6299/5760: gen_loss: 71.2034 dis_loss: 0.0014 est_loss: 2.1625
+**Epoch 26/29 Train 6599/5760: gen_loss: 71.0999 dis_loss: 0.0014 est_loss: 1.6095
+**Epoch 26/29 Train 6899/5760: gen_loss: 71.4308 dis_loss: 0.0021 est_loss: 1.4052
+**Epoch 26/29 Train 7199/5760: gen_loss: 71.3538 dis_loss: 0.0008 est_loss: 1.3121
+**Epoch 26/29 Train 7499/5760: gen_loss: 71.0734 dis_loss: 0.0018 est_loss: 1.3981
+**Epoch 26/29 Train 7799/5760: gen_loss: 71.6361 dis_loss: 0.0010 est_loss: 1.8162
+**Epoch 26/29 Train 8099/5760: gen_loss: 71.0172 dis_loss: 0.0074 est_loss: 1.4777
+**Epoch 26/29 Train 8399/5760: gen_loss: 71.3132 dis_loss: 0.0011 est_loss: 1.3275
+**Epoch 26/29 Train 8699/5760: gen_loss: 71.2748 dis_loss: 0.0028 est_loss: 1.4775
+**Epoch 26/29 Train 8999/5760: gen_loss: 71.1095 dis_loss: 0.0011 est_loss: 1.5110
+**Epoch 26/29 Train 9299/5760: gen_loss: 71.3991 dis_loss: 0.0018 est_loss: 1.5500
+**Epoch 26/29 Train 9599/5760: gen_loss: 71.2080 dis_loss: 0.0031 est_loss: 1.9332
+**Epoch 26/29 Train 9899/5760: gen_loss: 71.4322 dis_loss: 0.0023 est_loss: 1.6295
+**Epoch 26/29 Train 10199/5760: gen_loss: 71.5865 dis_loss: 0.0010 est_loss: 1.7252
+**Epoch 26/29 Train 10499/5760: gen_loss: 71.0402 dis_loss: 0.0007 est_loss: 2.1898
+**Epoch 26/29 Train 10799/5760: gen_loss: 71.4737 dis_loss: 0.0006 est_loss: 1.4757
+**Epoch 26/29 Train 11099/5760: gen_loss: 71.3244 dis_loss: 0.0010 est_loss: 1.9285
+**Epoch 26/29 Train 11399/5760: gen_loss: 71.2000 dis_loss: 0.0008 est_loss: 1.5248
+**Epoch 26/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 26/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 26/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 26/29 Time 2785.8085486888885s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 26
+------------------------------------------------------------------------
+**Epoch 27/29 Train 5999/5760: gen_loss: 71.2970 dis_loss: 0.0008 est_loss: 1.3230
+**Epoch 27/29 Train 6299/5760: gen_loss: 71.3152 dis_loss: 0.0006 est_loss: 1.5064
+**Epoch 27/29 Train 6599/5760: gen_loss: 71.0433 dis_loss: 0.0029 est_loss: 1.3747
+**Epoch 27/29 Train 6899/5760: gen_loss: 71.1977 dis_loss: 0.0036 est_loss: 1.4722
+**Epoch 27/29 Train 7199/5760: gen_loss: 71.4997 dis_loss: 0.0008 est_loss: 1.4487
+**Epoch 27/29 Train 7499/5760: gen_loss: 71.1010 dis_loss: 0.0011 est_loss: 1.4731
+**Epoch 27/29 Train 7799/5760: gen_loss: 71.0927 dis_loss: 0.0008 est_loss: 1.5174
+**Epoch 27/29 Train 8099/5760: gen_loss: 71.3613 dis_loss: 0.0014 est_loss: 1.5012
+**Epoch 27/29 Train 8399/5760: gen_loss: 71.2804 dis_loss: 0.0010 est_loss: 1.7772
+**Epoch 27/29 Train 8699/5760: gen_loss: 71.3591 dis_loss: 0.0013 est_loss: 1.4706
+**Epoch 27/29 Train 8999/5760: gen_loss: 71.4074 dis_loss: 0.0010 est_loss: 1.3340
+**Epoch 27/29 Train 9299/5760: gen_loss: 71.1453 dis_loss: 0.0010 est_loss: 2.1571
+**Epoch 27/29 Train 9599/5760: gen_loss: 71.3458 dis_loss: 0.0006 est_loss: 1.4602
+**Epoch 27/29 Train 9899/5760: gen_loss: 71.1869 dis_loss: 0.0008 est_loss: 1.8147
+**Epoch 27/29 Train 10199/5760: gen_loss: 71.4736 dis_loss: 0.0008 est_loss: 1.5548
+**Epoch 27/29 Train 10499/5760: gen_loss: 71.3225 dis_loss: 0.0006 est_loss: 1.3433
+**Epoch 27/29 Train 10799/5760: gen_loss: 71.3336 dis_loss: 0.0008 est_loss: 1.6457
+**Epoch 27/29 Train 11099/5760: gen_loss: 71.4305 dis_loss: 0.0019 est_loss: 1.2163
+**Epoch 27/29 Train 11399/5760: gen_loss: 71.1994 dis_loss: 0.0008 est_loss: 1.5555
+**Epoch 27/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 27/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 27/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 27/29 Time 2787.3528413772583s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 27
+------------------------------------------------------------------------
+**Epoch 28/29 Train 5999/5760: gen_loss: 71.2136 dis_loss: 0.1769 est_loss: 1.3567
+**Epoch 28/29 Train 6299/5760: gen_loss: 71.1104 dis_loss: 0.0005 est_loss: 1.4677
+**Epoch 28/29 Train 6599/5760: gen_loss: 71.1553 dis_loss: 0.0014 est_loss: 1.4913
+**Epoch 28/29 Train 6899/5760: gen_loss: 71.4622 dis_loss: 0.0006 est_loss: 1.5261
+**Epoch 28/29 Train 7199/5760: gen_loss: 71.3706 dis_loss: 0.0011 est_loss: 1.5781
+**Epoch 28/29 Train 7499/5760: gen_loss: 71.2897 dis_loss: 0.0013 est_loss: 1.7903
+**Epoch 28/29 Train 7799/5760: gen_loss: 71.1848 dis_loss: 0.0007 est_loss: 1.5860
+**Epoch 28/29 Train 8099/5760: gen_loss: 71.1976 dis_loss: 0.0011 est_loss: 1.5142
+**Epoch 28/29 Train 8399/5760: gen_loss: 71.1860 dis_loss: 0.0009 est_loss: 1.9079
+**Epoch 28/29 Train 8699/5760: gen_loss: 71.3309 dis_loss: 0.0010 est_loss: 1.4076
+**Epoch 28/29 Train 8999/5760: gen_loss: 71.2507 dis_loss: 0.0008 est_loss: 1.3202
+**Epoch 28/29 Train 9299/5760: gen_loss: 71.2668 dis_loss: 0.0029 est_loss: 1.6043
+**Epoch 28/29 Train 9599/5760: gen_loss: 71.1383 dis_loss: 0.0024 est_loss: 1.8492
+**Epoch 28/29 Train 9899/5760: gen_loss: 71.0895 dis_loss: 0.0015 est_loss: 1.4515
+**Epoch 28/29 Train 10199/5760: gen_loss: 71.1677 dis_loss: 0.0035 est_loss: 1.8548
+**Epoch 28/29 Train 10499/5760: gen_loss: 71.3584 dis_loss: 0.0011 est_loss: 1.5312
+**Epoch 28/29 Train 10799/5760: gen_loss: 71.1336 dis_loss: 0.0019 est_loss: 1.6228
+**Epoch 28/29 Train 11099/5760: gen_loss: 71.2655 dis_loss: 0.0006 est_loss: 1.4298
+**Epoch 28/29 Train 11399/5760: gen_loss: 71.3081 dis_loss: 0.0052 est_loss: 1.5069
+**Epoch 28/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 28/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 28/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 28/29 Time 2778.4988214969635s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 28
+------------------------------------------------------------------------
+**Epoch 29/29 Train 5999/5760: gen_loss: 71.2305 dis_loss: 0.0008 est_loss: 1.6597
+**Epoch 29/29 Train 6299/5760: gen_loss: 71.1957 dis_loss: 0.0010 est_loss: 1.6318
+**Epoch 29/29 Train 6599/5760: gen_loss: 71.3990 dis_loss: 0.0007 est_loss: 1.7114
+**Epoch 29/29 Train 6899/5760: gen_loss: 71.1460 dis_loss: 0.0009 est_loss: 1.8061
+**Epoch 29/29 Train 7199/5760: gen_loss: 71.2571 dis_loss: 0.0014 est_loss: 1.7012
+**Epoch 29/29 Train 7499/5760: gen_loss: 71.0844 dis_loss: 0.0012 est_loss: 1.6659
+**Epoch 29/29 Train 7799/5760: gen_loss: 71.1968 dis_loss: 0.0013 est_loss: 1.3792
+**Epoch 29/29 Train 8099/5760: gen_loss: 71.3522 dis_loss: 0.0009 est_loss: 1.8620
+**Epoch 29/29 Train 8399/5760: gen_loss: 71.4030 dis_loss: 0.0017 est_loss: 1.6675
+**Epoch 29/29 Train 8699/5760: gen_loss: 71.3769 dis_loss: 0.0014 est_loss: 1.5376
+**Epoch 29/29 Train 8999/5760: gen_loss: 71.1411 dis_loss: 0.0040 est_loss: 1.4549
+**Epoch 29/29 Train 9299/5760: gen_loss: 71.0355 dis_loss: 0.0015 est_loss: 1.3689
+**Epoch 29/29 Train 9599/5760: gen_loss: 71.1746 dis_loss: 0.0044 est_loss: 1.1866
+**Epoch 29/29 Train 9899/5760: gen_loss: 71.2042 dis_loss: 0.0038 est_loss: 1.4808
+**Epoch 29/29 Train 10199/5760: gen_loss: 71.2562 dis_loss: 0.0010 est_loss: 1.6605
+**Epoch 29/29 Train 10499/5760: gen_loss: 71.2564 dis_loss: 0.0091 est_loss: 1.6840
+**Epoch 29/29 Train 10799/5760: gen_loss: 71.2588 dis_loss: 0.0010 est_loss: 1.6019
+**Epoch 29/29 Train 11099/5760: gen_loss: 71.2310 dis_loss: 0.0023 est_loss: 1.7150
+**Epoch 29/29 Train 11399/5760: gen_loss: 71.3801 dis_loss: 0.0012 est_loss: 1.3172
+**Epoch 29/29 Test 299/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 599/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 899/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 1199/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 1499/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 1799/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 2099/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 2399/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 2699/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 2999/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 3299/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 3599/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 3899/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 4199/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 4499/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 4799/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 5099/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 5399/5760: Accuracy: 0.5000
+**Epoch 29/29 Test 5699/5760: Accuracy: 0.5000
+
+ *********Epoch 29/29: APCER: 0.0000 NPCER: 1.0000 ACER: 0.5000 HTER: 0.5000 AUC: 0.5000 
+***************************************************
+Epoch 29/29 Time 2826.559830188751s
+***************************************************Best epoch is 0. The ACER of best epoch is 0.5, current epoch is 29
+Total time is 86370.34963393211.

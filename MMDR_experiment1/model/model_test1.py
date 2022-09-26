@@ -3,9 +3,9 @@ from torch import nn
 from torch.autograd import Variable
 import torch
 import torch.nn.functional as F
-from CBAM import CBAM
+from .CBAM import CBAM
 import cv2
-from warp import warping, generate_offset_map
+from .warp import warping, generate_offset_map
 try:
     from itertools import izip as zip
 except ImportError:     # detect the 3.x series
@@ -113,7 +113,8 @@ class FeatureEstimator(nn.Module):
     def forward(self, x):
         maps = []
         for i in range(self.n_layer):
-            out_cbam = self.cbam[i](x[i])
+            # x[i] = x[i].to("cuda:0")
+            out_cbam = self.cbam[i](x[i].cuda(0))
             maps += [F.interpolate(out_cbam, [32, 32])]
         map = torch.cat(maps, dim=1)
         return self.est(map)
