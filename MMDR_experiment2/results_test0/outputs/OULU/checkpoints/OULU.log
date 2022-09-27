@@ -1,3 +1,0 @@
-model: MMDR   batch_size: 1 frames_sample: 3 
-pretrain: False   input_size: 256*56*3
-loading train data

@@ -8,11 +8,11 @@ import torch.nn.functional as F
 import argparse
 import shutil
 import tensorboardX
-from model.model_test import Generator, MultiScaleDis, FeatureEstimator
-from utils.loss import l1_loss, l2_loss
-from utils.statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
+from MMDR_experiment1.model.model_test import Generator, MultiScaleDis, FeatureEstimator
+from MMDR_experiment1.utils.loss import l1_loss, l2_loss
+from statistic import calculate_statistic, calculate_accuracy_score, calculate_roc_auc_score
 
-from utils.utils import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, write_loss, get_config, write_2images
+from MMDR_experiment1.utils.utils import get_all_data_loaders, get_scheduler, weights_init, get_model_list, prepare_sub_folder, write_loss, get_config, write_2images
 
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
@@ -277,7 +277,7 @@ def val_model(scores, labels, current_epoch, num_epochs):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='./config/OULU.yaml', help='Path to the config file.')
+    parser.add_argument('--config', type=str, default='OULU.yaml', help='Path to the config file.')
     parser.add_argument('--output_path', type=str, default='./results_test0/', help="outputs path")
     parser.add_argument("--resume", type=bool, default=False, help="pretrain resume")
     opts = parser.parse_args()
