@@ -63,13 +63,17 @@ class data_merge(object):
             data_name_list_train = ["MSU_MFSD", "REPLAY_ATTACK"]
             data_name_list_test = ["OULU"]
         sum_n = 0
-        data_set_sum = {}
         if train:
-            for i in range(len(data_name_list_train)):
+            data_set_sum = self.get_single_dataset(data_name=data_name_list_train[0], train=True, img_size=img_size,
+                                               map_size=map_size, transform=transform,
+                                               debug_subset_size=debug_subset_size, UUID=0)
+            sum_n = len(data_set_sum)
+            for i in range(1, len(data_name_list_train)):
                 data_tmp = self.get_single_dataset(data_name=data_name_list_train[i], train=True, img_size=img_size, map_size=map_size, transform=transform, debug_subset_size=debug_subset_size, UUID=i)
-                data_set_sum[data_name_list_train[i]] = data_tmp
+                data_set_sum += data_tmp
                 sum_n += len(data_tmp)
         else:
+            data_set_sum = {}
             for i in range(len(data_name_list_test)):
                 data_tmp = self.get_single_dataset(data_name=data_name_list_test[i], train=False, img_size=img_size, map_size=map_size, transform=transform, debug_subset_size=debug_subset_size, UUID=i)
                 data_set_sum[data_name_list_test[i]] = data_tmp
