@@ -6,16 +6,16 @@ import torch
 def parse_args():
     parser = argparse.ArgumentParser()
     # build dirs
-    parser.add_argument('--data_dir', type=str, default="", help='YOUR_Data_Dir')
+    parser.add_argument('--data_dir', type=str, default="/media/l228/数据/zsw/Data/", help='YOUR_Data_Dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
-    parser.add_argument('--result_name', type=str, default='demo', help='result directory')
+    parser.add_argument('--result_name', type=str, default='test', help='result directory')
     # training settings
-    parser.add_argument('--model_type', type=str, default="SSAN-M", help='model_type')
+    parser.add_argument('--model_type', type=str, default="SSAN_M", help='model_type')
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--img_size', type=int, default=256, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
     parser.add_argument('--protocol', type=str, default="O_C_I_to_M", help='protocal')
-    parser.add_argument('--device', type=str, default='0,1', help='device id, format is like 0,1,2')
+    parser.add_argument('--device', type=str, default='0', help='device id, format is like 0,1,2')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='base learning rate')
     parser.add_argument('--start_epoch', type=int, default=0, help='start epoch')
     parser.add_argument('--num_epochs', type=int, default=1200, help='total training epochs')
