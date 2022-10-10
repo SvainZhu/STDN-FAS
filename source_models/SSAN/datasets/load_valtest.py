@@ -35,12 +35,13 @@ def crop_face_from_scene(image, scale):
 
 class ImageLabelFileList_valtest(Dataset):
     
-    def __init__(self, root_csv, transform=None, face_scale=1.3, img_size=256, map_size=32):
+    def __init__(self, root_csv, transform=None, face_scale=1.3, img_size=256, map_size=32, UUID=-1):
         self.images = pd.read_csv(root_csv, delimiter=",", header=None)
         self.face_scale = face_scale
         self.transform = transform
         self.img_size = img_size
         self.map_size = map_size
+        self.UUID = UUID
 
     def __len__(self):
         return len(self.images)
@@ -50,6 +51,7 @@ class ImageLabelFileList_valtest(Dataset):
         sample = self.read_image_x(impath, mappath, label)
         if self.transform:
             sample = self.transform(sample)
+        sample["UUID"] = self.UUID
         return sample
 
     def read_image_x(self, impath, mappath, label):
