@@ -1,0 +1,7 @@
+PyYAML
+tensorboardX
+torch
+torchvision
+scikit-learn
+opencv-python
+matplotlib
