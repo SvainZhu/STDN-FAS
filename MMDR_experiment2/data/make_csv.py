@@ -4,7 +4,6 @@ import json
 import random
 import pandas as pd
 
-
 n_sample = 6
 def base_process(image_dir, map_dir, image_csv, map_csv):
     map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
@@ -54,11 +53,11 @@ def Oulu_process(crop_size):
     val_list = '/media/l228/数据/zsw/Data/OULU/Protocols/Protocol_%s/Dev%s.txt' % (Protocol, sub_Protocol)
     test_list = '/media/l228/数据/zsw/Data/OULU/Protocols/Protocol_%s/Test%s.txt' % (Protocol, sub_Protocol)
 
-    train_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_MMDR/%s/train_%s%s_%s.csv' % (
+    train_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_SSAN/%s/train_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    val_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_MMDR/%s/val_%s%s_%s.csv' % (
+    val_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_SSAN/%s/val_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, n_sample)  # the validation split file
-    test_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_MMDR/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
+    test_csv = r'/media/l228/数据/zsw/Data/OULU/CSV_SSAN/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
     def oulu_base_process(image_dir, map_dir, list, data_csv):
         set = pd.read_csv(list, delimiter=',', header=None)
@@ -110,9 +109,9 @@ def SiW_process(crop_size):
     crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
     test_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
-    train_map_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/train_map_%s%s_%s.csv' % (
+    train_map_csv = r'E:/zsw/Data/SiW/CSV_SSAN/%s/train_map_%s%s_%s.csv' % (
         crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    test_map_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
+    test_map_csv = r'E:/zsw/Data/SiW/CSV_SSAN/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
     def siw_base_process(image_dir, map_dir, image_csv, map_csv, frames_num, type_ids, medium_ids):
         map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
