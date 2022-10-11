@@ -11,4 +11,4 @@ At the same time, we use the depth map to auxiliary supervision to better train 
 By redesigning the adjacent depth loss, we train the corresponding network with more efficient information.
 
 ### Architecture
-![MMDR_with_ConvGRU architecture](:ConvGRU.png)
+![MMDR_with_ConvGRU architecture](ConvGRU.png)
