@@ -26,7 +26,7 @@ class data_merge(object):
         if train:
             data_dir = self.dic[data_name]
             if data_name in ["OULU", "CASIA_MFSD", "REPLAY_ATTACK", "MSU_MFSD"]:
-                data_set = train_dataload(os.path.join(data_dir, "CSV/2.0/train_1_6.csv"), transform=transform, img_size=img_size, map_size=map_size)
+                data_set = train_dataload(os.path.join(data_dir, "CSV_SSAN/2.0/train_1_6.csv"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             else:
                 raise("Load data Error!!!")
             if debug_subset_size is not None:
@@ -34,8 +34,8 @@ class data_merge(object):
         else:
             data_dir = self.dic[data_name]
             if data_name in ["OULU", "CASIA_MFSD", "REPLAY_ATTACK", "MSU_MFSD"]:
-                data_set = valtest_dataload(os.path.join(data_dir, "CSV/2.0/test_1_6.csv"), transform=transform,
-                                          img_size=img_size, map_size=map_size)
+                data_set = valtest_dataload(os.path.join(data_dir, "CSV_SSAN/2.0/test_1_6.csv"), transform=transform,
+                                          img_size=img_size, map_size=map_size, UUID=UUID)
             else:
                 raise ("Load data Error!!!")
             if debug_subset_size is not None:
@@ -52,7 +52,7 @@ class data_merge(object):
             data_name_list_test = ["CASIA_MFSD"]
         elif protocol == "O_C_M_to_I":
             data_name_list_train = ["OULU", "CASIA_MFSD", "MSU_MFSD"]
-            data_name_list_test = ["RELEAY_ATTACK"]
+            data_name_list_test = ["REPLAY_ATTACK"]
         elif protocol == "I_C_M_to_O":
             data_name_list_train = ["MSU_MFSD", "CASIA_MFSD", "REPLAY_ATTACK"]
             data_name_list_test = ["OULU"] 

@@ -47,7 +47,7 @@ class ImageLabelFileList_train(Dataset):
         return len(self.images)
     
     def __getitem__(self, index):
-        impath, mappath, label = self.images[index]
+        impath, mappath, label = self.images.iloc[index]
         sample = self.read_image_x(impath, mappath, label)
         if self.transform:
             sample = self.transform(sample)

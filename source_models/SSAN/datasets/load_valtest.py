@@ -39,6 +39,7 @@ class ImageLabelFileList_valtest(Dataset):
         self.images = pd.read_csv(root_csv, delimiter=",", header=None)
         self.face_scale = face_scale
         self.transform = transform
+
         self.img_size = img_size
         self.map_size = map_size
         self.UUID = UUID
@@ -47,7 +48,7 @@ class ImageLabelFileList_valtest(Dataset):
         return len(self.images)
 
     def __getitem__(self, index):
-        impath, mappath, label = self.images[index]
+        impath, mappath, label = self.images.iloc[index]
         sample = self.read_image_x(impath, mappath, label)
         if self.transform:
             sample = self.transform(sample)
@@ -57,16 +58,16 @@ class ImageLabelFileList_valtest(Dataset):
     def read_image_x(self, impath, mappath, label):
         image, map = cv2.imread(impath, cv2.IMREAD_COLOR), cv2.imread(mappath, cv2.IMREAD_GRAYSCALE)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        face_scale = np.random.randint(int(self.scale_down * 10), int(self.scale_up * 10))
-        face_scale = face_scale / 10.0
         if label == 1:
-            map = cv2.resize(crop_face_from_scene(map, face_scale), (self.map_size, self.map_size))
+            map = cv2.resize(crop_face_from_scene(map, self.face_scale), (self.map_size, self.map_size))
         else:
             map = np.zeros((self.map_size, self.map_size))
         # RGB
         try:
-            image = cv2.resize(crop_face_from_scene(image, face_scale), (self.img_size, self.img_size))
+            image = cv2.resize(crop_face_from_scene(image, self.face_scale), (self.img_size, self.img_size))
         except:
             print(impath)
+        image = np.expand_dims(image, axis=0)
+        map = np.expand_dims(map, axis=0)
         sample = {'image_x': image, 'map_x': map, 'label': label}
         return sample
