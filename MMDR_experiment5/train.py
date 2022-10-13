@@ -3,7 +3,7 @@ import torch.nn as nn
 import os
 from torch.utils.data import Dataset, DataLoader
 from model.model import get_model
-from data import data_merge
+from data.data_merge import data_merge
 from utils.lr_scheduler import get_optimizer
 from utils.transformer_train import *
 from utils.transformer_test import *
