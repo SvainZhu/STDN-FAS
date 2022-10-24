@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--img_size', type=int, default=256, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
-    parser.add_argument('--protocol', type=str, default="O_M_I_to_C", help='protocal')
+    parser.add_argument('--protocol', type=str, default="O_C_I_to_M", help='protocal')
     parser.add_argument('--device', type=str, default='0,1', help='device id, format is like 0,1,2')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='base learning rate')
     parser.add_argument('--start_epoch', type=int, default=0, help='start epoch')
