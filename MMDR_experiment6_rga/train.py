@@ -94,8 +94,8 @@ def main(args):
             elif args.model_type in ["SSAN_M"]:
                 map_x = sample_batched["map_x"].cuda()
                 rand_idx = torch.randperm(image_x.shape[0])
-                cls_x1_x1, fea_x1_x1, fea_x1_x2, domain_invariant = model(image_x, image_x[rand_idx, :, :, :])
-                binary_loss = map_fuc(cls_x1_x1, map_x)
+                pre_map_x1_x1, fea_x1_x1, fea_x1_x2, domain_invariant = model(image_x, image_x[rand_idx, :, :, :])
+                binary_loss = map_fuc(pre_map_x1_x1, map_x)
                 contrast_label = label[:, 0].long() == label[rand_idx, 0].long()
                 contrast_label = torch.where(contrast_label == True, 1, -1)
                 constract_loss = contra_fun(fea_x1_x1, fea_x1_x2, contrast_label)

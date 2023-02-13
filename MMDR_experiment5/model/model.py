@@ -399,6 +399,8 @@ class SSAN_R(nn.Module):
         return cls_x1_x1[:, 0, :, :], fea_x1_x1, fea_x1_x2, dis_invariant
 
 
+# modify the nn.Conv2d to the residual gradient operator
+
 class SSAN_M(nn.Module):
     def __init__(self, ada_num=2, max_iter=4000):
         super(SSAN_M, self).__init__()
