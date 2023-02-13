@@ -108,13 +108,13 @@ def SiW_process(crop_size):
     train_map_dir = 'E:/zsw/Data/SiW/Face_Depth_Map/%s/Train/' % crop_size
     test_map_dir = 'E:/zsw/Data/SiW/Face_Depth_Map/%s/Test/' % crop_size
 
-    train_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/train_%s%s_%s.csv' % (
+    train_csv = r'E:/zsw/Data/SiW/CSV_MMDR/%s/train_%s%s_%s.csv' % (
     crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    test_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
+    test_csv = r'E:/zsw/Data/SiW/CSV_MMDR/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
-    train_map_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/train_map_%s%s_%s.csv' % (
+    train_map_csv = r'E:/zsw/Data/SiW/CSV_MMDR/%s/train_map_%s%s_%s.csv' % (
         crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    test_map_csv = r'E:/zsw/Data/SiW/CSV_rsf/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
+    test_map_csv = r'E:/zsw/Data/SiW/CSV_MMDR/%s/test_map_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
 
     def siw_base_process(image_dir, map_dir, image_csv, map_csv, frames_num, type_ids, medium_ids):
         map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
@@ -178,17 +178,17 @@ def SiW_process(crop_size):
 
 def CASIA_FASD_process(crop_size):
     Protocol = '1'  # 1: wrapped photo attack; 2: cut photo attack; 0: video attack
-    train_map_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/train_release/" % crop_size
-    test_map_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/test_release/" % crop_size
+    train_map_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/train_release/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/test_release/" % (path_pre, crop_size)
 
-    train_image_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/train_release/" % crop_size
-    test_image_dir = "E:/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/test_release/" % crop_size
+    train_image_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/train_release/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/test_release/" % (path_pre, crop_size)
 
-    train_csv = r'E:/zsw/Data/CASIA_FASD/CSV_rsf/%s/train_%s_%s.csv' % (crop_size, Protocol, interval)
-    test_csv = r'E:/zsw/Data/CASIA_FASD/CSV_rsf/%s/test_%s_%s.csv' % (crop_size, Protocol, interval)
+    train_csv = r'%s/zsw/Data/CASIA_FASD/CSV_MMDR/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_csv = r'%s/zsw/Data/CASIA_FASD/CSV_MMDR/%s/test_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
-    train_map_csv = r'E:/zsw/Data/CASIA_FASD/CSV_rsf/%s/train_map_%s_%s.csv' % (crop_size, Protocol, interval)
-    test_map_csv = r'E:/zsw/Data/CASIA_FASD/CSV_rsf/%s/test_map_%s_%s.csv' % (crop_size, Protocol, interval)
+    train_map_csv = r'%s/zsw/Data/CASIA_FASD/CSV_MMDR/%s/train_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_map_csv = r'%s/zsw/Data/CASIA_FASD/CSV_MMDR/%s/test_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
     def CASIA_FASD_base_process(image_dir, map_dir, image_csv, map_csv, type_id):
         map_csv_a = open(map_csv, 'a', encoding='utf-8', newline='')
@@ -206,7 +206,7 @@ def CASIA_FASD_process(crop_size):
                     if int(j) % 3 != int(type_id) and i == 'attack_face':
                         continue
                     faces_name = os.listdir(file_path2)
-                    for k in random.sample(faces_name, 1):
+                    for k in random.sample(faces_name, n_sample):
                         face_name = '_'.join(k.split('_')[:-1]) + '.jpg'
                         map_path = os.path.join(file_path2, k)
                         image_path = os.path.join(os.path.join(image_dir, i), j)
@@ -226,17 +226,17 @@ def CASIA_FASD_process(crop_size):
 
 def MSU_MFSD_process(crop_size):
     Protocol = 'ipad'  # ipad: HR video attack; iphone: Mobile video attack; printed: Printed attack
-    train_map_dir = "E:/zsw/Data/MSU_MFSD/MSU_MFSD_DepthMap/%s/train/" % crop_size
-    test_map_dir = "E:/zsw/Data/MSU_MFSD/MSU_MFSD_DepthMap/%s/test/" % crop_size
+    train_map_dir = "%s/zsw/Data/MSU_MFSD/MSU_MFSD_DepthMap/%s/train/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/MSU_MFSD/MSU_MFSD_DepthMap/%s/test/" % (path_pre, crop_size)
 
-    train_image_dir = "E:/zsw/Data/MSU_MFSD/MSU_MFSD_CropFace256/%s/train/" % crop_size
-    test_image_dir = "E:/zsw/Data/MSU_MFSD/MSU_MFSD_CropFace256/%s/test/" % crop_size
+    train_image_dir = "%s/zsw/Data/MSU_MFSD/MSU_MFSD_CropFace256/%s/train/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/MSU_MFSD/MSU_MFSD_CropFace256/%s/test/" % (path_pre, crop_size)
 
-    train_csv = r'E:/zsw/Data/MSU_MFSD/CSV_rsf/%s/train_%s_%s.csv' % (crop_size, Protocol, n_sample)
-    test_csv = r'E:/zsw/Data/MSU_MFSD/CSV/%s/test_%s%s_%s.csv' % (crop_size, Protocol, n_sample)
+    train_csv = r'%s/zsw/Data/MSU_MFSD/CSV_MMDR/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_csv = r'%s/zsw/Data/MSU_MFSD/CSV_MMDR/%s/test_%s%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
-    train_map_csv = r'E:/zsw/Data/MSU_MFSD/CSV_rsf/%s/train_map_%s_%s.csv' % (crop_size, Protocol, n_sample)
-    test_map_csv = r'E:/zsw/Data/MSU_MFSD/CSV_rsf/%s/test_map_%s_%s.csv' % (crop_size, Protocol, n_sample)
+    train_map_csv = r'%s/zsw/Data/MSU_MMDR/CSV_rsf/%s/train_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_map_csv = r'%s/zsw/Data/MSU_MMDR/CSV_rsf/%s/test_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
     # if not os.path.exists(train_csv):
     #     os.makedirs(train_csv)
@@ -277,19 +277,19 @@ def MSU_MFSD_process(crop_size):
 
 def RE_process(crop_size):
     Protocol = 'print'  # print: Printed Photo attack; mobile: Video attack; highdef: Digital Photo attack
-    train_map_dir = "E:/zsw/Data/RE/RE_DepthMap/%s/train/" % crop_size
-    devel_map_dir = "E:/zsw/Data/RE/RE_DepthMap/%s/devel/" % crop_size
-    test_map_dir = "E:/zsw/Data/RE/RE_DepthMap/%s/test/" % crop_size
+    train_map_dir = "%s/zsw/Data/RE/RE_DepthMap/%s/train/" % (path_pre, crop_size)
+    devel_map_dir = "%s/zsw/Data/RE/RE_DepthMap/%s/devel/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/RE/RE_DepthMap/%s/test/" % (path_pre, crop_size)
 
-    train_image_dir = "E:/zsw/Data/RE/RE_CropFace256/%s/train/" % crop_size
-    devel_image_dir = "E:/zsw/Data/RE/RE_CropFace256/%s/devel/" % crop_size
-    test_image_dir = "E:/zsw/Data/RE/RE_CropFace256/%s/test/" % crop_size
+    train_image_dir = "%s/zsw/Data/RE/RE_CropFace256/%s/train/" % (path_pre, crop_size)
+    devel_image_dir = "%s/zsw/Data/RE/RE_CropFace256/%s/devel/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/RE/RE_CropFace256/%s/test/" % (path_pre, crop_size)
 
-    train_csv = r'E:/zsw/Data/RE/CSV_rsf/%s/train_%s_%s.csv' % (crop_size, Protocol, n_sample)
-    test_csv = r'E:/zsw/Data/RE/CSV_rsf/%s/test_%s%s_%s.csv' % (crop_size, Protocol, n_sample)
+    train_csv = r'%s/zsw/Data/RE/CSV_MMDR/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_csv = r'%s/zsw/Data/RE/CSV_MMDR/%s/test_%s%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
-    train_map_csv = r'E:/zsw/Data/RE/CSV_rsf/%s/train_map_%s_%s.csv' % (crop_size, Protocol, n_sample)
-    test_map_csv = r'E:/zsw/Data/RE/CSV_rsf/%s/test_map_%s_%s.csv' % (crop_size, Protocol, n_sample)
+    train_map_csv = r'%s/zsw/Data/RE/CSV_MMDR/%s/train_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_map_csv = r'%s/zsw/Data/RE/CSV_MMDR/%s/test_map_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
 
     # if not os.path.exists(train_csv):
     #     os.makedirs(train_csv)
@@ -333,9 +333,9 @@ def RE_process(crop_size):
 if __name__ == '__main__':
     # Modify the following directories to yourselves
     crop_size = '2.0'
-    Oulu_process(crop_size)
+    # Oulu_process(crop_size)
     # SiW_process(crop_size)
-    # CASIA_FASD_process(crop_size)
-    # RE_process(crop_size)
+    CASIA_FASD_process(crop_size)
+    RE_process(crop_size)
 
-    # MSU_MFSD_process(crop_size)
+    MSU_MFSD_process(crop_size)

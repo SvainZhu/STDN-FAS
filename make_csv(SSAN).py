@@ -5,13 +5,13 @@ import random
 import pandas as pd
 
 n_sample = 6
-path_pre = 'H:'
+path_pre = "H:"
 
 def Oulu_process(crop_size):
     Protocol = '1'
     sub_Protocol = ''
-    if not os.path.exists(r'%s/zsw/Data/OULU/CSV_MMDR/%s/' % (path_pre, crop_size)):
-        os.makedirs(r'%s/zsw/Data/OULU/CSV_MMDR/%s/' % (path_pre, crop_size))
+    if not os.path.exists(r'%s/zsw/Data/OULU/CSV_SSAN/%s/' % (path_pre, crop_size)):
+        os.makedirs(r'%s/zsw/Data/OULU/CSV_SSAN/%s/' % (path_pre, crop_size))
 
     train_image_dir = '%s/zsw/Data/OULU/CropFace256/%s/Train_files/' % (path_pre, crop_size)
     val_image_dir = '%s/zsw/Data/OULU/CropFace256/%s/Dev_files/' % (path_pre, crop_size)
@@ -25,11 +25,11 @@ def Oulu_process(crop_size):
     val_list = '%s/zsw/Data/OULU/Protocols/Protocol_%s/Dev%s.txt' % (path_pre, Protocol, sub_Protocol)
     test_list = '%s/zsw/Data/OULU/Protocols/Protocol_%s/Test%s.txt' % (path_pre, Protocol, sub_Protocol)
 
-    train_csv = r'%s/zsw/Data/OULU/CSV_MMDR/%s/train_%s%s_%s.csv' % (
+    train_csv = r'%s/zsw/Data/OULU/CSV_SSAN/%s/train_%s%s_%s.csv' % (
         path_pre, crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    val_csv = r'%s/zsw/Data/OULU/CSV_MMDR/%s/val_%s%s_%s.csv' % (
+    val_csv = r'%s/zsw/Data/OULU/CSV_SSAN/%s/val_%s%s_%s.csv' % (
         path_pre, crop_size, Protocol, sub_Protocol, n_sample)  # the validation split file
-    test_csv = r'%s/zsw/Data/OULU/CSV_MMDR/%s/test_%s%s_%s.csv' % (path_pre, crop_size, Protocol, sub_Protocol, n_sample)
+    test_csv = r'%s/zsw/Data/OULU/CSV_SSAN/%s/test_%s%s_%s.csv' % (path_pre, crop_size, Protocol, sub_Protocol, n_sample)
 
     def oulu_base_process(image_dir, map_dir, list, image_csv):
         set = pd.read_csv(list, delimiter=',', header=None)
@@ -44,7 +44,7 @@ def Oulu_process(crop_size):
                     labels = 0
 
                 faces_name = os.listdir(os.path.join(image_dir, video_name))
-                for face_name in random.sample(faces_name, n_sample):
+                for face_name in random.sample(faces_name, min(n_sample, len(faces_name))):
                     face_name = face_name.split('.')[0] + '.jpg'
                     map_name = face_name.split('.')[0].replace('-', '_') + '_depth1D.jpg'
                     map_path = os.path.join(os.path.join(map_dir, video_name), map_name)
@@ -64,18 +64,20 @@ def SiW_process(crop_size):
     Protocol = '1'
     sub_Protocol = ''
 
-    train_image_dir = '/media/l228/数据/zsw/Data/SiW/CropFace256/%s/Train/' % crop_size
-    test_image_dir = '/media/l228/数据/zsw/Data/SiW/CropFace256/%s/Test/' % crop_size
+    if not os.path.exists(r'%s/zsw/Data/SiW/CSV_SSAN/%s/' % (path_pre, crop_size)):
+        os.makedirs(r'%s/zsw/Data/SiW/CSV_SSAN/%s/' % (path_pre, crop_size))
 
-    train_map_dir = '/media/l228/数据/zsw/Data/SiW/Face_Depth_Map/%s/Train/' % crop_size
-    test_map_dir = '/media/l228/数据/zsw/Data/SiW/Face_Depth_Map/%s/Test/' % crop_size
+    train_image_dir = '%s/zsw/Data/SiW/CropFace256/%s/Train/' % (path_pre, crop_size)
+    test_image_dir = '%s/zsw/Data/SiW/CropFace256/%s/Test/' % (path_pre, crop_size)
 
-    train_csv = r'/media/l228/数据/zsw/Data/SiW/CSV_SSAN/%s/train_%s%s_%s.csv' % (
-    crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
-    test_csv = r'/media/l228/数据/zsw/Data/SiW/CSV_SSAN/%s/test_%s%s_%s.csv' % (crop_size, Protocol, sub_Protocol, n_sample)
+    train_map_dir = '%s/zsw/Data/SiW/Face_Depth_Map/%s/Train/' % (path_pre, crop_size)
+    test_map_dir = '%s/zsw/Data/SiW/Face_Depth_Map/%s/Test/' % (path_pre, crop_size)
 
-    if not os.path.exists(r'/media/l228/数据/zsw/Data/SiW/CSV_SSAN/%s/' % (crop_size)):
-        os.makedirs(r'/media/l228/数据/zsw/Data/SiW/CSV_SSAN/%s/' % (crop_size))
+    train_csv = r'%s/zsw/Data/SiW/CSV_SSAN/%s/train_%s%s_%s.csv' % (
+        path_pre, crop_size, Protocol, sub_Protocol, n_sample)  # the train split file
+    test_csv = r'%s/zsw/Data/SiW/CSV_SSAN/%s/test_%s%s_%s.csv' % (path_pre, crop_size, Protocol, sub_Protocol, n_sample)
+
+
 
     def siw_base_process(image_dir, map_dir, image_csv, frames_num, type_ids, medium_ids):
         with open(image_csv, 'a', encoding='utf-8', newline='') as f:
@@ -131,17 +133,20 @@ def SiW_process(crop_size):
 
 def CASIA_FASD_process(crop_size):
     Protocol = '1'  # 1: wrapped photo attack; 2: cut photo attack; 0: video attack
-    train_map_dir = "/media/l228/数据/zsw/Data/CASIA_FASD/DepthMap/%s/train_release/" % crop_size
-    test_map_dir = "/media/l228/数据/zsw/Data/CASIA_FASD/DepthMap/%s/test_release/" % crop_size
 
-    train_image_dir = "/media/l228/数据/zsw/Data/CASIA_FASD/CropFace256/%s/train_release/" % crop_size
-    test_image_dir = "/media/l228/数据/zsw/Data/CASIA_FASD/CropFace256/%s/test_release/" % crop_size
+    if not os.path.exists(r'%s/zsw/Data/CASIA_FASD/CSV_SSAN/%s/' % (path_pre, crop_size)):
+        os.makedirs(r'%s/zsw/Data/CASIA_FASD/CSV_SSAN/%s/' % (path_pre, crop_size))
 
-    train_csv = r'/media/l228/数据/zsw/Data/CASIA_FASD/CSV_SSAN/%s/train_%s_%s.csv' % (crop_size, Protocol, n_sample)
-    test_csv = r'/media/l228/数据/zsw/Data/CASIA_FASD/CSV_SSAN/%s/test_%s_%s.csv' % (crop_size, Protocol, n_sample)
+    train_map_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/train_release/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_DepthMap/%s/test_release/" % (path_pre, crop_size)
 
-    if not os.path.exists(r'/media/l228/数据/zsw/Data/CASIA_FASD/CSV_SSAN/%s/' % (crop_size)):
-        os.makedirs(r'/media/l228/数据/zsw/Data/CASIA_FASD/CSV_SSAN/%s/' % (crop_size))
+    train_image_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/train_release/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/CASIA_FASD/CASIA_FASD_CropFace256/%s/test_release/" % (path_pre, crop_size)
+
+    train_csv = r'%s/zsw/Data/CASIA_FASD/CSV_SSAN/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+    test_csv = r'%s/zsw/Data/CASIA_FASD/CSV_SSAN/%s/test_%s_%s.csv' % (path_pre, crop_size, Protocol, n_sample)
+
+
 
     def CASIA_FASD_base_process(image_dir, map_dir, image_csv, type_id):
         with open(image_csv, 'a', encoding='utf-8', newline='') as f:
@@ -174,17 +179,18 @@ def CASIA_FASD_process(crop_size):
 
 
 def MSU_MFSD_process(crop_size):
+    if not os.path.exists(r'%s/zsw/Data/MSU_MFSD/CSV_SSAN/%s/' % (path_pre, crop_size)):
+        os.makedirs(r'%s/zsw/Data/MSU_MFSD/CSV_SSAN/%s/' % (path_pre, crop_size))
     Protocol = 'ipad'  # ipad: HR video attack; iphone: Mobile video attack; printed: Printed attack
-    train_map_dir = "/media/l228/数据/zsw/Data/MSU_MFSD/DepthMap/%s/train/" % crop_size
-    test_map_dir = "/media/l228/数据/zsw/Data/MSU_MFSD/DepthMap/%s/test/" % crop_size
+    train_map_dir = "%s/zsw/Data/MSU_MFSD/DepthMap/%s/train/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/MSU_MFSD/DepthMap/%s/test/" % (path_pre, crop_size)
     Protocol_dict = {"ipad": 1, "iphone": 2, "printed": 3}
-    train_image_dir = "/media/l228/数据/zsw/Data/MSU_MFSD/CropFace256/%s/train/" % crop_size
-    test_image_dir = "/media/l228/数据/zsw/Data/MSU_MFSD/CropFace256/%s/test/" % crop_size
+    train_image_dir = "%s/zsw/Data/MSU_MFSD/CropFace256/%s/train/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/MSU_MFSD/CropFace256/%s/test/" % (path_pre, crop_size)
 
-    train_csv = r'/media/l228/数据/zsw/Data/MSU_MFSD/CSV_SSAN/%s/train_%s_%s.csv' % (crop_size, Protocol_dict[Protocol], n_sample)
-    test_csv = r'/media/l228/数据/zsw/Data/MSU_MFSD/CSV_SSAN/%s/test_%s_%s.csv' % (crop_size, Protocol_dict[Protocol], n_sample)
-    if not os.path.exists(r'/media/l228/数据/zsw/Data/MSU_MFSD/CSV_SSAN/%s/' % (crop_size)):
-        os.makedirs(r'/media/l228/数据/zsw/Data/MSU_MFSD/CSV_SSAN/%s/' % (crop_size))
+    train_csv = r'%s/zsw/Data/MSU_MFSD/CSV_SSAN/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol_dict[Protocol], n_sample)
+    test_csv = r'%s/zsw/Data/MSU_MFSD/CSV_SSAN/%s/test_%s_%s.csv' % (path_pre, crop_size, Protocol_dict[Protocol], n_sample)
+
 
     def MSU_MFSD_base_process(image_dir, map_dir, image_csv, type_id):
         with open(image_csv, 'a', encoding='utf-8', newline='') as f:
@@ -217,22 +223,25 @@ def MSU_MFSD_process(crop_size):
 
 
 def RE_process(crop_size):
-    Protocol = 'print'  # print: Printed Photo attack; mobile: Video attack; highdef: Digital Photo attack
-    train_map_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/DepthMap/%s/train/" % crop_size
-    devel_map_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/DepthMap/%s/devel/" % crop_size
-    test_map_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/DepthMap/%s/test/" % crop_size
 
-    train_image_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/CropFace256/%s/train/" % crop_size
-    devel_image_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/CropFace256/%s/devel/" % crop_size
-    test_image_dir = "/media/l228/数据/zsw/Data/REPLAY_ATTACK/CropFace256/%s/test/" % crop_size
+    if not os.path.exists(r'%s/zsw/Data/RE/CSV_SSAN/%s/' % (path_pre, crop_size)):
+        os.makedirs(r'%s/zsw/Data/RE/CSV_SSAN/%s/' % (path_pre, crop_size))
+
+
+    Protocol = 'print'  # print: Printed Photo attack; mobile: Video attack; highdef: Digital Photo attack
+    train_map_dir = "%s/zsw/Data/RE/DepthMap/%s/train/" % (path_pre, crop_size)
+    devel_map_dir = "%s/zsw/Data/RE/DepthMap/%s/devel/" % (path_pre, crop_size)
+    test_map_dir = "%s/zsw/Data/RE/DepthMap/%s/test/" % (path_pre, crop_size)
+
+    train_image_dir = "%s/zsw/Data/RE/CropFace256/%s/train/" % (path_pre, crop_size)
+    devel_image_dir = "%szsw/Data/RE/CropFace256/%s/devel/" % (path_pre, crop_size)
+    test_image_dir = "%s/zsw/Data/RE/CropFace256/%s/test/" % (path_pre, crop_size)
 
     Protocol_dict = {"print": 1, "mobile": 2, "highdef": 3}
 
-    train_csv = r'/media/l228/数据/zsw/Data/REPLAY_ATTACK/CSV_SSAN/%s/train_%s_%s.csv' % (crop_size, Protocol_dict[Protocol], n_sample)
-    test_csv = r'/media/l228/数据/zsw/Data/REPLAY_ATTACK/CSV_SSAN/%s/test_%s_%s.csv' % (crop_size, Protocol_dict[Protocol], n_sample)
+    train_csv = r'%s/zsw/Data/RE/CSV_SSAN/%s/train_%s_%s.csv' % (path_pre, crop_size, Protocol_dict[Protocol], n_sample)
+    test_csv = r'%s/zsw/Data/RE/CSV_SSAN/%s/test_%s_%s.csv' % (path_pre, crop_size, Protocol_dict[Protocol], n_sample)
 
-    if not os.path.exists(r'/media/l228/数据/zsw/Data/REPLAY_ATTACK/CSV_SSAN/%s/' % (crop_size)):
-        os.makedirs(r'/media/l228/数据/zsw/Data/REPLAY_ATTACK/CSV_SSAN/%s/' % (crop_size))
 
     def RE_base_process(image_dir, map_dir, image_csv, type_id):
         with open(image_csv, 'a', encoding='utf-8', newline='') as f:
@@ -269,9 +278,9 @@ def RE_process(crop_size):
 if __name__ == '__main__':
     # Modify the following directories to yourselves
     crop_size = '2.0'
-    Oulu_process(crop_size)
+    # Oulu_process(crop_size)
     # SiW_process(crop_size)
     # CASIA_FASD_process(crop_size)
     # RE_process(crop_size)
 
-    # MSU_MFSD_process(crop_size)
+    MSU_MFSD_process(crop_size)
